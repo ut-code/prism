@@ -118,6 +118,19 @@ bun paraglide
 </script>
 ```
 
+### Mutations with useMutation
+
+Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.ts`:
+
+```typescript
+import { useMutation } from "~/lib/useMutation";
+
+const createOrganization = useMutation(api.organizations.create);
+
+// Use like any mutation hook
+await createOrganization({ name: "New Org", description: "..." });
+```
+
 ### Backend (Convex)
 
 - **Schema**: Defined in `packages/convex/src/convex/schema.ts`
@@ -164,6 +177,7 @@ bun dev:tauri
 
 Tauri conflicts with the web development server and requires more resources for compilation.
 
-## Code Architecture Best Practices
+## Coding Instructions
 
+- Always prefer using DaisyUI classes, and use minimal Tailwind classes.
 - Separate components into smallest pieces for readability.
