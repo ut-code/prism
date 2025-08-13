@@ -1,25 +1,15 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getChannelPerms } from "./perms";
 
 export const list = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return [];
-    }
-
-    const membership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", args.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!membership) {
-      return [];
+    const perms = await getChannelPerms(ctx, {
+      organizationId: args.organizationId,
+    });
+    if (!perms.read) {
+      throw new Error("Insufficient permissions");
     }
 
     return await ctx.db
@@ -39,20 +29,10 @@ export const create = mutation({
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const membership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", args.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!membership || membership.permission === "visitor") {
+    const perms = await getChannelPerms(ctx, {
+      organizationId: args.organizationId,
+    });
+    if (!perms.write) {
       throw new Error("Insufficient permissions");
     }
 
@@ -67,27 +47,14 @@ export const create = mutation({
 });
 
 export const get = query({
-  args: { id: v.id("channels") },
+  args: { channelId: v.id("channels") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return null;
+    const perms = await getChannelPerms(ctx, { channelId: args.channelId });
+    if (!perms.read) {
+      throw new Error("Insufficient permissions");
     }
-
-    const channel = await ctx.db.get(args.id);
+    const channel = await ctx.db.get(args.channelId);
     if (!channel) {
-      return null;
-    }
-
-    const membership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", channel.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!membership) {
       return null;
     }
 

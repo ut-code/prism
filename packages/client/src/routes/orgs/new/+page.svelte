@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api } from "@packages/convex";
   import { goto } from "$app/navigation";
-  import { useMutation } from "~/lib/useMutation";
+  import { useMutation } from "~/lib/useMutation.svelte.ts";
 
   const createOrganization = useMutation(api.organizations.create);
 
@@ -10,14 +10,11 @@
     description: "",
   });
 
-  let isSubmitting = $state(false);
-
   async function handleSubmit() {
     if (!form.name.trim()) return;
 
-    isSubmitting = true;
     try {
-      const organizationId = await createOrganization({
+      const organizationId = await createOrganization.run({
         name: form.name.trim(),
         description: form.description.trim() || undefined,
       });
@@ -26,8 +23,6 @@
     } catch (error) {
       console.error("Failed to create organization:", error);
       alert("組織の作成に失敗しました");
-    } finally {
-      isSubmitting = false;
     }
   }
 
@@ -63,7 +58,7 @@
             class="input input-bordered w-full"
             placeholder="例: 株式会社サンプル"
             required
-            disabled={isSubmitting}
+            disabled={createOrganization.processing}
           />
         </div>
 
@@ -77,7 +72,7 @@
             bind:value={form.description}
             class="textarea textarea-bordered h-24 w-full"
             placeholder="この組織について簡単に説明してください"
-            disabled={isSubmitting}
+            disabled={createOrganization.processing}
           ></textarea>
         </div>
 
@@ -86,16 +81,16 @@
             type="button"
             class="btn btn-ghost"
             onclick={goBack}
-            disabled={isSubmitting}
+            disabled={createOrganization.processing}
           >
             キャンセル
           </button>
           <button
             type="submit"
             class="btn btn-primary"
-            disabled={isSubmitting || !form.name.trim()}
+            disabled={createOrganization.processing || !form.name.trim()}
           >
-            {#if isSubmitting}
+            {#if createOrganization.processing}
               <span class="loading loading-spinner loading-sm"></span>
               作成中...
             {:else}

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { useAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
-  import { goto } from "$app/navigation";
   import { type Id } from "@packages/convex";
-  import OrganizationSelector from "$components/organization/OrganizationSelector.svelte";
+  import { goto } from "$app/navigation";
+  import OrganizationSelector from "~/components/organization/OrganizationSelector.svelte";
 
   const auth = useAuth();
 
   function handleOrganizationSelect(organizationId: Id<"organizations">) {
-    goto(`/chat/${organizationId}`);
+    goto(`/orgs/${organizationId}`);
   }
 </script>
 
@@ -16,7 +16,7 @@
     <span class="loading loading-dots loading-lg"></span>
   </div>
 {:else if auth.isAuthenticated}
-  <OrganizationSelector onSelect={handleOrganizationSelect} />
+  <OrganizationSelector onselect={handleOrganizationSelect} />
 {:else}
   <div class="hero bg-base-100 min-h-screen">
     <div class="hero-content text-center">

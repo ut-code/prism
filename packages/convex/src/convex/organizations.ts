@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getOrganizationPerms } from "./perms";
 
 export const create = mutation({
   args: {
@@ -36,7 +37,7 @@ export const list = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      return [];
+      throw new Error("Not authenticated");
     }
 
     const memberships = await ctx.db
@@ -62,30 +63,12 @@ export const list = query({
 export const get = query({
   args: { id: v.id("organizations") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return null;
-    }
-
-    const membership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.id))
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!membership) {
-      return null;
-    }
-
-    const organization = await ctx.db.get(args.id);
-    if (!organization) {
-      return null;
-    }
+    const perms = await getOrganizationPerms(ctx, { id: args.id });
 
     return {
-      ...organization,
-      permission: membership.permission,
-      role: membership.role,
+      ...perms.organization,
+      permission: perms.membership.permission,
+      role: perms.membership.role,
     };
   },
 });
@@ -97,26 +80,14 @@ export const update = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const membership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) => q.eq("organizationId", args.id))
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!membership || membership.permission !== "admin") {
+    const perms = await getOrganizationPerms(ctx, { id: args.id });
+    if (!perms.info.update) {
       throw new Error("Insufficient permissions");
     }
-
-    const updates: { name?: string; description?: string } = {};
-    if (args.name !== undefined) updates.name = args.name;
-    if (args.description !== undefined) updates.description = args.description;
-
-    await ctx.db.patch(args.id, updates);
+    await ctx.db.patch(args.id, {
+      name: args.name,
+      description: args.description,
+    });
   },
 });
 
@@ -132,20 +103,8 @@ export const addMember = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const currentUserId = await getAuthUserId(ctx);
-    if (!currentUserId) {
-      throw new Error("Not authenticated");
-    }
-
-    const currentMembership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", args.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), currentUserId))
-      .first();
-
-    if (!currentMembership || currentMembership.permission !== "admin") {
+    const perms = await getOrganizationPerms(ctx, { id: args.organizationId });
+    if (!perms.members.invite) {
       throw new Error("Insufficient permissions");
     }
 
@@ -177,21 +136,12 @@ export const removeMember = mutation({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const currentUserId = await getAuthUserId(ctx);
-    if (!currentUserId) {
-      throw new Error("Not authenticated");
-    }
-
-    const currentMembership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", args.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), currentUserId))
-      .first();
-
-    if (!currentMembership || currentMembership.permission !== "admin") {
+    const perms = await getOrganizationPerms(ctx, { id: args.organizationId });
+    if (!perms.members.kick) {
       throw new Error("Insufficient permissions");
+    }
+    if (args.userId === perms.membership.userId) {
+      throw new Error("Cannot kick yourself");
     }
 
     const targetMembership = await ctx.db
@@ -213,21 +163,9 @@ export const removeMember = mutation({
 export const getMembers = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return [];
-    }
-
-    const currentMembership = await ctx.db
-      .query("organizationMembers")
-      .withIndex("by_organization", (q) =>
-        q.eq("organizationId", args.organizationId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    if (!currentMembership) {
-      return [];
+    const perms = await getOrganizationPerms(ctx, { id: args.organizationId });
+    if (!perms.members.read) {
+      throw new Error("Insufficient permissions");
     }
 
     const memberships = await ctx.db

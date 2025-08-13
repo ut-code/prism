@@ -122,15 +122,18 @@ bun paraglide
 
 ### Mutations with useMutation
 
-Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.ts`:
+Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.svelte.ts`:
 
 ```typescript
-import { useMutation } from "~/lib/useMutation";
+import { useMutation } from "~/lib/useMutation.svelte.ts";
 
 const createOrganization = useMutation(api.organizations.create);
 
-// Use like any mutation hook
-await createOrganization({ name: "New Org", description: "..." });
+// Use like this
+await createOrganization.run({ name: "New Org", description: "..." });
+// which exposes these properties
+createOrganization.processing; // boolean, use for button disabled state / loading spinners
+createOrganization.error; // string | null, use for error messages
 ```
 
 ### Backend (Convex)
@@ -189,3 +192,4 @@ Tauri conflicts with the web development server and requires more resources for 
   - ✅ REQUIRED: `$effect(() => { ... })` for side effects
 - Always prefer using DaisyUI classes, and use minimal Tailwind classes.
 - Separate components into smallest pieces for readability.
+- Name snippets with camelCase instead of PascalCase to avoid confusion with components.

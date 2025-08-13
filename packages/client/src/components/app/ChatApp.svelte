@@ -1,17 +1,16 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
-  import Channel from "../chat/Channel.svelte";
-  import OrganizationChannelList from "./OrganizationChannelList.svelte";
+  import { goto } from "$app/navigation";
+  import Channel from "../channels/Channel.svelte";
+  import ChannelList from "../channels/ChannelList.svelte";
 
   interface Props {
     organizationId: Id<"organizations">;
-    onOrganizationChange: () => void;
+    channelId?: Id<"channels">;
   }
 
-  const { organizationId, onOrganizationChange }: Props = $props();
-
-  let selectedChannelId = $state<Id<"channels"> | undefined>(undefined);
+  const { organizationId, channelId }: Props = $props();
 
   const organization = useQuery(api.organizations.get, () => ({
     id: organizationId,
@@ -53,14 +52,15 @@
             </svg>
           </div>
           <ul
+            role="menu"
             tabindex="0"
             class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
           >
-            <li>
-              <a href="/{organizationId}/settings">組織設定</a>
+            <li role="menuitem">
+              <a href="/orgs/{organizationId}/settings">組織設定</a>
             </li>
-            <li>
-              <button onclick={onOrganizationChange}>組織を切り替え</button>
+            <li role="menuitem">
+              <a href="/">組織選択</a>
             </li>
           </ul>
         </div>
@@ -72,12 +72,20 @@
       {/if}
     </div>
 
-    <OrganizationChannelList {organizationId} bind:selectedChannelId />
+    <ChannelList
+      {organizationId}
+      bind:selectedChannelId={
+        () => channelId,
+        (id) => {
+          goto(`/orgs/${organizationId}/chat/${id}`);
+        }
+      }
+    />
   </div>
 
   <div class="flex flex-1 flex-col">
-    {#if selectedChannelId}
-      <Channel {selectedChannelId} />
+    {#if channelId}
+      <Channel selectedChannelId={channelId} />
     {:else}
       <div class="bg-base-200 flex flex-1 items-center justify-center">
         <div class="text-center">

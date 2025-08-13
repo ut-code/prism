@@ -72,3 +72,16 @@ bun dev:tauri
   const selectedChannel = useQuery(api.channels.get, { id: selectedChannelId });
 </script>
 ```
+
+### (client) Icon の使用について
+
+- unplugin-icons を使っています。 <https://github.com/unplugin/unplugin-icons>
+- Usage Example: `import MdiClose from "~icons/mdi/close"`
+- 現在インストールされているアイコンセットは以下のとおりです:
+  - mdi (Material Design Icons)
+- 新規アイコンセットを追加する場合は、`cd packages/client; bun add @iconify-json/[iconset]` で追加できます。
+- icon の一覧はここで見れます。: https://icones.js.org/
+
+### 独自命名規則
+
+- Snippet の命名は camelCase で行います。 (PascalCase はコンポーネントと混同されるため)

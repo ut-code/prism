@@ -1,37 +1,24 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import { useQuery } from "convex-svelte";
+  import CreateChannelButton from "./CreateChannelButton.svelte";
 
   interface Props {
     organizationId: Id<"organizations">;
     selectedChannelId?: Id<"channels">;
   }
 
-  let { organizationId, selectedChannelId = $bindable(undefined) }: Props =
-    $props();
+  let { organizationId, selectedChannelId = $bindable() }: Props = $props();
 
-  const convex = useConvexClient();
   const channels = useQuery(api.channels.list, () => ({
     organizationId,
   }));
-
-  async function createChannel() {
-    const name = prompt("チャンネル名を入力してください:");
-    if (name?.trim()) {
-      await convex.mutation(api.channels.create, {
-        name: name.trim(),
-        organizationId,
-      });
-    }
-  }
 </script>
 
 <div class="flex h-full flex-col">
   <div class="border-base-300 border-b p-4">
     <h3 class="text-base font-semibold">チャンネル</h3>
-    <button class="btn btn-primary btn-sm mt-2 w-full" onclick={createChannel}>
-      + 新しいチャンネル
-    </button>
+    <CreateChannelButton {organizationId} />
   </div>
 
   <div class="flex-1 overflow-y-auto">

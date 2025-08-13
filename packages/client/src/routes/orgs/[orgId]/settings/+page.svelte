@@ -1,9 +1,8 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
-  import { goto } from "$app/navigation";
   import { page } from "$app/stores";
-  import { useMutation } from "~/lib/useMutation";
+  import { useMutation } from "~/lib/useMutation.svelte.ts";
 
   const organizationId = $derived($page.params.orgId as Id<"organizations">);
 
@@ -33,7 +32,8 @@
     if (!organizationId) return;
 
     try {
-      await updateOrganization({
+      console.log("Updating organization...", $state.snapshot(editForm));
+      await updateOrganization.run({
         id: organizationId,
         name: editForm.name,
         description: editForm.description,
@@ -49,23 +49,19 @@
 
     if (confirm("このメンバーを削除しますか？")) {
       try {
-        await removeMember({ organizationId, userId });
+        await removeMember.run({ organizationId, userId });
       } catch (error) {
         console.error("Failed to remove member:", error);
       }
     }
   }
-
-  function goBack() {
-    goto(`/chat/${organizationId}`);
-  }
 </script>
 
 <div class="container mx-auto p-6">
   <div class="mb-6">
-    <button class="btn btn-ghost btn-sm mb-4" onclick={goBack}>
-      ← チャットに戻る
-    </button>
+    <a href={`/orgs/${organizationId}`} class="btn btn-ghost btn-sm mb-4">
+      ← 戻る
+    </a>
 
     {#if organization.data}
       <div class="flex items-center justify-between">

@@ -3,10 +3,10 @@
   import { useQuery } from "convex-svelte";
 
   interface Props {
-    onSelect: (organizationId: Id<"organizations">) => void;
+    onselect: (organizationId: Id<"organizations">) => void;
   }
 
-  const { onSelect }: Props = $props();
+  const { onselect }: Props = $props();
 
   const organizations = useQuery(api.organizations.list, () => ({}));
 </script>
@@ -25,7 +25,7 @@
         {#each organizations.data as org}
           <button
             class="card bg-base-200 hover:bg-base-300 w-full cursor-pointer text-left transition-colors"
-            onclick={() => org._id && onSelect(org._id)}
+            onclick={() => org._id && onselect(org._id)}
           >
             <div class="card-body p-4">
               <div class="flex items-center justify-between">
@@ -54,9 +54,9 @@
     {#if organizations.data && organizations.data.length === 0}
       <div class="py-8 text-center">
         <p class="text-base-content/60 mb-4">参加している組織がありません</p>
-        <a href="/organizations/create" class="btn btn-primary"
-          >新しい組織を作成</a
-        >
+        <a href="/organizations/create" class="btn btn-primary">
+          新しい組織を作成
+        </a>
       </div>
     {/if}
   </div>

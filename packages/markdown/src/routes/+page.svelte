@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Debounced } from "runed";
-  import ThemeToggle from "@/lib/components/ThemeToggle.svelte";
-  import Editor from "@/lib/Editor.svelte";
-  import { ThemeStore } from "@/lib/stores/theme.svelte";
+  import ThemeToggle from "~/lib/components/ThemeToggle.svelte";
+  import Editor from "~/lib/Editor.svelte";
+  import { ThemeStore } from "~/lib/stores/theme.svelte";
 
   /**
    * Document state for the markdown editor
