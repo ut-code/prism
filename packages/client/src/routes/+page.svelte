@@ -1,21 +1,13 @@
 <script lang="ts">
   import { useAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
+  import { goto } from "$app/navigation";
   import { type Id } from "@packages/convex";
-  import OrganizationChatApp from "$components/organization/OrganizationChatApp.svelte";
   import OrganizationSelector from "$components/organization/OrganizationSelector.svelte";
 
   const auth = useAuth();
 
-  let selectedOrganizationId = $state<Id<"organizations"> | undefined>(
-    undefined,
-  );
-
   function handleOrganizationSelect(organizationId: Id<"organizations">) {
-    selectedOrganizationId = organizationId;
-  }
-
-  function handleOrganizationChange() {
-    selectedOrganizationId = undefined;
+    goto(`/chat/${organizationId}`);
   }
 </script>
 
@@ -24,14 +16,7 @@
     <span class="loading loading-dots loading-lg"></span>
   </div>
 {:else if auth.isAuthenticated}
-  {#if selectedOrganizationId}
-    <OrganizationChatApp
-      organizationId={selectedOrganizationId}
-      onOrganizationChange={handleOrganizationChange}
-    />
-  {:else}
-    <OrganizationSelector onSelect={handleOrganizationSelect} />
-  {/if}
+  <OrganizationSelector onSelect={handleOrganizationSelect} />
 {:else}
   <div class="hero bg-base-100 min-h-screen">
     <div class="hero-content text-center">

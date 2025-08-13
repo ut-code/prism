@@ -37,7 +37,9 @@
                     </p>
                   {/if}
                 </div>
-                <div class="badge badge-outline capitalize">{org.role}</div>
+                <div class="badge badge-outline capitalize">
+                  {org.permission}
+                </div>
               </div>
             </div>
           </button>

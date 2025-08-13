@@ -57,14 +57,17 @@
             class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
           >
             <li>
+              <a href="/{organizationId}/settings">組織設定</a>
+            </li>
+            <li>
               <button onclick={onOrganizationChange}>組織を切り替え</button>
             </li>
           </ul>
         </div>
       </div>
-      {#if organization.data?.role}
+      {#if organization.data?.permission}
         <div class="badge badge-outline mt-2 capitalize">
-          {organization.data.role}
+          {organization.data.permission}
         </div>
       {/if}
     </div>

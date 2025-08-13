@@ -52,7 +52,7 @@ export const create = mutation({
       .filter((q) => q.eq(q.field("userId"), userId))
       .first();
 
-    if (!membership || membership.role === "visitor") {
+    if (!membership || membership.permission === "visitor") {
       throw new Error("Insufficient permissions");
     }
 

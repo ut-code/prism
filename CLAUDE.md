@@ -9,6 +9,8 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
 ### Stack
 
 - **Frontend**: SvelteKit with Svelte 5, TypeScript, TailwindCSS, DaisyUI
+  - **CRITICAL**: This project uses Svelte 5 RUNES MODE - NEVER use legacy reactive statements (`$:`)
+  - **ALWAYS use**: `$state`, `$derived`, `$effect` instead of legacy syntax
 - **Backend**: Convex (real-time database and functions)
 - **Desktop**: Tauri (optional, conflicts with web dev server)
 - **Internationalization**: Paraglide for i18n (English/Japanese)
@@ -179,5 +181,11 @@ Tauri conflicts with the web development server and requires more resources for 
 
 ## Coding Instructions
 
+- **🚫 NEVER USE LEGACY SVELTE SYNTAX**: This project uses Svelte 5 runes mode
+  - ❌ FORBIDDEN: `$: reactiveVar = ...` (reactive statements)
+  - ❌ FORBIDDEN: `let count = 0` for reactive state
+  - ✅ REQUIRED: `const reactiveVar = $derived(...)`
+  - ✅ REQUIRED: `let count = $state(0)` for reactive state
+  - ✅ REQUIRED: `$effect(() => { ... })` for side effects
 - Always prefer using DaisyUI classes, and use minimal Tailwind classes.
 - Separate components into smallest pieces for readability.

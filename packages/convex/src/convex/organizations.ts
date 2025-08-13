@@ -23,7 +23,7 @@ export const create = mutation({
     await ctx.db.insert("organizationMembers", {
       organizationId,
       userId,
-      role: "admin",
+      permission: "admin",
       joinedAt: Date.now(),
     });
 
@@ -49,6 +49,7 @@ export const list = query({
         const org = await ctx.db.get(membership.organizationId);
         return {
           ...org,
+          permission: membership.permission,
           role: membership.role,
         };
       }),
@@ -83,6 +84,7 @@ export const get = query({
 
     return {
       ...organization,
+      permission: membership.permission,
       role: membership.role,
     };
   },
@@ -106,7 +108,7 @@ export const update = mutation({
       .filter((q) => q.eq(q.field("userId"), userId))
       .first();
 
-    if (!membership || membership.role !== "admin") {
+    if (!membership || membership.permission !== "admin") {
       throw new Error("Insufficient permissions");
     }
 
@@ -122,7 +124,8 @@ export const addMember = mutation({
   args: {
     organizationId: v.id("organizations"),
     userId: v.id("users"),
-    role: v.union(
+    role: v.optional(v.string()),
+    permission: v.union(
       v.literal("admin"),
       v.literal("member"),
       v.literal("visitor"),
@@ -142,7 +145,7 @@ export const addMember = mutation({
       .filter((q) => q.eq(q.field("userId"), currentUserId))
       .first();
 
-    if (!currentMembership || currentMembership.role !== "admin") {
+    if (!currentMembership || currentMembership.permission !== "admin") {
       throw new Error("Insufficient permissions");
     }
 
@@ -162,6 +165,7 @@ export const addMember = mutation({
       organizationId: args.organizationId,
       userId: args.userId,
       role: args.role,
+      permission: args.permission,
       joinedAt: Date.now(),
     });
   },
@@ -186,7 +190,7 @@ export const removeMember = mutation({
       .filter((q) => q.eq(q.field("userId"), currentUserId))
       .first();
 
-    if (!currentMembership || currentMembership.role !== "admin") {
+    if (!currentMembership || currentMembership.permission !== "admin") {
       throw new Error("Insufficient permissions");
     }
 

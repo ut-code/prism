@@ -5,7 +5,7 @@
   import { page } from "$app/stores";
   import { useMutation } from "~/lib/useMutation";
 
-  $: organizationId = $page.params.id as Id<"organizations">;
+  const organizationId = $derived($page.params.orgId as Id<"organizations">);
 
   const organization = useQuery(api.organizations.get, () => ({
     id: organizationId,
@@ -57,14 +57,14 @@
   }
 
   function goBack() {
-    goto("/organizations");
+    goto(`/chat/${organizationId}`);
   }
 </script>
 
 <div class="container mx-auto p-6">
   <div class="mb-6">
     <button class="btn btn-ghost btn-sm mb-4" onclick={goBack}>
-      ← 組織一覧に戻る
+      ← チャットに戻る
     </button>
 
     {#if organization.data}
@@ -93,7 +93,7 @@
           {/if}
         </div>
 
-        {#if organization.data.role === "admin"}
+        {#if organization.data.permission === "admin"}
           <div class="flex gap-2">
             {#if isEditing}
               <button class="btn btn-primary" onclick={handleUpdate}
@@ -131,9 +131,9 @@
               )}
             </div>
             <div>
-              <span class="font-semibold">あなたの役割:</span>
+              <span class="font-semibold">あなたの権限:</span>
               <div class="badge badge-outline ml-2 capitalize">
-                {organization.data.role}
+                {organization.data.permission}
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@
       <div class="card-body">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="card-title">メンバー</h2>
-          {#if organization.data?.role === "admin"}
+          {#if organization.data?.permission === "admin"}
             <button class="btn btn-primary btn-sm"> メンバーを追加 </button>
           {/if}
         </div>
@@ -178,9 +178,9 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <div class="badge badge-outline capitalize">
-                    {member.role}
+                    {member.permission}
                   </div>
-                  {#if organization.data?.role === "admin" && member.userId !== organization.data?.ownerId}
+                  {#if organization.data?.permission === "admin" && member.userId !== organization.data?.ownerId}
                     <button
                       class="btn btn-ghost btn-sm text-error"
                       onclick={() => handleRemoveMember(member.userId)}

@@ -22,7 +22,7 @@
         description: form.description.trim() || undefined,
       });
 
-      goto(`/organizations/${organizationId}`);
+      goto(`/${organizationId}/settings`);
     } catch (error) {
       console.error("Failed to create organization:", error);
       alert("組織の作成に失敗しました");
@@ -32,14 +32,14 @@
   }
 
   function goBack() {
-    goto("/organizations");
+    goto("/");
   }
 </script>
 
 <div class="container mx-auto max-w-md p-6">
   <div class="mb-6">
     <button class="btn btn-ghost btn-sm mb-4" onclick={goBack}>
-      ← 組織一覧に戻る
+      ← ホームに戻る
     </button>
 
     <h1 class="text-base-content mb-2 text-3xl font-bold">新しい組織を作成</h1>

@@ -17,7 +17,8 @@ export default defineSchema({
   organizationMembers: defineTable({
     organizationId: v.id("organizations"),
     userId: v.id("users"),
-    role: v.union(
+    role: v.optional(v.string()),
+    permission: v.union(
       v.literal("admin"),
       v.literal("member"),
       v.literal("visitor"),
