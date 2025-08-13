@@ -163,3 +163,7 @@ bun dev:tauri
 ```
 
 Tauri conflicts with the web development server and requires more resources for compilation.
+
+## Code Architecture Best Practices
+
+- Separate components into smallest pieces for readability.

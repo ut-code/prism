@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { api, type Id } from "@packages/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import { type Id } from "@packages/convex";
 
   interface Props {
     selectedChannelId?: Id<"channels">;
@@ -8,13 +7,12 @@
 
   let { selectedChannelId = $bindable(undefined) }: Props = $props();
 
-  const convex = useConvexClient();
-  const channels = useQuery(api.channels.list, () => ({}));
+  // This component is deprecated - use OrganizationChannelList instead
 
   async function createChannel() {
     const name = prompt("チャンネル名を入力してください:");
     if (name?.trim()) {
-      await convex.mutation(api.channels.create, { name: name.trim() });
+      // This component is deprecated - channels need organizationId
     }
   }
 </script>
@@ -28,27 +26,8 @@
   </div>
 
   <div class="flex-1 overflow-y-auto">
-    {#if channels.data}
-      {#each channels.data as channel (channel._id)}
-        <button
-          class={[
-            "border-base-300 w-full border-b p-3 text-left",
-            selectedChannelId === channel._id
-              ? "bg-primary text-primary-content"
-              : "hover:bg-base-300",
-          ].join(" ")}
-          onclick={() => (selectedChannelId = channel._id)}
-        >
-          <div class="font-medium"># {channel.name}</div>
-          {#if channel.description}
-            <div class="text-sm opacity-70">{channel.description}</div>
-          {/if}
-        </button>
-      {/each}
-    {:else}
-      <div class="text-base-content/60 p-4 text-center">
-        チャンネルを読み込み中...
-      </div>
-    {/if}
+    <div class="text-base-content/60 p-4 text-center">
+      この機能は廃止されました。OrganizationChannelListを使用してください。
+    </div>
   </div>
 </div>
