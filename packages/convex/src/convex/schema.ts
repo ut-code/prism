@@ -8,11 +8,31 @@ export default defineSchema({
     isCompleted: v.boolean(),
     assigner: v.string(),
   }),
-  channels: defineTable({
+  organizations: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
     createdAt: v.number(),
+    ownerId: v.id("users"),
   }),
+  organizationMembers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    role: v.optional(v.string()),
+    permission: v.union(
+      v.literal("admin"),
+      v.literal("member"),
+      v.literal("visitor"),
+    ),
+    joinedAt: v.number(),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_user", ["userId"]),
+  channels: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    organizationId: v.id("organizations"),
+    createdAt: v.number(),
+  }).index("by_organization", ["organizationId"]),
   messages: defineTable({
     channelId: v.id("channels"),
     content: v.string(),

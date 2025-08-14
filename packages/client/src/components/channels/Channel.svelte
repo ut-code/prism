@@ -2,8 +2,8 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
-  import MessageInput from "./MessageInput.svelte";
-  import MessageList from "./MessageList.svelte";
+  import MessageInput from "../chat/MessageInput.svelte";
+  import MessageList from "../chat/MessageList.svelte";
 
   interface Props {
     selectedChannelId: Id<"channels">;
@@ -12,7 +12,7 @@
   let { selectedChannelId }: Props = $props();
 
   const selectedChannel = useQuery(api.channels.get, () => ({
-    id: selectedChannelId,
+    channelId: selectedChannelId,
   }));
 
   let replyingTo = $state<Doc<"messages"> | null>(null);
