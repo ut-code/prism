@@ -2,8 +2,8 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
-  import MessageInput from "../app/MessageInput.svelte";
-  import MessageList from "../app/MessageList.svelte";
+  import MessageInput from "../chat/MessageInput.svelte";
+  import MessageList from "../chat/MessageList.svelte";
 
   interface Props {
     selectedChannelId: Id<"channels">;
