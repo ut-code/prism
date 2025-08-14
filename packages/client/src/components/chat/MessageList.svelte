@@ -47,22 +47,32 @@
 
   let clientX = $state(0);
   let clientY = $state(0);
-  let onclick_dropdown_reply = $state(() => {});
-  let visible_dropdown = $state(false);
+  let visibleDropdown = $state<Id<"messages"> | null>(null);
   document.addEventListener("click", () => {
-    visible_dropdown = false;
+    visibleDropdown = null;
   });
 </script>
 
 <div bind:this={messagesContainer} class="flex-1 space-y-2 overflow-y-auto p-4">
-  <MessageDropdown
-    x={clientX}
-    y={clientY}
-    visible={visible_dropdown}
-    onclick_reply={onclick_dropdown_reply}
-  />
   {#if messages.data}
     {#each messages.data as message (message._id)}
+      {#snippet dropdownContent()}
+        <ul
+          class="menu dropdown-content bg-base-100 absolute z-[1] w-40 rounded-md border p-2 shadow"
+        >
+          <li>
+            <button onclick={() => (replyingTo = message)}>返信</button>
+          </li>
+        </ul>
+      {/snippet}
+      <MessageDropdown
+        x={clientX}
+        y={clientY}
+        visible={visibleDropdown === message._id}
+      >
+        {@render dropdownContent()}
+      </MessageDropdown>
+
       <div
         role="button"
         tabindex="0"
@@ -71,10 +81,7 @@
           e.preventDefault();
           clientX = e.clientX;
           clientY = e.clientY;
-          visible_dropdown = true;
-          onclick_dropdown_reply = () => {
-            replyingTo = message;
-          };
+          visibleDropdown = message._id;
         }}
       >
         {#if message.parentId && messages.data.find((m) => m._id === message.parentId)}
