@@ -57,6 +57,16 @@ bun dev:tauri
 
 ## 注意点
 
+### Pre-Commit Hook について
+
+コミット前に Lefthook というツールで自動的に型チェックなどを実行し、通らなかったらコミットしないようにしています。
+
+エラーの共有など目的で、気にせずコミットしたい場合は、 `git commit` に `-n` フラグを渡してください。
+
+```sh
+git commit -m "It's not working??" -n
+```
+
 ### convex-svelte の `useQuery` について
 
 `useQuery` に渡す引数は、関数の形式で渡してください。そうでないと、期待しない動作を引き起こす可能性があります。
