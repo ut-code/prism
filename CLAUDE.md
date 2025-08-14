@@ -86,6 +86,12 @@ bun paraglide
 
 ## Code Architecture
 
+### Svelte Documentation
+
+When working with Svelte code, always reference the latest documentation:
+
+- **Latest Svelte Docs**: https://svelte.dev/llms-small.txt
+
 ### Frontend (SvelteKit)
 
 - **Routes**: Standard SvelteKit routing in `packages/client/src/routes/`
