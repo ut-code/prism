@@ -1,5 +1,6 @@
 <script lang="ts">
-  import "emoji-picker-element";
+  import { Picker } from "emoji-picker-element";
+
   interface Props {
     onClose: () => void;
     onEmojiSelected: (emoji: string) => void;
@@ -18,6 +19,9 @@
         onClose();
       }
     };
+
+    const picker = new Picker();
+    paletteRef.appendChild(picker);
 
     document.addEventListener("mousedown", handleClickOutside);
 
@@ -39,6 +43,4 @@
   });
 </script>
 
-<div bind:this={paletteRef} class="absolute right-4 bottom-24">
-  <emoji-picker></emoji-picker>
-</div>
+<div bind:this={paletteRef} class="absolute right-4 bottom-24"></div>
