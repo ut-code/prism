@@ -1,7 +1,8 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import { useQuery } from "convex-svelte";
+  import { useMutation } from "~/lib/useMutation.svelte.ts";
   import EmojiPalette from "./EmojiPalette.svelte";
 
   interface Props {
@@ -11,7 +12,7 @@
 
   let { channelId, replyingTo = $bindable() }: Props = $props();
 
-  const convex = useConvexClient();
+  const sendMessageMutation = useMutation(api.messages.send);
   const identity = useQuery(api.users.me, {});
 
   let messageContent = $state("");
@@ -28,7 +29,7 @@
   async function sendMessage() {
     if (!messageContent.trim()) return;
 
-    await convex.mutation(api.messages.send, {
+    await sendMessageMutation.run({
       channelId,
       content: messageContent.trim(),
       author: authorName.trim() || "匿名",
@@ -40,7 +41,7 @@
   }
 
   function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === "Enter" && event.ctrlKey) {
       event.preventDefault();
       sendMessage();
     }
@@ -67,7 +68,7 @@
 
   <div class="flex gap-2">
     <textarea
-      placeholder="メッセージを入力... (Enterで送信、Shift+Enterで改行)"
+      placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)"
       class="textarea textarea-bordered flex-1 resize-none"
       rows="2"
       bind:value={messageContent}
@@ -76,9 +77,20 @@
     <button
       class="btn btn-primary self-end"
       onclick={sendMessage}
-      disabled={!messageContent.trim()}
+      disabled={!messageContent.trim() || sendMessageMutation.processing}
     >
-      送信
+      {#if sendMessageMutation.processing}
+        <span class="loading loading-spinner loading-sm"></span>
+      {:else}
+        送信
+      {/if}
+    </button>
+    <button
+      bind:this={emojiButtonRef}
+      class="btn btn-secondary self-end"
+      onclick={() => (showEmojiPalette = !showEmojiPalette)}
+    >
+      😀
     </button>
     <button
       bind:this={emojiButtonRef}

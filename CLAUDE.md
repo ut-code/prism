@@ -9,6 +9,8 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
 ### Stack
 
 - **Frontend**: SvelteKit with Svelte 5, TypeScript, TailwindCSS, DaisyUI
+  - **CRITICAL**: This project uses Svelte 5 RUNES MODE - NEVER use legacy reactive statements (`$:`)
+  - **ALWAYS use**: `$state`, `$derived`, `$effect` instead of legacy syntax
 - **Backend**: Convex (real-time database and functions)
 - **Desktop**: Tauri (optional, conflicts with web dev server)
 - **Internationalization**: Paraglide for i18n (English/Japanese)
@@ -84,6 +86,12 @@ bun paraglide
 
 ## Code Architecture
 
+### Svelte Documentation
+
+When working with Svelte code, always reference the latest documentation:
+
+- **Latest Svelte Docs**: https://svelte.dev/llms-small.txt
+
 ### Frontend (SvelteKit)
 
 - **Routes**: Standard SvelteKit routing in `packages/client/src/routes/`
@@ -116,6 +124,22 @@ bun paraglide
   // better - only use getter functions
   const selectedChannelBetter = useQuery(api.channels.list, () => ({}));
 </script>
+```
+
+### Mutations with useMutation
+
+Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.svelte.ts`:
+
+```typescript
+import { useMutation } from "~/lib/useMutation.svelte.ts";
+
+const createOrganization = useMutation(api.organizations.create);
+
+// Use like this
+await createOrganization.run({ name: "New Org", description: "..." });
+// which exposes these properties
+createOrganization.processing; // boolean, use for button disabled state / loading spinners
+createOrganization.error; // string | null, use for error messages
 ```
 
 ### Backend (Convex)
@@ -163,3 +187,15 @@ bun dev:tauri
 ```
 
 Tauri conflicts with the web development server and requires more resources for compilation.
+
+## Coding Instructions
+
+- **🚫 NEVER USE LEGACY SVELTE SYNTAX**: This project uses Svelte 5 runes mode
+  - ❌ FORBIDDEN: `$: reactiveVar = ...` (reactive statements)
+  - ❌ FORBIDDEN: `let count = 0` for reactive state
+  - ✅ REQUIRED: `const reactiveVar = $derived(...)`
+  - ✅ REQUIRED: `let count = $state(0)` for reactive state
+  - ✅ REQUIRED: `$effect(() => { ... })` for side effects
+- Always prefer using DaisyUI classes, and use minimal Tailwind classes.
+- Separate components into smallest pieces for readability.
+- Name snippets with camelCase instead of PascalCase to avoid confusion with components.

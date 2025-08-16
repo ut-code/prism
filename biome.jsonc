@@ -26,7 +26,6 @@
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "noUselessElse": "error",
       },
       "correctness": {
         "useImportExtensions": {
