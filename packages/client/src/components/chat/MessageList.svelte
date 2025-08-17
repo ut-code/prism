@@ -63,6 +63,9 @@
           <li>
             <button onclick={() => (replyingTo = message)}>返信</button>
           </li>
+          <li>
+            <button>リアクションを付ける</button>
+          </li>
         </ul>
       {/snippet}
       <MessageDropdown

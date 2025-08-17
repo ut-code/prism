@@ -37,8 +37,17 @@ export default defineSchema({
     channelId: v.id("channels"),
     content: v.string(),
     author: v.string(),
+    userId: v.id("users"),
     createdAt: v.number(),
     parentId: v.optional(v.id("messages")),
   }).index("by_channel", ["channelId"]),
+  reactions: defineTable({
+    messageId: v.id("messages"),
+    userId: v.id("users"),
+    emoji: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_message", ["messageId"])
+    .index("by_user", ["userId"]),
   ...authTables,
 });

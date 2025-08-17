@@ -92,13 +92,6 @@
     >
       😀
     </button>
-    <button
-      bind:this={emojiButtonRef}
-      class="btn btn-secondary self-end"
-      onclick={() => (showEmojiPalette = !showEmojiPalette)}
-    >
-      😀
-    </button>
   </div>
   {#if showEmojiPalette}
     <EmojiPalette
