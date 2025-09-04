@@ -4,6 +4,7 @@
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
+  import ReactionList from "./ReactionList.svelte";
 
   interface Props {
     channelId: Id<"channels">;
@@ -108,6 +109,7 @@
           <div class="text-base-content ml-0 whitespace-pre-wrap">
             {message.content}
           </div>
+          <ReactionList messageId={message._id} />
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"
           >
