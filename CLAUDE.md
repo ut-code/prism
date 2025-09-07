@@ -101,8 +101,17 @@ When working with Svelte code, always reference the latest documentation:
   - `@@` → `../..` (workspace root)
   - `$components` → `src/components`
   - `~` → `src/`
+  - `@packages/{package}` → monorepo
 - **Convex Integration**: Uses `convex-svelte` for reactive queries
 - **State Pattern**: Logic components (e.g., TaskList.svelte) separate from presentation (TaskListSkin.svelte)
+
+### Convex の Import について
+
+```ts
+import { api, type Id } from "@packages/convex";
+
+// use api and type Id ...
+```
 
 ### 注意点: convex-svelte の `useQuery` について
 
@@ -199,3 +208,5 @@ Tauri conflicts with the web development server and requires more resources for 
 - Always prefer using DaisyUI classes, and use minimal Tailwind classes.
 - Separate components into smallest pieces for readability.
 - Name snippets with camelCase instead of PascalCase to avoid confusion with components.
+- Always run `bun check` after writing code.
+- Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
