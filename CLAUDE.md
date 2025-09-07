@@ -210,3 +210,4 @@ Tauri conflicts with the web development server and requires more resources for 
 - Name snippets with camelCase instead of PascalCase to avoid confusion with components.
 - Always run `bun check` after writing code.
 - Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
+- Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
