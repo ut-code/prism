@@ -51,7 +51,7 @@
       {@const count = detail.count}
       <div in:fly={{ y: -5, duration: 150 }}>
         <button
-          class="btn btn-xs"
+          class="btn btn-xs flex w-12 justify-between"
           class:btn-primary={amIin}
           onclick={() => handleReactionClick(emoji, amIin)}
         >
