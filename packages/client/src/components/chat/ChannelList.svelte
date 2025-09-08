@@ -4,9 +4,13 @@
 
   interface Props {
     selectedChannelId?: Id<"channels">;
+    screenMode: string;
   }
 
-  let { selectedChannelId = $bindable(undefined) }: Props = $props();
+  let {
+    selectedChannelId = $bindable(undefined),
+    screenMode = $bindable(),
+  }: Props = $props();
 
   const convex = useConvexClient();
   const channels = useQuery(api.channels.list, () => ({}));
@@ -37,7 +41,10 @@
               ? "bg-primary text-primary-content"
               : "hover:bg-base-300",
           ].join(" ")}
-          onclick={() => (selectedChannelId = channel._id)}
+          onclick={() => {
+            selectedChannelId = channel._id;
+            screenMode = "chat";
+          }}
         >
           <div class="font-medium"># {channel.name}</div>
           {#if channel.description}
@@ -51,4 +58,10 @@
       </div>
     {/if}
   </div>
+  <button
+    class="btn btn-primary mt-auto mb-2 w-full"
+    onclick={() => {
+      screenMode = "personalization";
+    }}>個人用設定</button
+  >
 </div>
