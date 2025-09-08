@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Id, Query, Task } from "@packages/convex";
   import BufferedTextInput from "$components/atoms/BufferedTextInput.svelte";
-  import { m } from "$lib/paraglide/messages.js";
 
   type Props = {
     updateTodo: (id: Id<"tasks">, data: Partial<Task>) => void;
@@ -12,20 +11,16 @@
 </script>
 
 <div class="bg-base-200 m-4 rounded-xl p-4">
-  <h1 class="p-5 text-center text-3xl">{m["example.taskList"]()}</h1>
+  <h1 class="p-5 text-center text-3xl">Task List</h1>
   {#if todos.isLoading}
-    <p><span class="loading loading-dots"></span>{m["common.loading"]()}</p>
+    <p><span class="loading loading-dots"></span>Loading</p>
   {:else if todos.error}
     <p>Error: {todos.error.message}</p>
   {:else}
     <ul class="list">
       <li class="list-row">
-        <span class="list-col-grow text-center text-xl">
-          {m["example.task"]()}
-        </span>
-        <span class="w-80 text-center text-xl">
-          {m["example.assigner"]()}
-        </span>
+        <span class="list-col-grow text-center text-xl"> Task </span>
+        <span class="w-80 text-center text-xl"> Assigner </span>
       </li>
       {#each todos.data as todo}
         <li class="list-row">
