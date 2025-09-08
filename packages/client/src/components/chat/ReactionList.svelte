@@ -1,8 +1,6 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
-  import { fly } from "svelte/transition";
-  import { useMutation } from "~/lib/useMutation.svelte.ts";
 
   interface Props {
     messageId: Id<"messages">;
@@ -10,55 +8,92 @@
 
   let { messageId }: Props = $props();
 
-  const reactions = useQuery(api.messages.getReactions, () => ({
-    messageId,
-  }));
+  const reactions = useQuery(api.messages.getReactions, () => ({ messageId }));
 
-  const me = useQuery(api.users.me, {});
+  let selectedEmoji = $state<string | null>(null);
 
-  const addReaction = useMutation(api.messages.addReaction);
-  const removeReaction = useMutation(api.messages.removeReaction);
-
-  const reactionsByEmoji = $derived.by(() => {
-    const counts = new Map<string, { count: number; me: boolean }>();
+  const reactionDetailsByEmoji = $derived.by(() => {
+    const details = new Map<string, { count: number; users: Id<"users">[] }>();
     if (!reactions.data) {
-      return counts;
+      return details;
     }
     for (const r of reactions.data) {
-      counts.set(r.emoji, {
-        count: (counts.get(r.emoji)?.count ?? 0) + 1,
-        me: counts.get(r.emoji)?.me || r.userId === me.data?._id,
+      details.set(r.emoji, {
+        count: (details.get(r.emoji)?.count ?? 0) + 1,
+        users: [...(details.get(r.emoji)?.users ?? []), r.userId],
       });
     }
-    return counts;
+    return details;
   });
 
-  function handleReactionClick(emoji: string, amIin: boolean) {
-    if (!me.data) return;
+  const allUserIdsInReactions = $derived(
+    reactions.data ? [...new Set(reactions.data.map((r) => r.userId))] : [],
+  );
 
-    if (amIin) {
-      removeReaction.run({ messageId, emoji });
-    } else {
-      addReaction.run({ messageId, emoji });
-    }
+  const userNamesById = useQuery(api.users.getUserNames, () => ({
+    userIds: allUserIdsInReactions,
+  }));
+
+  function toggleUserList(emoji: string) {
+    selectedEmoji = emoji;
   }
+
+  $effect(() => {
+    if (!selectedEmoji && reactionDetailsByEmoji.size > 0) {
+      selectedEmoji = reactionDetailsByEmoji.keys().next().value || null;
+    }
+  });
 </script>
 
-<div class="flex gap-1">
-  {#if me.data}
-    {#each [...reactionsByEmoji.entries()] as [emoji, detail]}
-      {@const amIin = detail.me}
-      {@const count = detail.count}
-      <div in:fly={{ y: -5, duration: 150 }}>
-        <button
-          class="btn btn-xs flex w-12 justify-between"
-          class:btn-primary={amIin}
-          onclick={() => handleReactionClick(emoji, amIin)}
-        >
-          {emoji}
-          <span class="text-xs">{count}</span>
-        </button>
+<div>
+  {#if reactionDetailsByEmoji.size > 0}
+    <div class="flex h-96 gap-4 py-4">
+      <div class="flex w-24 flex-col gap-1 overflow-y-auto pr-2">
+        {#each [...reactionDetailsByEmoji.entries()] as [emoji, detail]}
+          <button
+            class="btn btn-sm w-full"
+            class:btn-active={selectedEmoji === emoji}
+            onclick={() => toggleUserList(emoji)}
+          >
+            <span class="text-xl">{emoji}</span>
+            <span class="text-sm">{detail.count}</span>
+          </button>
+        {/each}
       </div>
-    {/each}
+      <div class="flex-1 overflow-y-auto">
+        {#if selectedEmoji}
+          <table class="table-sm table table-fixed">
+            <tbody>
+              {#if userNamesById.data && reactionDetailsByEmoji.get(selectedEmoji)}
+                {@const userIdsForSelectedEmoji =
+                  reactionDetailsByEmoji.get(selectedEmoji)?.users ?? []}
+                {#if userIdsForSelectedEmoji.length === 0}
+                  <tr>
+                    <td>No one has reacted with this emoji.</td>
+                  </tr>
+                {/if}
+                {#each userIdsForSelectedEmoji as userId}
+                  <tr>
+                    <td class="truncate">{userNamesById.data[userId]}</td>
+                  </tr>
+                {/each}
+              {:else if userNamesById.isLoading || reactions.isLoading}
+                <tr>
+                  <td>Loading...</td>
+                </tr>
+              {:else}
+                <tr>
+                  <td>Error</td>
+                </tr>
+              {/if}
+            </tbody>
+          </table>
+        {/if}
+      </div>
+    </div>
+  {:else}
+    <div class="flex h-96 items-center justify-center">
+      <p>There are no reactions yet.</p>
+    </div>
   {/if}
 </div>

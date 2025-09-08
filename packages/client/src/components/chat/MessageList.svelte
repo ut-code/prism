@@ -2,11 +2,13 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
+  import { ModalManager } from "$lib/modal/modal.svelte";
   import MdiDotsVertical from "~/icons/mdi-dots-vertical.svelte";
   import { useMutation } from "~/lib/useMutation.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
+  import ReactionButtons from "./ReactionButtons.svelte";
   import ReactionList from "./ReactionList.svelte";
 
   interface Props {
@@ -54,7 +56,8 @@
   let clientX = $state(0);
   let clientY = $state(0);
   let visibleDropdown = $state<Id<"messages"> | null>(null);
-  let paletteVisibleFor = $state<Id<"messages"> | null>(null);
+  let reactionPaletteVisibleFor = $state<Id<"messages"> | null>(null);
+  const reactionListManager = getContext<ModalManager>("modal-manager");
   document.addEventListener("click", () => {
     visibleDropdown = null;
   });
@@ -63,6 +66,10 @@
 <div bind:this={messagesContainer} class="flex-1 space-y-2 overflow-y-auto p-4">
   {#if messages.data}
     {#each messages.data as message (message._id)}
+      {#snippet reactionListSnippet()}
+        <ReactionList messageId={message._id} />
+      {/snippet}
+
       {#snippet dropdownContent()}
         <ul
           class="menu dropdown-content bg-base-100 absolute z-[1] w-40 rounded-md border p-2 shadow"
@@ -71,12 +78,15 @@
             <button onclick={() => (replyingTo = message)}>返信</button>
           </li>
           <li>
-            <button onclick={() => (paletteVisibleFor = message._id)}
+            <button onclick={() => (reactionPaletteVisibleFor = message._id)}
               >リアクションを付ける</button
             >
           </li>
           <li>
-            <button>リアクションを表示</button>
+            <button
+              onclick={() => reactionListManager.dispatch(reactionListSnippet)}
+              >リアクションを表示</button
+            >
           </li>
         </ul>
       {/snippet}
@@ -88,17 +98,20 @@
         {@render dropdownContent()}
       </MessageDropdown>
 
-      {#if paletteVisibleFor && paletteVisibleFor === message._id}
+      {#if reactionPaletteVisibleFor && reactionPaletteVisibleFor === message._id}
         <EmojiPalette
           x={clientX}
           y={clientY}
           onClose={() => {
-            paletteVisibleFor = null;
+            reactionPaletteVisibleFor = null;
           }}
           onEmojiSelected={async (emoji) => {
-            if (!paletteVisibleFor) return;
-            await addReaction.run({ messageId: paletteVisibleFor, emoji });
-            paletteVisibleFor = null;
+            if (!reactionPaletteVisibleFor) return;
+            await addReaction.run({
+              messageId: reactionPaletteVisibleFor,
+              emoji,
+            });
+            reactionPaletteVisibleFor = null;
           }}
         />
       {/if}
@@ -135,7 +148,7 @@
           <div class="text-base-content ml-0 whitespace-pre-wrap">
             {message.content}
           </div>
-          <ReactionList messageId={message._id} />
+          <ReactionButtons messageId={message._id} />
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"
           >
