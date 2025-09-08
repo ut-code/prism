@@ -2,6 +2,7 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
+  import MdiClose from "~/icons/mdi-close.svelte";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
   import EmojiPalette from "./EmojiPalette.svelte";
 
@@ -49,10 +50,20 @@
 
 <div class="border-base-300 bg-base-100 border-t p-4">
   {#if replyingTo}
-    <div class="text-base-content/70 mb-2 text-sm">
-      <span class="font-semibold">返信先:</span>
-      <span class="text-primary font-semibold">{replyingTo.author}</span>
-      <span>{replyingTo.content}</span>
+    <div
+      class="bg-base-200 mb-2 flex items-center justify-between rounded-md p-2 text-sm"
+    >
+      <div class="text-base-content/70 truncate">
+        <span class="font-semibold">返信先:</span>
+        <span class="text-primary font-semibold">{replyingTo.author}</span>
+        <span class="truncate">: {replyingTo.content}</span>
+      </div>
+      <button
+        class="btn btn-ghost btn-circle btn-sm"
+        onclick={() => (replyingTo = null)}
+      >
+        <MdiClose />
+      </button>
     </div>
   {/if}
 
