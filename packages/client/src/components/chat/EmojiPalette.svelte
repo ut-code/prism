@@ -11,6 +11,19 @@
   let { onClose, onEmojiSelected, toggleButtonRef, x, y }: Props = $props();
   let paletteRef: HTMLElement;
 
+  const paletteWidth = 350; // emoji-picker-element default width
+  const paletteHeight = 450; // emoji-picker-element default height
+
+  let finalX = $state(x);
+  let finalY = $state(y);
+
+  $effect(() => {
+    if (x !== undefined && y !== undefined) {
+      finalX = x + paletteWidth > window.innerWidth ? x - paletteWidth : x;
+      finalY = y + paletteHeight > window.innerHeight ? y - paletteHeight : y;
+    }
+  });
+
   $effect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -50,8 +63,10 @@
 
 <div
   bind:this={paletteRef}
-  class={x === undefined || y === undefined
-    ? "absolute right-4 bottom-24"
-    : "absolute"}
-  style={`top: ${y}px; left: ${x}px;`}
+  class={`z-10 ${
+    x === undefined || y === undefined
+      ? "absolute right-4 bottom-24"
+      : "absolute"
+  }`}
+  style={`top: ${finalY}px; left: ${finalX}px;`}
 ></div>

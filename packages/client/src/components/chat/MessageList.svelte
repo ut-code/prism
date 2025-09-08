@@ -58,6 +58,54 @@
   let visibleDropdown = $state<Id<"messages"> | null>(null);
   let reactionPaletteVisibleFor = $state<Id<"messages"> | null>(null);
   const modalManager = new ModalManager();
+
+  let dropdownElement: HTMLUListElement | undefined = $state();
+  type TriggerDetails = {
+    type: "contextmenu" | "click";
+    clientX: number;
+    clientY: number;
+    rect?: DOMRect;
+  };
+  let triggerDetails: TriggerDetails | undefined = $state();
+
+  $effect(() => {
+    if (visibleDropdown && dropdownElement && triggerDetails) {
+      const menuWidth = dropdownElement.offsetWidth;
+      const menuHeight = dropdownElement.offsetHeight;
+
+      let newX: number;
+      let newY: number;
+
+      if (triggerDetails.type === "click" && triggerDetails.rect) {
+        const rect = triggerDetails.rect;
+        newX = rect.left;
+        if (rect.left + menuWidth > window.innerWidth) {
+          newX = rect.right - menuWidth;
+        }
+        newY = rect.bottom;
+        if (rect.bottom + menuHeight > window.innerHeight) {
+          newY = rect.top - menuHeight;
+        }
+      } else {
+        // contextmenu
+        const { clientX: cx, clientY: cy } = triggerDetails;
+        newX = cx;
+        if (cx + menuWidth > window.innerWidth) {
+          newX = cx - menuWidth;
+        }
+        newY = cy;
+        if (cy + menuHeight > window.innerHeight) {
+          newY = cy - menuHeight;
+        }
+      }
+
+      clientX = newX;
+      clientY = newY;
+
+      triggerDetails = undefined;
+    }
+  });
+
   document.addEventListener("click", () => {
     visibleDropdown = null;
   });
@@ -123,7 +171,11 @@
         class="p-1 hover:bg-sky-900"
         oncontextmenu={(e) => {
           e.preventDefault();
-          clientX = e.clientX;
+          const menuWidth = 160; // w-40
+          clientX =
+            e.clientX + menuWidth > window.innerWidth
+              ? e.clientX - menuWidth
+              : e.clientX;
           clientY = e.clientY;
           visibleDropdown = message._id;
         }}
@@ -157,9 +209,13 @@
               class="btn btn-ghost btn-sm p-2"
               onclick={(e) => {
                 e.stopPropagation();
-                visibleDropdown = message._id;
-                clientX = e.clientX - 150; // TODO: 暫定的なので直す
+                const menuWidth = 160; // w-40
+                clientX =
+                  e.clientX + menuWidth > window.innerWidth
+                    ? e.clientX - menuWidth
+                    : e.clientX;
                 clientY = e.clientY;
+                visibleDropdown = message._id;
               }}
             >
               <MdiDotsVertical />
