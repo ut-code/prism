@@ -3,6 +3,7 @@
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
+  import MdiDotsVertical from "~/icons/mdi-dots-vertical.svelte";
   import { useMutation } from "~/lib/useMutation.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
@@ -74,6 +75,9 @@
               >リアクションを付ける</button
             >
           </li>
+          <li>
+            <button>リアクションを表示</button>
+          </li>
         </ul>
       {/snippet}
       <MessageDropdown
@@ -89,18 +93,10 @@
           x={clientX}
           y={clientY}
           onClose={() => {
-            console.log("closed");
             paletteVisibleFor = null;
           }}
           onEmojiSelected={async (emoji) => {
-            console.log("Emoji selected:", emoji);
             if (!paletteVisibleFor) return;
-            console.log(
-              "Selected emoji",
-              emoji,
-              "for message",
-              paletteVisibleFor,
-            );
             await addReaction.run({ messageId: paletteVisibleFor, emoji });
             paletteVisibleFor = null;
           }}
@@ -143,23 +139,17 @@
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"
           >
-            <div class="dropdown dropdown-end">
-              <button class="btn btn-ghost btn-sm p-2" tabindex="0"> ⋮ </button>
-              <ul
-                tabindex="0"
-                role="menu"
-                class="menu dropdown-content bg-base-100 z-[1] w-40 rounded-md border p-2 shadow"
-              >
-                <li>
-                  <button onclick={() => (replyingTo = message)}>返信</button>
-                </li>
-                <li>
-                  <button onclick={() => (paletteVisibleFor = message._id)}
-                    >リアクションを付ける</button
-                  >
-                </li>
-              </ul>
-            </div>
+            <button
+              class="btn btn-ghost btn-sm p-2"
+              onclick={(e) => {
+                e.stopPropagation();
+                visibleDropdown = message._id;
+                clientX = e.clientX - 150; // TODO: 暫定的なので直す
+                clientY = e.clientY;
+              }}
+            >
+              <MdiDotsVertical />
+            </button>
           </div>
         </div>
       </div>
