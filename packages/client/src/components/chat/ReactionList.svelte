@@ -47,12 +47,12 @@
 
 <div>
   {#if reactionDetailsByEmoji.size > 0}
-    <div class="flex h-96 gap-4 py-4">
-      <div class="flex w-24 flex-col gap-1 overflow-y-auto pr-2">
+    <div class="flex h-96 gap-4">
+      <div class="flex w-24 flex-col gap-1 overflow-y-auto">
         {#each [...reactionDetailsByEmoji.entries()] as [emoji, detail]}
           <button
             class="btn btn-sm w-full"
-            class:btn-active={selectedEmoji === emoji}
+            class:btn-primary={selectedEmoji === emoji}
             onclick={() => toggleUserList(emoji)}
           >
             <span class="text-xl">{emoji}</span>

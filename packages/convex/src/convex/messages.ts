@@ -71,8 +71,6 @@ export const addReaction = mutation({
       throw new Error("User not authenticated");
     }
 
-    console.log("Adding reaction", args.emoji, "to message", args.messageId);
-
     const existingReaction = await ctx.db
       .query("reactions")
       .withIndex("by_message", (q) => q.eq("messageId", args.messageId))

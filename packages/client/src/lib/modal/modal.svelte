@@ -11,7 +11,6 @@
 
     close() {
       this.dialog?.close();
-      this.snippet = null;
     }
   }
 </script>

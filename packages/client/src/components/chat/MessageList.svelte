@@ -2,8 +2,8 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
-  import { getContext, onMount } from "svelte";
-  import { ModalManager } from "$lib/modal/modal.svelte";
+  import { onMount } from "svelte";
+  import Modal, { ModalManager } from "$lib/modal/modal.svelte";
   import MdiDotsVertical from "~/icons/mdi-dots-vertical.svelte";
   import { useMutation } from "~/lib/useMutation.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
@@ -57,11 +57,13 @@
   let clientY = $state(0);
   let visibleDropdown = $state<Id<"messages"> | null>(null);
   let reactionPaletteVisibleFor = $state<Id<"messages"> | null>(null);
-  const reactionListManager = getContext<ModalManager>("modal-manager");
+  const modalManager = new ModalManager();
   document.addEventListener("click", () => {
     visibleDropdown = null;
   });
 </script>
+
+<Modal manager={modalManager} />
 
 <div bind:this={messagesContainer} class="flex-1 space-y-2 overflow-y-auto p-4">
   {#if messages.data}
@@ -83,8 +85,7 @@
             >
           </li>
           <li>
-            <button
-              onclick={() => reactionListManager.dispatch(reactionListSnippet)}
+            <button onclick={() => modalManager.dispatch(reactionListSnippet)}
               >リアクションを表示</button
             >
           </li>
