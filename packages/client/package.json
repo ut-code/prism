@@ -8,7 +8,7 @@
     "dev:tauri": "bun run tauri dev",
     "build": "bun vite build",
     "build:tauri": "bun run tauri build",
-    "sync": "svelte-kit sync && bun run paraglide",
+    "sync": "svelte-kit sync",
     "check": "bun sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "bun sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test:e2e": "playwright test",
