@@ -59,53 +59,6 @@
   let reactionPaletteVisibleFor = $state<Id<"messages"> | null>(null);
   const modalManager = new ModalManager();
 
-  let dropdownElement: HTMLUListElement | undefined = $state();
-  type TriggerDetails = {
-    type: "contextmenu" | "click";
-    clientX: number;
-    clientY: number;
-    rect?: DOMRect;
-  };
-  let triggerDetails: TriggerDetails | undefined = $state();
-
-  $effect(() => {
-    if (visibleDropdown && dropdownElement && triggerDetails) {
-      const menuWidth = dropdownElement.offsetWidth;
-      const menuHeight = dropdownElement.offsetHeight;
-
-      let newX: number;
-      let newY: number;
-
-      if (triggerDetails.type === "click" && triggerDetails.rect) {
-        const rect = triggerDetails.rect;
-        newX = rect.left;
-        if (rect.left + menuWidth > window.innerWidth) {
-          newX = rect.right - menuWidth;
-        }
-        newY = rect.bottom;
-        if (rect.bottom + menuHeight > window.innerHeight) {
-          newY = rect.top - menuHeight;
-        }
-      } else {
-        // contextmenu
-        const { clientX: cx, clientY: cy } = triggerDetails;
-        newX = cx;
-        if (cx + menuWidth > window.innerWidth) {
-          newX = cx - menuWidth;
-        }
-        newY = cy;
-        if (cy + menuHeight > window.innerHeight) {
-          newY = cy - menuHeight;
-        }
-      }
-
-      clientX = newX;
-      clientY = newY;
-
-      triggerDetails = undefined;
-    }
-  });
-
   document.addEventListener("click", () => {
     visibleDropdown = null;
   });
@@ -128,8 +81,12 @@
             <button onclick={() => (replyingTo = message)}>返信</button>
           </li>
           <li>
-            <button onclick={() => (reactionPaletteVisibleFor = message._id)}
-              >リアクションを付ける</button
+            <button
+              onclick={(e) => {
+                e.stopPropagation();
+                reactionPaletteVisibleFor = message._id;
+                visibleDropdown = null;
+              }}>リアクションを付ける</button
             >
           </li>
           <li>

@@ -18,7 +18,6 @@
   let messageContent = $state("");
   let authorName = $state("");
   let showEmojiPalette = $state(false);
-  let emojiButtonRef = $state<HTMLElement | null>(null);
 
   $effect(() => {
     if (identity?.data && !authorName) {
@@ -86,9 +85,11 @@
       {/if}
     </button>
     <button
-      bind:this={emojiButtonRef}
       class="btn btn-secondary self-end"
-      onclick={() => (showEmojiPalette = !showEmojiPalette)}
+      onclick={(e) => {
+        e.stopPropagation();
+        showEmojiPalette = !showEmojiPalette;
+      }}
     >
       😀
     </button>
@@ -99,7 +100,6 @@
       onEmojiSelected={(emoji) => {
         messageContent += emoji;
       }}
-      toggleButtonRef={emojiButtonRef}
     />
   {/if}
 </div>

@@ -4,11 +4,10 @@
   interface Props {
     onClose: () => void;
     onEmojiSelected: (emoji: string) => void;
-    toggleButtonRef?: HTMLElement;
     x?: number;
     y?: number;
   }
-  let { onClose, onEmojiSelected, toggleButtonRef, x, y }: Props = $props();
+  let { onClose, onEmojiSelected, x, y }: Props = $props();
   let paletteRef: HTMLElement;
 
   const paletteWidth = 350; // emoji-picker-element default width
@@ -28,8 +27,8 @@
     const handleClickOutside = (event: MouseEvent) => {
       if (
         paletteRef &&
-        !paletteRef.contains(event.target as Node) &&
-        !toggleButtonRef?.contains(event.target as Node)
+        !paletteRef.contains(event.target as Node)
+        // !toggleButtonRef?.contains(event.target as Node)
       ) {
         onClose();
       }
@@ -38,11 +37,11 @@
     const picker = new Picker();
     paletteRef.appendChild(picker);
 
-    paletteRef.addEventListener("mousedown", (event: MouseEvent) => {
+    paletteRef.addEventListener("click", (event: MouseEvent) => {
       event.stopPropagation();
     });
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
     const emojiPicker = document.querySelector("emoji-picker");
 
@@ -53,7 +52,7 @@
     });
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
       if (emojiPicker) {
         emojiPicker.removeEventListener("emoji-click", () => {});
       }
