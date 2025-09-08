@@ -3,7 +3,7 @@
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
-  import FileAttachment from "$components/files/FileAttachment.svelte";
+  import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
 
   interface Props {

@@ -2,36 +2,26 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
-  import FilePreview from "$components/files/FilePreview.svelte";
-  import FileUploader from "$components/files/FileUploader.svelte";
+  import FilePreview from "~/features/files/upload/FilePreview.svelte";
+  import FileSelector from "~/features/files/upload/Selector.svelte";
+  import { FileUploader } from "~/features/files/upload/uploader.svelte";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
 
   interface Props {
+    organizationId: Id<"organizations">;
     channelId: Id<"channels">;
     replyingTo: Doc<"messages"> | null;
   }
 
-  interface UploadedFile {
-    id: Id<"files">;
-    filename: string;
-    originalFilename: string;
-    mimeType: string;
-    size: number;
-    url?: string;
-  }
-
-  let { channelId, replyingTo = $bindable() }: Props = $props();
+  let { channelId, organizationId, replyingTo = $bindable() }: Props = $props();
 
   const sendMessageMutation = useMutation(api.messages.send);
   const identity = useQuery(api.users.me, {});
 
-  // Get channel info to determine organization
-  const channelData = useQuery(api.channels.get, () => ({ channelId }));
-
   let messageContent = $state("");
   let authorName = $state("");
-  let attachedFiles = $state<UploadedFile[]>([]);
-  let showFileUploader = $state(false);
+  let showFileSelector = $state(false);
+  let attachedFiles = $state<File[]>([]);
 
   $effect(() => {
     if (identity?.data && !authorName) {
@@ -39,11 +29,16 @@
     }
   });
 
+  const uploader = new FileUploader(() => ({
+    organizationId,
+  }));
+
   async function sendMessage() {
     if (!messageContent.trim() && attachedFiles.length === 0) return;
 
-    const attachments =
-      attachedFiles.length > 0 ? attachedFiles.map((f) => f.id) : undefined;
+    const attachments = (await uploader.uploadAll(attachedFiles)).map(
+      (it) => it.id,
+    );
 
     await sendMessageMutation.run({
       channelId,
@@ -56,7 +51,7 @@
     messageContent = "";
     attachedFiles = [];
     replyingTo = null;
-    showFileUploader = false;
+    showFileSelector = false;
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -66,17 +61,8 @@
     }
   }
 
-  function handleFilesUploaded(files: UploadedFile[]) {
-    attachedFiles = [...attachedFiles, ...files];
-    showFileUploader = false;
-  }
-
-  function removeAttachedFile(index: number) {
-    attachedFiles = attachedFiles.filter((_, i) => i !== index);
-  }
-
   function toggleFileUploader() {
-    showFileUploader = !showFileUploader;
+    showFileSelector = !showFileSelector;
   }
 </script>
 
@@ -94,12 +80,12 @@
     <div class="space-y-2">
       <h4 class="text-base-content/70 text-sm font-medium">添付ファイル:</h4>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {#each attachedFiles as file, index}
+        {#each attachedFiles as file, index (file.name)}
           <FilePreview
             {file}
             compact={true}
             removable={true}
-            onRemove={() => removeAttachedFile(index)}
+            onRemove={() => attachedFiles.splice(index, 1)}
           />
         {/each}
       </div>
@@ -107,10 +93,13 @@
   {/if}
 
   <!-- File uploader -->
-  {#if showFileUploader && channelData?.data?.organizationId}
-    <FileUploader
-      organizationId={channelData.data.organizationId}
-      onUpload={handleFilesUploaded}
+  {#if showFileSelector}
+    <FileSelector
+      {organizationId}
+      bind:files={attachedFiles}
+      onselect={() => {
+        showFileSelector = false;
+      }}
     />
   {/if}
 
@@ -154,7 +143,7 @@
               d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
             ></path>
           </svg>
-          {showFileUploader ? "キャンセル" : "ファイル添付"}
+          {showFileSelector ? "キャンセル" : "ファイル添付"}
         </button>
       </div>
     </div>

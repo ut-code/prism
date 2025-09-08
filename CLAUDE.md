@@ -13,7 +13,6 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
   - **ALWAYS use**: `$state`, `$derived`, `$effect` instead of legacy syntax
 - **Backend**: Convex (real-time database and functions)
 - **Desktop**: Tauri (optional, conflicts with web dev server)
-- **Internationalization**: Paraglide for i18n (English/Japanese)
 - **Styling**: TailwindCSS v4 with DaisyUI components
 - **Package Manager**: Bun
 - **Monorepo Structure**: Workspaces with `packages/`
@@ -22,75 +21,6 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
 
 - `packages/client/` - SvelteKit frontend with Tauri integration
 - `packages/convex/` - Convex backend with database schema and functions
-
-## Development Commands
-
-### Setup
-
-```bash
-bun install --frozen-lockfile
-```
-
-### Development Servers
-
-```bash
-# Main development (Convex + Web Client)
-bun dev
-
-# All development servers including Storybook
-bun dev:all
-
-# Individual servers
-bun dev:web         # Web client at http://localhost:5173
-bun dev:convex      # Convex at http://localhost:3210, Dashboard at http://localhost:6790
-bun dev:storybook   # Storybook at http://localhost:6006
-bun dev:tauri       # Desktop app (conflicts with web client)
-```
-
-### Building and Testing
-
-```bash
-# Build all apps
-bun run --filter=* build
-
-# Run tests
-bun test
-
-# Type checking and linting
-bun check          # Runs lint + format + all app checks
-bun check:lint     # Biome linting only
-bun check:format   # Prettier formatting check only
-
-# Auto-fix
-bun fix            # Auto-fix lint + format issues
-bun fix:lint       # Biome auto-fix
-bun fix:format     # Prettier auto-format
-```
-
-### Convex Operations
-
-```bash
-# Convex CLI commands
-bun convex [command]
-
-# Code generation (run after schema changes)
-bun sync
-```
-
-### Internationalization
-
-```bash
-# Compile i18n messages
-bun paraglide
-```
-
-## Code Architecture
-
-### Svelte Documentation
-
-When working with Svelte code, always reference the latest documentation:
-
-- **Latest Svelte Docs**: https://svelte.dev/llms-small.txt
 
 ### Frontend (SvelteKit)
 
@@ -104,6 +34,21 @@ When working with Svelte code, always reference the latest documentation:
   - `@packages/{package}` → monorepo
 - **Convex Integration**: Uses `convex-svelte` for reactive queries
 - **State Pattern**: Logic components (e.g., TaskList.svelte) separate from presentation (TaskListSkin.svelte)
+
+### Backend (Convex)
+
+- **Schema**: Defined in `packages/convex/src/convex/schema.ts`
+- **Functions**: Database operations in `packages/convex/src/convex/[feature].ts`
+- **Type Safety**: Auto-generated types from schema shared with frontend via workspace dependency
+
+### Data Flow
+
+1. Convex schema defines database structure
+2. Convex functions provide type-safe CRUD operations
+3. Frontend uses `convex-svelte` hooks for reactive data
+4. Automatic type generation ensures type safety across stack
+
+## Framework - Convex
 
 ### Convex の Import について
 
@@ -151,63 +96,51 @@ createOrganization.processing; // boolean, use for button disabled state / loadi
 createOrganization.error; // string | null, use for error messages
 ```
 
-### Backend (Convex)
+## Framework - Svelte
 
-- **Schema**: Defined in `packages/convex/src/convex/schema.ts`
-- **Functions**: Database operations in `packages/convex/src/convex/[feature].ts`
-- **Type Safety**: Auto-generated types from schema shared with frontend via workspace dependency
+### Syntax
 
-### Data Flow
+Never use logacy svelte syntax. This project uses Svelte 5 runes mode.
 
-1. Convex schema defines database structure
-2. Convex functions provide type-safe CRUD operations
-3. Frontend uses `convex-svelte` hooks for reactive data
-4. Automatic type generation ensures type safety across stack
+- ❌ FORBIDDEN: `$: reactiveVar = ...` (reactive statements)
+- ❌ FORBIDDEN: `let count = 0` for reactive state
+- ✅ REQUIRED: `let count = $state(0)` for reactive state
+- ✅ REQUIRED: `$effect(() => { ... })` for side effects
+- ✅ REQUIRED: `const sum = $derived(a + b);` for derived variables
+- ✅ REQUIRED: `const sum = $derived.by(() => { if (a + b < 0) return 0; return a + b; );` for derived variables which needs a block.
 
-## Code Quality
+### Svelte Capabilities
 
-### Linting and Formatting
+- clsx: Svelte has clsx builtin to its class. `<div class={["text-lg", isError && "text-error"]}>{text}</div>`
 
-- **Biome**: Primary linter with strict rules
-- **Prettier**: Code formatting (Biome formatter disabled)
-- **Lefthook**: Pre-commit hooks for code generation and formatting
+- reactive class: Svelte allows defining reactive controller classes inside ".svelte.ts" files for reusability and separation of concerns.
 
-### Special Biome Rules
-
-- Svelte files have relaxed rules for unused variables/imports
-- Convex files exempt from import extension requirements
-- Strict style rules including parameter assignment, const assertions
-
-### Pre-commit Hooks
-
-- Automatic code generation (`bun sync`)
-- Automatic formatting (`bun fix:format`)
-
-## Tauri Desktop App
-
-Tauri integration requires separate development workflow:
-
-```bash
-# Start backend first
-bun dev:convex
-
-# Then start Tauri (in separate terminal)
-bun dev:tauri
+```ts
+// my-controller.svelte.ts
+class MyController {
+  foo = $state(3);
+  bar: number;
+  baz = $derived.by(() => bar + baz); // use derived.by if it needs to be lazy-initialized
+  doubleQux: number;
+  // unless it doesn't change at runtime (e.g. static configuration - initBar in this example),
+  // using getter function is better for reactivity.
+  constructor(initBar: number, props: () => { qux: number }) {
+    this.bar = $state(initBar);
+    this.doubleQux = $derived(props().qux * 2);
+  }
+}
 ```
 
-Tauri conflicts with the web development server and requires more resources for compilation.
+## Code Quality / Coding Rules
 
-## Coding Instructions
-
-- **🚫 NEVER USE LEGACY SVELTE SYNTAX**: This project uses Svelte 5 runes mode
-  - ❌ FORBIDDEN: `$: reactiveVar = ...` (reactive statements)
-  - ❌ FORBIDDEN: `let count = 0` for reactive state
-  - ✅ REQUIRED: `const reactiveVar = $derived(...)`
-  - ✅ REQUIRED: `let count = $state(0)` for reactive state
-  - ✅ REQUIRED: `$effect(() => { ... })` for side effects
-- Always prefer using DaisyUI classes, and use minimal Tailwind classes.
-- Separate components into smallest pieces for readability.
-- Name snippets with camelCase instead of PascalCase to avoid confusion with components.
-- Always run `bun check` after writing code.
-- Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
-- Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
+- NAMING: Name snippets with camelCase instead of PascalCase to avoid confusion with components.
+- ALIAS: Use TypeScript import alias for client code. `import component from "~/features/foo/component.svelte";`
+- CHECK: Always run `bun check` after writing code.
+- STYLING: Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
+- STYLING: Always prefer using DaisyUI classes, and use minimal Tailwind classes.
+- FILE LENGTH: Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
+- SEPARATE COMPONENTS: Separate components into smallest pieces for readability.
+- SEPARATE LOGIC: Separate Logic from .svelte files into .svelte.ts files.
+  - .svelte.ts files should handle Calculation / Reactivity, while .svelte files should handle UI changes (e.g. navigation, modal open).
+  - if it has any reusable utility function, it should be separated again into plain .ts files / .svelte.ts
+    - An Ideal import tree would look like this: `UI component [.svelte] -> controller [.svelte.ts] -> processor [.svelte.ts] -> pure logic utility [.ts]`
