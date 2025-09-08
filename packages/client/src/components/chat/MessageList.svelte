@@ -3,6 +3,8 @@
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
+  import { useMutation } from "~/lib/useMutation.svelte";
+  import EmojiPalette from "./EmojiPalette.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
   import ReactionList from "./ReactionList.svelte";
 
@@ -16,6 +18,8 @@
   const messages = useQuery(api.messages.list, () => ({
     channelId,
   }));
+
+  const addReaction = useMutation(api.messages.addReaction);
 
   const messagesById = $derived(
     new Map(messages.data?.map((message) => [message._id, message])),
@@ -49,6 +53,7 @@
   let clientX = $state(0);
   let clientY = $state(0);
   let visibleDropdown = $state<Id<"messages"> | null>(null);
+  let paletteVisibleFor = $state<Id<"messages"> | null>(null);
   document.addEventListener("click", () => {
     visibleDropdown = null;
   });
@@ -65,7 +70,9 @@
             <button onclick={() => (replyingTo = message)}>返信</button>
           </li>
           <li>
-            <button>リアクションを付ける</button>
+            <button onclick={() => (paletteVisibleFor = message._id)}
+              >リアクションを付ける</button
+            >
           </li>
         </ul>
       {/snippet}
@@ -76,6 +83,29 @@
       >
         {@render dropdownContent()}
       </MessageDropdown>
+
+      {#if paletteVisibleFor && paletteVisibleFor === message._id}
+        <EmojiPalette
+          x={clientX}
+          y={clientY}
+          onClose={() => {
+            console.log("closed");
+            paletteVisibleFor = null;
+          }}
+          onEmojiSelected={async (emoji) => {
+            console.log("Emoji selected:", emoji);
+            if (!paletteVisibleFor) return;
+            console.log(
+              "Selected emoji",
+              emoji,
+              "for message",
+              paletteVisibleFor,
+            );
+            await addReaction.run({ messageId: paletteVisibleFor, emoji });
+            paletteVisibleFor = null;
+          }}
+        />
+      {/if}
 
       <div
         role="button"
@@ -122,6 +152,11 @@
               >
                 <li>
                   <button onclick={() => (replyingTo = message)}>返信</button>
+                </li>
+                <li>
+                  <button onclick={() => (paletteVisibleFor = message._id)}
+                    >リアクションを付ける</button
+                  >
                 </li>
               </ul>
             </div>

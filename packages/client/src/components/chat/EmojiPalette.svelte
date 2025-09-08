@@ -4,9 +4,11 @@
   interface Props {
     onClose: () => void;
     onEmojiSelected: (emoji: string) => void;
-    toggleButtonRef: HTMLElement | null;
+    toggleButtonRef?: HTMLElement;
+    x?: number;
+    y?: number;
   }
-  let { onClose, onEmojiSelected, toggleButtonRef }: Props = $props();
+  let { onClose, onEmojiSelected, toggleButtonRef, x, y }: Props = $props();
   let paletteRef: HTMLElement;
 
   $effect(() => {
@@ -23,16 +25,19 @@
     const picker = new Picker();
     paletteRef.appendChild(picker);
 
+    paletteRef.addEventListener("mousedown", (event: MouseEvent) => {
+      event.stopPropagation();
+    });
+
     document.addEventListener("mousedown", handleClickOutside);
 
     const emojiPicker = document.querySelector("emoji-picker");
-    if (emojiPicker) {
-      emojiPicker.addEventListener("emoji-click", (event) => {
-        const emoji = event.detail.unicode;
-        if (!emoji) return;
-        onEmojiSelected(emoji);
-      });
-    }
+
+    emojiPicker?.addEventListener("emoji-click", (event) => {
+      const emoji = event.detail.unicode;
+      if (!emoji) return;
+      onEmojiSelected(emoji);
+    });
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -43,4 +48,10 @@
   });
 </script>
 
-<div bind:this={paletteRef} class="absolute right-4 bottom-24"></div>
+<div
+  bind:this={paletteRef}
+  class={x === undefined || y === undefined
+    ? "absolute right-4 bottom-24"
+    : "absolute"}
+  style={`top: ${y}px; left: ${x}px;`}
+></div>
