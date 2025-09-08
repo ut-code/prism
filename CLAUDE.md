@@ -13,7 +13,6 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
   - **ALWAYS use**: `$state`, `$derived`, `$effect` instead of legacy syntax
 - **Backend**: Convex (real-time database and functions)
 - **Desktop**: Tauri (optional, conflicts with web dev server)
-- **Internationalization**: Paraglide for i18n (English/Japanese)
 - **Styling**: TailwindCSS v4 with DaisyUI components
 - **Package Manager**: Bun
 - **Monorepo Structure**: Workspaces with `packages/`
