@@ -85,7 +85,7 @@
 
   <div class="flex flex-1 flex-col">
     {#if channelId}
-      <Channel selectedChannelId={channelId} />
+      <Channel {organizationId} selectedChannelId={channelId} />
     {:else}
       <div class="bg-base-200 flex flex-1 items-center justify-center">
         <div class="text-center">

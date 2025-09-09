@@ -176,3 +176,91 @@ export async function getOrganizationPerms(
     },
   };
 }
+
+/**
+# Files
+
+- Fellow can upload files to the organization.
+- Fellow can view files in the organization.
+- File uploader and admin can delete files.
+- Attachments must belong to the same organization as the channel.
+
+*/
+export async function getFilePerms(
+  ctx: QueryCtx,
+  query:
+    | {
+        fileId: Id<"files">;
+      }
+    | {
+        organizationId: Id<"organizations">;
+      },
+) {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error("User is not authenticated");
+  }
+
+  const { file, organizationId } = await (async () => {
+    if ("fileId" in query) {
+      const file = await ctx.db.get(query.fileId);
+      if (!file) {
+        throw new Error("File not found");
+      }
+      return { file, organizationId: file.organizationId };
+    } else {
+      return { file: null, organizationId: query.organizationId };
+    }
+  })();
+
+  const membership = await ctx.db
+    .query("organizationMembers")
+    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
+    .filter((q) => q.eq(q.field("userId"), userId))
+    .first();
+
+  if (!membership) {
+    throw new Error("User is not a member of the organization");
+  }
+
+  return {
+    userId,
+    membership,
+    file,
+    organizationId,
+    read: true,
+    upload: true,
+    delete: file?.uploadedBy === userId || membership.permission === "admin",
+  };
+}
+
+/**
+ * Validate file attachments for message creation
+ * Ensures all files belong to the same organization as the channel
+ */
+export async function validateFileAttachments(
+  ctx: QueryCtx,
+  fileIds: Id<"files">[],
+  channelId: Id<"channels">,
+) {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) {
+    throw new Error("User is not authenticated");
+  }
+
+  const channel = await ctx.db.get(channelId);
+  if (!channel) {
+    throw new Error("Channel not found");
+  }
+
+  for (const fileId of fileIds) {
+    const file = await ctx.db.get(fileId);
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`);
+    }
+
+    if (file.organizationId !== channel.organizationId) {
+      throw new Error("File attachment belongs to different organization");
+    }
+  }
+}

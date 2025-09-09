@@ -7,9 +7,10 @@
 
   interface Props {
     selectedChannelId: Id<"channels">;
+    organizationId: Id<"organizations">;
   }
 
-  let { selectedChannelId }: Props = $props();
+  let { selectedChannelId, organizationId }: Props = $props();
 
   const selectedChannel = useQuery(api.channels.get, () => ({
     channelId: selectedChannelId,
@@ -30,4 +31,4 @@
 </div>
 
 <MessageList channelId={selectedChannelId} bind:replyingTo />
-<MessageInput channelId={selectedChannelId} bind:replyingTo />
+<MessageInput channelId={selectedChannelId} {organizationId} bind:replyingTo />

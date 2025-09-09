@@ -3,6 +3,7 @@
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
+  import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
 
   interface Props {
@@ -105,6 +106,15 @@
           <div class="text-base-content ml-0 whitespace-pre-wrap">
             {message.content}
           </div>
+
+          <!-- Attachments -->
+          {#if message.attachments && message.attachments.length > 0}
+            <div class="mt-2 space-y-2">
+              {#each message.attachments as fileId}
+                <FileAttachment {fileId} compact={false} />
+              {/each}
+            </div>
+          {/if}
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"
           >
