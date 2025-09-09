@@ -2,6 +2,7 @@
   import { type Id } from "@packages/convex";
   import Channel from "./Channel.svelte";
   import ChannelList from "./ChannelList.svelte";
+  import Personalization from "./Personalization.svelte";
 
   let selectedChannelId = $state<Id<"channels"> | undefined>(undefined);
   let screenMode = $state("chat");
@@ -26,7 +27,7 @@
         </div>
       {/if}
     {:else if screenMode == "personalization"}
-      <h1>個人用設定</h1>
+      <Personalization />
     {/if}
   </div>
 </div>
