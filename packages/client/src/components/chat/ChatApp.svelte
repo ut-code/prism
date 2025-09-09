@@ -6,7 +6,6 @@
 
   type Selection = {type: "chat", selectedChannelId: Id<"channels"> | undefined} | {type: "personalization", selectedChannelId: undefined};
 
-  //let selectedChannelId = $state<Id<"channels"> | undefined>(undefined);
   let screenMode = $state<Selection>({type: "chat", selectedChannelId: undefined});
 </script>
 
