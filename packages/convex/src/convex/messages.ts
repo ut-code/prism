@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getMessagePerms } from "./perms";
+import { getMessagePerms, validateFileAttachments } from "./perms";
 
 export const list = query({
   args: { channelId: v.id("channels") },
@@ -35,19 +35,9 @@ export const send = mutation({
       throw new Error("Insufficient permissions");
     }
 
-    // 添付ファイルがある場合、ファイルの存在と権限を確認
+    // 添付ファイルの検証
     if (args.attachments && args.attachments.length > 0) {
-      for (const fileId of args.attachments) {
-        const file = await ctx.db.get(fileId);
-        if (!file) {
-          throw new Error(`ファイルが見つかりません: ${fileId}`);
-        }
-        // ファイルがアップロードされた Organization とチャンネルの Organization が同じかチェック
-        const channel = await ctx.db.get(args.channelId);
-        if (!channel || file.organizationId !== channel.organizationId) {
-          throw new Error("不正な添付ファイルです");
-        }
-      }
+      await validateFileAttachments(ctx, args.attachments, args.channelId);
     }
 
     await ctx.db.insert("messages", {

@@ -133,14 +133,24 @@ class MyController {
 
 ## Code Quality / Coding Rules
 
+### Common Rules
+
+- FILE LENGTH: Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
+- CHECK: Always run `bun check` after writing code.
+- DOCUMENTATION: document the behavior (and optionally the expected usage) of the code, not the implementation
+
+### Svelte
+
 - NAMING: Name snippets with camelCase instead of PascalCase to avoid confusion with components.
 - ALIAS: Use TypeScript import alias for client code. `import component from "~/features/foo/component.svelte";`
-- CHECK: Always run `bun check` after writing code.
 - STYLING: Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
 - STYLING: Always prefer using DaisyUI classes, and use minimal Tailwind classes.
-- FILE LENGTH: Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
 - SEPARATE COMPONENTS: Separate components into smallest pieces for readability.
 - SEPARATE LOGIC: Separate Logic from .svelte files into .svelte.ts files.
   - .svelte.ts files should handle Calculation / Reactivity, while .svelte files should handle UI changes (e.g. navigation, modal open).
   - if it has any reusable utility function, it should be separated again into plain .ts files / .svelte.ts
     - An Ideal import tree would look like this: `UI component [.svelte] -> controller [.svelte.ts] -> processor [.svelte.ts] -> pure logic utility [.ts]`
+
+### Convex Rules
+
+- AUTHORIZATION: write authorization determinator in `packages/convex/src/convex/perms.ts`

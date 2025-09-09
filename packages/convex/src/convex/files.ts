@@ -1,41 +1,6 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
-import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
-
-// ファイル権限チェック関数
-async function checkOrganizationMember(
-  ctx: QueryCtx,
-  organizationId: Id<"organizations">,
-  userId: Id<"users">,
-) {
-  const membership = await ctx.db
-    .query("organizationMembers")
-    .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))
-    .filter((q) => q.eq(q.field("userId"), userId))
-    .first();
-
-  if (!membership) {
-    throw new Error("Organization のメンバーではありません");
-  }
-
-  return membership;
-}
-
-async function checkOrganizationAdmin(
-  ctx: QueryCtx,
-  organizationId: Id<"organizations">,
-  userId: Id<"users">,
-) {
-  const membership = await checkOrganizationMember(ctx, organizationId, userId);
-
-  if (membership.permission !== "admin") {
-    throw new Error("管理者権限が必要です");
-  }
-
-  return membership;
-}
+import { getFilePerms } from "./perms";
 
 // ファイルのMIMEタイプを検証
 function isValidMimeType(mimeType: string): boolean {
@@ -77,11 +42,7 @@ export const generateUploadUrl = mutation({
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, { organizationId }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("認証が必要です");
-
-    await checkOrganizationMember(ctx, organizationId, userId);
-
+    await getFilePerms(ctx, { organizationId });
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -101,8 +62,9 @@ export const saveFileInfo = mutation({
     height: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("認証が必要です");
+    const { userId } = await getFilePerms(ctx, {
+      organizationId: args.organizationId,
+    });
 
     // ファイルサイズ制限チェック (10MB)
     if (args.size > 10 * 1024 * 1024) {
@@ -113,9 +75,6 @@ export const saveFileInfo = mutation({
     if (!isValidMimeType(args.mimeType)) {
       throw new Error("サポートされていないファイル形式です");
     }
-
-    // Organization メンバーシップ確認
-    await checkOrganizationMember(ctx, args.organizationId, userId);
 
     const sanitizedFilename = sanitizeFilename(args.filename);
 
@@ -134,16 +93,13 @@ export const saveFileInfo = mutation({
 export const deleteFile = mutation({
   args: { fileId: v.id("files") },
   handler: async (ctx, { fileId }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("認証が必要です");
+    const perms = await getFilePerms(ctx, { fileId });
 
-    const file = await ctx.db.get(fileId);
-    if (!file) throw new Error("ファイルが見つかりません");
-
-    // 権限チェック（アップロード者またはadmin）
-    if (file.uploadedBy !== userId) {
-      await checkOrganizationAdmin(ctx, file.organizationId, userId);
+    if (!perms.delete || !perms.file) {
+      throw new Error("ファイルを削除する権限がありません");
     }
+
+    const file = perms.file;
 
     // ストレージからファイルを削除
     await ctx.storage.delete(file.storageId);
@@ -159,13 +115,9 @@ export const deleteFile = mutation({
 export const getFile = query({
   args: { fileId: v.id("files") },
   handler: async (ctx, { fileId }) => {
-    const file = await ctx.db.get(fileId);
+    const perms = await getFilePerms(ctx, { fileId });
+    const file = perms.file;
     if (!file) return null;
-
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("認証が必要です");
-
-    await checkOrganizationMember(ctx, file.organizationId, userId);
 
     const url = await ctx.storage.getUrl(file.storageId);
     return { ...file, url };
@@ -181,10 +133,7 @@ export const listFiles = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, { organizationId, limit = 50 }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
-
-    await checkOrganizationMember(ctx, organizationId, userId);
+    await getFilePerms(ctx, { organizationId });
 
     const files = await ctx.db
       .query("files")
@@ -209,17 +158,14 @@ export const listFiles = query({
 export const getFiles = query({
   args: { fileIds: v.array(v.id("files")) },
   handler: async (ctx, { fileIds }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("認証が必要です");
-
     const results = [];
 
     for (const fileId of fileIds) {
-      const file = await ctx.db.get(fileId);
-      if (!file) continue;
-
       try {
-        await checkOrganizationMember(ctx, file.organizationId, userId);
+        const perms = await getFilePerms(ctx, { fileId });
+        const file = perms.file;
+        if (!file) continue;
+
         const url = await ctx.storage.getUrl(file.storageId);
         results.push({ ...file, url });
       } catch {}
