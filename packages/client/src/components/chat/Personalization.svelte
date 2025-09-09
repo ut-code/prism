@@ -121,6 +121,4 @@
   </div>
 </div>
 
-<button class="btn btn-primary mt-auto mr-2 mb-2 ml-auto w-16" onclick={save}
-  >保存</button
->
+<button class="btn btn-primary mt-auto mr-2 mb-2 ml-auto w-16" onclick={save}>保存</button>
