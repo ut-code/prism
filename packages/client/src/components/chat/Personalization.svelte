@@ -1,19 +1,73 @@
 <script lang="ts">
-  import { api } from "@packages/convex";
+  import { api, type Id } from "@packages/convex";
   import { useConvexClient, useQuery } from "convex-svelte";
-
-  const identity = useQuery(api.users.me, {});
-  let imageURL = $derived(identity.data?.image);
-  let userName = $derived(identity.data?.name);
-  let changedImage = $state("");
-  let changedUserName = $state("");
 
   const convex = useConvexClient();
 
+  const identity = useQuery(api.users.me, {});
+  const personalization = useQuery(api.personalization.getPersonalization, {});
+  let iconURL = $state<string | null>("");
+  let imageURL = $derived(iconURL || identity.data?.image);
+  let userName = $derived(
+    personalization.data?.nickname || identity.data?.name,
+  );
+  let changedImage = $state<string>("");
+  let changedImageFile = $state<File | undefined>();
+  let changedUserName = $state<string>("");
+
+  $effect(() => {
+    if (userName) {
+      changedUserName = userName;
+    }
+    if (personalization.data) {
+      new Promise((resolve) => {
+        resolve(personalization.data?.icon);
+      })
+        .then((value) => {
+          return new Promise((resolve, reject) => {
+            const storageId = value as Id<"_storage">;
+            if (storageId) {
+              resolve(
+                convex.mutation(api.personalization.getImageUrl, {
+                  storageId: storageId,
+                }),
+              );
+            } else {
+              reject();
+            }
+          });
+        })
+        .then((value) => {
+          const url = value as string;
+          iconURL = url;
+        });
+    }
+  });
+
   async function save() {
-    if (userName?.trim()) {
+    const image = changedImageFile;
+    changedImage = "";
+    changedImageFile = undefined;
+    if (changedUserName?.trim() && !(userName === changedUserName)) {
       await convex.mutation(api.personalization.save, {
         name: changedUserName,
+      });
+    }
+    if (image) {
+      const postUrl = await convex.mutation(
+        api.personalization.generateUploadUrl,
+        {},
+      );
+      const result = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": image.type },
+        body: image,
+      });
+
+      const { storageId } = await result.json();
+
+      await convex.mutation(api.personalization.saveImage, {
+        icon: storageId,
       });
     }
   }
@@ -46,6 +100,7 @@
     const file = input.files?.[0];
     if (file) {
       changedImage = URL.createObjectURL(file);
+      changedImageFile = file;
     }
   }}
 />

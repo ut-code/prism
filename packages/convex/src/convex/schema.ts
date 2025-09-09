@@ -20,5 +20,10 @@ export default defineSchema({
     createdAt: v.number(),
     parentId: v.optional(v.id("messages")),
   }).index("by_channel", ["channelId"]),
+  personalization: defineTable({
+    userId: v.id("users"),
+    nickname: v.string(),
+    icon: v.union(v.id("_storage"), v.null()),
+  }),
   ...authTables,
 });
