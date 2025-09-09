@@ -1,6 +1,8 @@
 pre-commit:
   parallel: true
   jobs:
+    - name: Type Check
+      run: bun run --filter=* check
     - name: Run codegen before commit
       run: bun run sync
       stage_fixed: true

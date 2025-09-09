@@ -1,34 +1,36 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import { useQuery } from "convex-svelte";
+  import CreateChannelButton from "./CreateChannelButton.svelte";
 
   type Selection = {type: "chat", selectedChannelId: Id<"channels"> | undefined} | {type: "personalization", selectedChannelId: undefined};
 
-  interface Props {
+  
+/*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
     screenMode: Selection;
   }
 
   let {
     screenMode = $bindable(),
   }: Props = $props();
-
-  const convex = useConvexClient();
-  const channels = useQuery(api.channels.list, () => ({}));
-
-  async function createChannel() {
-    const name = prompt("チャンネル名を入力してください:");
-    if (name?.trim()) {
-      await convex.mutation(api.channels.create, { name: name.trim() });
-    }
+=======
+*/
+  interface Props {
+    organizationId: Id<"organizations">;
+    screenMode: Selection;
   }
+
+  let { organizationId, screenMode = $bindable() }: Props = $props();
+
+  const channels = useQuery(api.channels.list, () => ({
+    organizationId,
+  }));
 </script>
 
-<div class="bg-base-200 flex h-full w-64 flex-col">
+<div class="flex h-full flex-col">
   <div class="border-base-300 border-b p-4">
-    <h2 class="text-lg font-semibold">チャンネル</h2>
-    <button class="btn btn-primary btn-sm mt-2 w-full" onclick={createChannel}>
-      + 新しいチャンネル
-    </button>
+    <h3 class="text-base font-semibold">チャンネル</h3>
+    <CreateChannelButton {organizationId} />
   </div>
 
   <div class="flex-1 overflow-y-auto">
@@ -54,6 +56,12 @@
     {:else}
       <div class="text-base-content/60 p-4 text-center">
         チャンネルを読み込み中...
+      </div>
+    {/if}
+
+    {#if channels.data && channels.data.length === 0}
+      <div class="text-base-content/60 p-4 text-center text-sm">
+        まだチャンネルがありません
       </div>
     {/if}
   </div>
