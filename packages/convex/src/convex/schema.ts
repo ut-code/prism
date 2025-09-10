@@ -42,6 +42,12 @@ export default defineSchema({
     // 添付ファイル
     attachments: v.optional(v.array(v.id("files"))),
   }).index("by_channel", ["channelId"]),
+  personalization: defineTable({
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+    nickname: v.string(),
+    icon: v.union(v.id("_storage"), v.null()),
+  }),
   files: defineTable({
     // Convex Storage ID
     storageId: v.string(),
