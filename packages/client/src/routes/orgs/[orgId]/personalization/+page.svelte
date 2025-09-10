@@ -8,5 +8,5 @@
 
 <ChatApp
   organizationId={orgId as Id<"organizations">}
-  screenMode={{type:"personalization", selectedChannelId :undefined}}
+  screenMode={{ type: "personalization", selectedChannelId: undefined }}
 />

@@ -54,9 +54,7 @@
     {#if organizations.data && organizations.data.length === 0}
       <div class="py-8 text-center">
         <p class="text-base-content/60 mb-4">参加している組織がありません</p>
-        <a href="/orgs/new" class="btn btn-primary">
-          新しい組織を作成
-        </a>
+        <a href="/orgs/new" class="btn btn-primary"> 新しい組織を作成 </a>
       </div>
     {/if}
   </div>

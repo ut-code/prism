@@ -3,10 +3,11 @@
   import { useQuery } from "convex-svelte";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
-  type Selection = {type: "chat", selectedChannelId: Id<"channels"> | undefined} | {type: "personalization", selectedChannelId: undefined};
+  type Selection =
+    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
+    | { type: "personalization"; selectedChannelId: undefined };
 
-  
-/*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
+  /*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
     screenMode: Selection;
   }
 
@@ -27,7 +28,7 @@
   }));
 </script>
 
-<div class="flex flex-col h-full">
+<div class="flex h-full flex-col">
   <div class="border-base-300 border-b p-4">
     <h3 class="text-base font-semibold">チャンネル</h3>
     <CreateChannelButton {organizationId} />
@@ -44,7 +45,7 @@
               : "hover:bg-base-300",
           ].join(" ")}
           onclick={() => {
-            screenMode = {type: "chat", selectedChannelId: channel._id}
+            screenMode = { type: "chat", selectedChannelId: channel._id };
           }}
         >
           <div class="font-medium"># {channel.name}</div>
@@ -68,7 +69,7 @@
   <button
     class="btn btn-primary mt-auto mb-2 w-full"
     onclick={() => {
-      screenMode = {type: "personalization", selectedChannelId: undefined};
-    }}
-    >個人用設定</button>
+      screenMode = { type: "personalization", selectedChannelId: undefined };
+    }}>個人用設定</button
+  >
 </div>

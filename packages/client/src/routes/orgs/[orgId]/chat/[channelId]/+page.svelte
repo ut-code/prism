@@ -8,5 +8,5 @@
 
 <ChatApp
   organizationId={orgId as Id<"organizations">}
-  screenMode={{type:"chat", selectedChannelId :channelId as Id<"channels">}}
+  screenMode={{ type: "chat", selectedChannelId: channelId as Id<"channels"> }}
 />
