@@ -22,7 +22,7 @@
 </script>
 
 <div class="bg-base-100 flex h-screen">
-  <div class="bg-base-200 border-base-300 w-80 border-r">
+  <div class="flex flex-col bg-base-200 border-base-300 h-full w-80 border-r">
     <div class="border-base-300 border-b p-4">
       <div class="flex items-center justify-between">
         <div>
@@ -80,11 +80,17 @@
       {organizationId}
       bind:screenMode={
         () => screenMode,
-        (id) => {
-          goto(`/orgs/${organizationId}/chat/${id}`);
+        (screenMode) => {
+          if(screenMode.type === "chat"){
+            goto(`/orgs/${organizationId}/chat/${screenMode.selectedChannelId}`);
+          }
+          else if(screenMode.type === "personalization"){
+            goto(`/orgs/${organizationId}/personalization`);
+          }
         }
       }
     />
+    
   </div>
 
   <div class="flex flex-1 flex-col">
