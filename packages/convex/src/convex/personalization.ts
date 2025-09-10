@@ -4,24 +4,27 @@ import { mutation, query } from "./_generated/server";
 
 export const save = mutation({
   args: {
-    name: v.string(),
+    nickName: v.string(),
+    organizationId: v.id("organizations"),
   },
-  handler: async (ctx, args: { name: string }): Promise<void> => {
+  handler: async (ctx, args): Promise<void> => {
     const userId = await getAuthUserId(ctx);
     if (userId) {
       const data = await ctx.db
         .query("personalization")
         .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("organizationId"), args.organizationId))
         .unique();
 
       if (data) {
         await ctx.db.patch(data._id, {
-          nickname: args.name,
+          nickname: args.nickName,
         });
       } else {
         await ctx.db.insert("personalization", {
           userId: userId,
-          nickname: args.name,
+          organizationId: args.organizationId,
+          nickname: args.nickName,
           icon: null,
         });
       }
@@ -38,6 +41,7 @@ export const generateUploadUrl = mutation({
 export const saveImage = mutation({
   args: {
     icon: v.id("_storage"),
+    organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -45,6 +49,7 @@ export const saveImage = mutation({
       const data = await ctx.db
         .query("personalization")
         .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("organizationId"), args.organizationId))
         .unique();
 
       if (data) {
@@ -58,6 +63,7 @@ export const saveImage = mutation({
         await ctx.db.insert("personalization", {
           userId: userId,
           nickname: "",
+          organizationId: args.organizationId,
           icon: args.icon,
         });
       }
@@ -66,12 +72,14 @@ export const saveImage = mutation({
 });
 
 export const getPersonalization = query({
-  handler: async (ctx) => {
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (userId) {
       const user = await ctx.db
         .query("personalization")
         .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("organizationId"), args.organizationId))
         .unique();
       if (user) {
         return await ctx.db.get(user._id);

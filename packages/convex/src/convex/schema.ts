@@ -42,6 +42,7 @@ export default defineSchema({
   }).index("by_channel", ["channelId"]),
   personalization: defineTable({
     userId: v.id("users"),
+    organizationId: v.id("organizations"),
     nickname: v.string(),
     icon: v.union(v.id("_storage"), v.null()),
   }),

@@ -2,10 +2,14 @@
   import { api, type Id } from "@packages/convex";
   import { useConvexClient, useQuery } from "convex-svelte";
 
+  const { organizationId }: { organizationId: Id<"organizations"> } = $props();
+
   const convex = useConvexClient();
 
   const identity = useQuery(api.users.me, {});
-  const personalization = useQuery(api.personalization.getPersonalization, {});
+  const personalization = useQuery(api.personalization.getPersonalization, {
+    organizationId: organizationId,
+  });
   let iconURL = $state<string | null>("");
   let imageURL = $derived(iconURL || identity.data?.image);
   let userName = $derived(
@@ -50,7 +54,8 @@
     changedImageFile = undefined;
     if (changedUserName?.trim() && !(userName === changedUserName)) {
       await convex.mutation(api.personalization.save, {
-        name: changedUserName,
+        nickName: changedUserName,
+        organizationId: organizationId,
       });
     }
     if (image) {
@@ -68,6 +73,7 @@
 
       await convex.mutation(api.personalization.saveImage, {
         icon: storageId,
+        organizationId: organizationId,
       });
     }
   }
@@ -121,4 +127,6 @@
   </div>
 </div>
 
-<button class="btn btn-primary mt-auto mr-2 mb-2 ml-auto w-16" onclick={save}>保存</button>
+<button class="btn btn-primary mt-auto mr-2 mb-2 ml-auto w-16" onclick={save}
+  >保存</button
+>

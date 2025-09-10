@@ -6,8 +6,9 @@
   import ChannelList from "../channels/ChannelList.svelte";
   import Personalization from "../chat/Personalization.svelte";
 
-  type Selection = {type: "chat", selectedChannelId: Id<"channels"> | undefined} | {type: "personalization", selectedChannelId: undefined};
-
+  type Selection =
+    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
+    | { type: "personalization"; selectedChannelId: undefined };
 
   interface Props {
     organizationId: Id<"organizations">;
@@ -22,7 +23,7 @@
 </script>
 
 <div class="bg-base-100 flex h-screen">
-  <div class="flex flex-col bg-base-200 border-base-300 h-full w-80 border-r">
+  <div class="bg-base-200 border-base-300 flex h-full w-80 flex-col border-r">
     <div class="border-base-300 border-b p-4">
       <div class="flex items-center justify-between">
         <div>
@@ -81,16 +82,16 @@
       bind:screenMode={
         () => screenMode,
         (screenMode) => {
-          if(screenMode.type === "chat"){
-            goto(`/orgs/${organizationId}/chat/${screenMode.selectedChannelId}`);
-          }
-          else if(screenMode.type === "personalization"){
+          if (screenMode.type === "chat") {
+            goto(
+              `/orgs/${organizationId}/chat/${screenMode.selectedChannelId}`,
+            );
+          } else if (screenMode.type === "personalization") {
             goto(`/orgs/${organizationId}/personalization`);
           }
         }
       }
     />
-    
   </div>
 
   <div class="flex flex-1 flex-col">
@@ -110,7 +111,7 @@
         </div>
       {/if}
     {:else if screenMode.type == "personalization"}
-      <Personalization />
+      <Personalization {organizationId} />
     {/if}
   </div>
 </div>
