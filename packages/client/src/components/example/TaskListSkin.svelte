@@ -62,7 +62,5 @@
       {/each}
     </ul>
   {/if}
-  <button class="btn btn-primary" onclick={createTodo}>
-    {m["example.new"]()}
-  </button>
+  <button class="btn btn-primary" onclick={createTodo}> New </button>
 </div>

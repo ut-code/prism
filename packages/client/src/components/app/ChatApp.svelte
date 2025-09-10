@@ -97,7 +97,10 @@
   <div class="flex flex-1 flex-col">
     {#if screenMode.type == "chat"}
       {#if screenMode.selectedChannelId}
-        <Channel selectedChannelId={screenMode.selectedChannelId} />
+        <Channel
+          {organizationId}
+          selectedChannelId={screenMode.selectedChannelId}
+        />
       {:else}
         <div class="bg-base-200 flex flex-1 items-center justify-center">
           <div class="text-center">
