@@ -5,7 +5,9 @@
   import FilePreview from "~/features/files/upload/FilePreview.svelte";
   import FileSelector from "~/features/files/upload/Selector.svelte";
   import { FileUploader } from "~/features/files/upload/uploader.svelte";
+  import MdiClose from "~/icons/mdi-close.svelte";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
+  import EmojiPalette from "./EmojiPalette.svelte";
 
   interface Props {
     organizationId: Id<"organizations">;
@@ -20,6 +22,7 @@
 
   let messageContent = $state("");
   let authorName = $state("");
+  let showEmojiPalette = $state(false);
   let showFileSelector = $state(false);
   let attachedFiles = $state<File[]>([]);
 
@@ -68,10 +71,20 @@
 
 <div class="border-base-300 bg-base-100 space-y-4 border-t p-4">
   {#if replyingTo}
-    <div class="text-base-content/70 text-sm">
-      <span class="font-semibold">返信先:</span>
-      <span class="text-primary font-semibold">{replyingTo.author}</span>
-      <span>{replyingTo.content}</span>
+    <div
+      class="bg-base-200 mb-2 flex items-center justify-between rounded-md p-2 text-sm"
+    >
+      <div class="text-base-content/70 truncate">
+        <span class="font-semibold">返信先:</span>
+        <span class="text-primary font-semibold">{replyingTo.author}</span>
+        <span class="truncate">: {replyingTo.content}</span>
+      </div>
+      <button
+        class="btn btn-ghost btn-circle btn-sm"
+        onclick={() => (replyingTo = null)}
+      >
+        <MdiClose />
+      </button>
     </div>
   {/if}
 
@@ -160,7 +173,24 @@
         送信
       {/if}
     </button>
+    <button
+      class="btn btn-secondary self-end"
+      onclick={(e) => {
+        e.stopPropagation();
+        showEmojiPalette = !showEmojiPalette;
+      }}
+    >
+      😀
+    </button>
   </div>
+  {#if showEmojiPalette}
+    <EmojiPalette
+      onClose={() => (showEmojiPalette = false)}
+      onEmojiSelected={(emoji) => {
+        messageContent += emoji;
+      }}
+    />
+  {/if}
 
   {#if sendMessageMutation.error}
     <div class="alert alert-error text-sm">
