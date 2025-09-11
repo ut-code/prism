@@ -159,7 +159,6 @@
           <div class="text-base-content ml-0 whitespace-pre-wrap">
             {message.content}
           </div>
-          <ReactionButtons messageId={message._id} />
 
           <!-- Attachments -->
           {#if message.attachments && message.attachments.length > 0}
@@ -188,6 +187,7 @@
               <MdiDotsVertical />
             </button>
           </div>
+          <ReactionButtons messageId={message._id} />
         </div>
       </div>
     {:else}
