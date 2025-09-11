@@ -2,23 +2,15 @@
 
 ## 開発
 
-Prism では、 Monorepo 構成を採用しており、主に
-
-- `apps` -> リリース時に実行するアプリケーション
-- `packages` -> リリース時に直接実行しないライブラリ
-
-という配置になっています。
-
-`packages` はそれぞれ開発方法が違うので、それぞれの README を参考にしてください。
+Prism では、 Monorepo 構成を採用しており、 `packages/` にそれぞれのプログラムとライブラリが入っています。
 
 ### セットアップ
 
 - インストール: Bun >= v1.2
 - 実行: `bun install --frozen-lockfile`
+- 「開発用サーバー」の方法で Convex 起動後、Convex Dashboard で環境変数設定
 
 ### 開発用サーバー
-
-アプリケーションとして実行するものは `apps` 以下に配置されています。
 
 - Convex (`bun dev:convex`)
   - Convex at <http://localhost:3210>
@@ -37,6 +29,8 @@ bun dev
 ```
 
 でアプリケーションの動作に必要なものだけ (Convex + Web Client) を起動します。
+
+(Convex が頻繁に Interactive 性を要求するので、 `bun dev:web` と `bun dev:convex` で別々に起動したほうが安定して起動できるかもしれません)
 
 ```sh
 bun dev:all
