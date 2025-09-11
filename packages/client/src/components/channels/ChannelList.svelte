@@ -3,12 +3,25 @@
   import { useQuery } from "convex-svelte";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
-  interface Props {
-    organizationId: Id<"organizations">;
-    selectedChannelId?: Id<"channels">;
+  type Selection =
+    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
+    | { type: "personalization"; selectedChannelId: undefined };
+
+  /*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
+    screenMode: Selection;
   }
 
-  let { organizationId, selectedChannelId = $bindable() }: Props = $props();
+  let {
+    screenMode = $bindable(),
+  }: Props = $props();
+=======
+*/
+  interface Props {
+    organizationId: Id<"organizations">;
+    screenMode: Selection;
+  }
+
+  let { organizationId, screenMode = $bindable() }: Props = $props();
 
   const channels = useQuery(api.channels.list, () => ({
     organizationId,
@@ -27,11 +40,13 @@
         <button
           class={[
             "border-base-300 w-full border-b p-3 text-left",
-            selectedChannelId === channel._id
+            screenMode.selectedChannelId === channel._id
               ? "bg-primary text-primary-content"
               : "hover:bg-base-300",
           ].join(" ")}
-          onclick={() => (selectedChannelId = channel._id)}
+          onclick={() => {
+            screenMode = { type: "chat", selectedChannelId: channel._id };
+          }}
         >
           <div class="font-medium"># {channel.name}</div>
           {#if channel.description}
@@ -51,4 +66,10 @@
       </div>
     {/if}
   </div>
+  <button
+    class="btn btn-primary mt-auto mb-2 w-full"
+    onclick={() => {
+      screenMode = { type: "personalization", selectedChannelId: undefined };
+    }}>個人用設定</button
+  >
 </div>

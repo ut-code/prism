@@ -2,16 +2,20 @@
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
   import { useQuery } from "convex-svelte";
+  import FilePreview from "~/features/files/upload/FilePreview.svelte";
+  import FileSelector from "~/features/files/upload/Selector.svelte";
+  import { FileUploader } from "~/features/files/upload/uploader.svelte";
   import MdiClose from "~/icons/mdi-close.svelte";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
   import EmojiPalette from "./EmojiPalette.svelte";
 
   interface Props {
+    organizationId: Id<"organizations">;
     channelId: Id<"channels">;
     replyingTo: Doc<"messages"> | null;
   }
 
-  let { channelId, replyingTo = $bindable() }: Props = $props();
+  let { channelId, organizationId, replyingTo = $bindable() }: Props = $props();
 
   const sendMessageMutation = useMutation(api.messages.send);
   const identity = useQuery(api.users.me, {});
@@ -19,6 +23,8 @@
   let messageContent = $state("");
   let authorName = $state("");
   let showEmojiPalette = $state(false);
+  let showFileSelector = $state(false);
+  let attachedFiles = $state<File[]>([]);
 
   $effect(() => {
     if (identity?.data && !authorName) {
@@ -26,18 +32,29 @@
     }
   });
 
+  const uploader = new FileUploader(() => ({
+    organizationId,
+  }));
+
   async function sendMessage() {
-    if (!messageContent.trim()) return;
+    if (!messageContent.trim() && attachedFiles.length === 0) return;
+
+    const attachments = (await uploader.uploadAll(attachedFiles)).map(
+      (it) => it.id,
+    );
 
     await sendMessageMutation.run({
       channelId,
-      content: messageContent.trim(),
+      content: messageContent.trim() || "",
       author: authorName.trim() || "匿名",
       parentId: replyingTo?._id ?? undefined,
+      attachments,
     });
 
     messageContent = "";
+    attachedFiles = [];
     replyingTo = null;
+    showFileSelector = false;
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -46,9 +63,13 @@
       sendMessage();
     }
   }
+
+  function toggleFileUploader() {
+    showFileSelector = !showFileSelector;
+  }
 </script>
 
-<div class="border-base-300 bg-base-100 border-t p-4">
+<div class="border-base-300 bg-base-100 space-y-4 border-t p-4">
   {#if replyingTo}
     <div
       class="bg-base-200 mb-2 flex items-center justify-between rounded-md p-2 text-sm"
@@ -67,7 +88,35 @@
     </div>
   {/if}
 
-  <div class="mb-2 flex gap-2">
+  <!-- Attached files preview -->
+  {#if attachedFiles.length > 0}
+    <div class="space-y-2">
+      <h4 class="text-base-content/70 text-sm font-medium">添付ファイル:</h4>
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        {#each attachedFiles as file, index (file.name)}
+          <FilePreview
+            {file}
+            compact={true}
+            removable={true}
+            onRemove={() => attachedFiles.splice(index, 1)}
+          />
+        {/each}
+      </div>
+    </div>
+  {/if}
+
+  <!-- File uploader -->
+  {#if showFileSelector}
+    <FileSelector
+      {organizationId}
+      bind:files={attachedFiles}
+      onselect={() => {
+        showFileSelector = false;
+      }}
+    />
+  {/if}
+
+  <div class="flex gap-2">
     <input
       type="text"
       placeholder="ユーザー名"
@@ -77,17 +126,46 @@
   </div>
 
   <div class="flex gap-2">
-    <textarea
-      placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)"
-      class="textarea textarea-bordered flex-1 resize-none"
-      rows="2"
-      bind:value={messageContent}
-      onkeydown={handleKeyPress}
-    ></textarea>
+    <div class="flex-1 space-y-2">
+      <textarea
+        placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)"
+        class="textarea textarea-bordered w-full resize-none"
+        rows="2"
+        bind:value={messageContent}
+        onkeydown={handleKeyPress}
+      ></textarea>
+
+      <!-- Action buttons -->
+      <div class="flex gap-2">
+        <button
+          class="btn btn-ghost btn-sm"
+          onclick={toggleFileUploader}
+          title="ファイルを添付"
+          type="button"
+        >
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+            ></path>
+          </svg>
+          {showFileSelector ? "キャンセル" : "ファイル添付"}
+        </button>
+      </div>
+    </div>
+
     <button
       class="btn btn-primary self-end"
       onclick={sendMessage}
-      disabled={!messageContent.trim() || sendMessageMutation.processing}
+      disabled={(!messageContent.trim() && attachedFiles.length === 0) ||
+        sendMessageMutation.processing}
     >
       {#if sendMessageMutation.processing}
         <span class="loading loading-spinner loading-sm"></span>
@@ -112,5 +190,11 @@
         messageContent += emoji;
       }}
     />
+  {/if}
+
+  {#if sendMessageMutation.error}
+    <div class="alert alert-error text-sm">
+      {sendMessageMutation.error}
+    </div>
   {/if}
 </div>

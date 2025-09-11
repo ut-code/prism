@@ -2,6 +2,7 @@ import { createConvexAuthHooks } from "@mmailaender/convex-auth-svelte/sveltekit
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { PUBLIC_CONVEX_URL } from "$lib/env";
+
 // import { paraglideMiddleware } from "$lib/paraglide/server";
 
 // const handleParaglide: Handle = ({ event, resolve }) =>

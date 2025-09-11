@@ -3,10 +3,10 @@
   import { page } from "$app/state";
   import ChatApp from "~/components/app/ChatApp.svelte";
 
-  const { orgId, channelId } = $derived(page.params);
+  const { orgId } = $derived(page.params);
 </script>
 
 <ChatApp
   organizationId={orgId as Id<"organizations">}
-  screenMode={{ type: "chat", selectedChannelId: channelId as Id<"channels"> }}
+  screenMode={{ type: "personalization", selectedChannelId: undefined }}
 />

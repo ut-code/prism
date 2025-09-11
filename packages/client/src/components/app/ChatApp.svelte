@@ -4,13 +4,18 @@
   import { goto } from "$app/navigation";
   import Channel from "../channels/Channel.svelte";
   import ChannelList from "../channels/ChannelList.svelte";
+  import Personalization from "../chat/Personalization.svelte";
+
+  type Selection =
+    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
+    | { type: "personalization"; selectedChannelId: undefined };
 
   interface Props {
     organizationId: Id<"organizations">;
-    channelId?: Id<"channels">;
+    screenMode: Selection;
   }
 
-  const { organizationId, channelId }: Props = $props();
+  const { organizationId, screenMode }: Props = $props();
 
   const organization = useQuery(api.organizations.get, () => ({
     id: organizationId,
@@ -18,7 +23,7 @@
 </script>
 
 <div class="bg-base-100 flex h-screen">
-  <div class="bg-base-200 border-base-300 w-80 border-r">
+  <div class="bg-base-200 border-base-300 flex h-full w-80 flex-col border-r">
     <div class="border-base-300 border-b p-4">
       <div class="flex items-center justify-between">
         <div>
@@ -74,29 +79,42 @@
 
     <ChannelList
       {organizationId}
-      bind:selectedChannelId={
-        () => channelId,
-        (id) => {
-          goto(`/orgs/${organizationId}/chat/${id}`);
+      bind:screenMode={
+        () => screenMode,
+        (screenMode) => {
+          if (screenMode.type === "chat") {
+            goto(
+              `/orgs/${organizationId}/chat/${screenMode.selectedChannelId}`,
+            );
+          } else if (screenMode.type === "personalization") {
+            goto(`/orgs/${organizationId}/personalization`);
+          }
         }
       }
     />
   </div>
 
   <div class="flex flex-1 flex-col">
-    {#if channelId}
-      <Channel selectedChannelId={channelId} />
-    {:else}
-      <div class="bg-base-200 flex flex-1 items-center justify-center">
-        <div class="text-center">
-          <h2 class="text-base-content/60 mb-2 text-2xl font-semibold">
-            {organization.data?.name || "組織"}へようこそ
-          </h2>
-          <p class="text-base-content/50">
-            左からチャンネルを選択して会話を始めましょう
-          </p>
+    {#if screenMode.type == "chat"}
+      {#if screenMode.selectedChannelId}
+        <Channel
+          {organizationId}
+          selectedChannelId={screenMode.selectedChannelId}
+        />
+      {:else}
+        <div class="bg-base-200 flex flex-1 items-center justify-center">
+          <div class="text-center">
+            <h2 class="text-base-content/60 mb-2 text-2xl font-semibold">
+              {organization.data?.name || "組織"}へようこそ
+            </h2>
+            <p class="text-base-content/50">
+              左からチャンネルを選択して会話を始めましょう
+            </p>
+          </div>
         </div>
-      </div>
+      {/if}
+    {:else if screenMode.type == "personalization"}
+      <Personalization {organizationId} />
     {/if}
   </div>
 </div>

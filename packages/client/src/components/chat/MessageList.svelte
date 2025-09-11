@@ -6,6 +6,7 @@
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
   import MdiDotsVertical from "~/icons/mdi-dots-vertical.svelte";
   import { useMutation } from "~/lib/useMutation.svelte";
+  import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
   import ReactionButtons from "./ReactionButtons.svelte";
@@ -159,6 +160,15 @@
             {message.content}
           </div>
           <ReactionButtons messageId={message._id} />
+
+          <!-- Attachments -->
+          {#if message.attachments && message.attachments.length > 0}
+            <div class="mt-2 space-y-2">
+              {#each message.attachments as fileId}
+                <FileAttachment {fileId} compact={false} />
+              {/each}
+            </div>
+          {/if}
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"
           >
