@@ -49,6 +49,8 @@ bun dev:tauri
 
 で明示的に起動しないと起動しません。
 
+Linux で Google ログインなど HTTPS アクセス時に「TLS support is not available」と表示される場合は、WebKitGTK の TLS 実装が不足しています。Nix 開発シェルでは `glib-networking` と `cacert` を追加済みです。Nix を使わない環境では、各ディストリの `glib-networking` と `ca-certificates` をインストールしてください。
+
 ## 注意点
 
 ### Pre-Commit Hook について

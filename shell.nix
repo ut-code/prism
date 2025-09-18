@@ -20,6 +20,8 @@ in
         pkgs.bun
         pkgs.nodejs
         pkgs.openssl
+        pkgs.glib-networking
+        pkgs.cacert
       ]
       ++ (with pkgs; [
         at-spi2-atk
@@ -39,5 +41,8 @@ in
       export DISPLAY=:0
       export GDK_BACKEND=x11
       export WEBKIT_DISABLE_COMPOSITING_MODE=1
+      # Ensure TLS support for WebKit/GLib (HTTPS in WebView)
+      export GIO_EXTRA_MODULES=${pkgs.glib-networking}/lib/gio/modules
+      export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
     '';
   }
