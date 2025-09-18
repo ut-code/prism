@@ -14,8 +14,12 @@ const config = {
     adapter: adapter({
       pages: "./dist",
       assets: "./dist",
+      fallback: "index.html",
     }),
     outDir: "./.svelte-kit",
+    paths: {
+      relative: true,
+    },
     alias: {
       "@@": "../..",
       $components: "src/components",

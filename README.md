@@ -51,6 +51,23 @@ bun dev:tauri
 
 Linux で Google ログインなど HTTPS アクセス時に「TLS support is not available」と表示される場合は、WebKitGTK の TLS 実装が不足しています。Nix 開発シェルでは `glib-networking` と `cacert` を追加済みです。Nix を使わない環境では、各ディストリの `glib-networking` と `ca-certificates` をインストールしてください。
 
+##### 認証 (Convex + Google) の設定メモ
+
+- Convex の OAuth コールバック URL は Convex の HTTP エンドポイントに向けます。
+  - ローカル開発: `http://localhost:3210/api/auth/callback/google`
+  - Google Cloud Console の「承認済みのリダイレクトURI」に上記を追加してください。
+- `.env` では以下を揃えてください（ホスト表記は `localhost` に統一推奨）:
+
+```
+PUBLIC_CONVEX_URL=http://localhost:3210
+CONVEX_SITE_URL=http://localhost:3210
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+```
+
+- Convex Dashboard 側の環境変数にも `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` / `CONVEX_SITE_URL` を設定してください。
+- これがずれていると、Google のトークン交換で `redirect_uri_mismatch` となり認証に失敗します。
+
 ## 注意点
 
 ### Pre-Commit Hook について
