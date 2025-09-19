@@ -7,15 +7,6 @@
     | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
     | { type: "personalization"; selectedChannelId: undefined };
 
-  /*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
-    screenMode: Selection;
-  }
-
-  let {
-    screenMode = $bindable(),
-  }: Props = $props();
-=======
-*/
   interface Props {
     organizationId: Id<"organizations">;
     screenMode: Selection;

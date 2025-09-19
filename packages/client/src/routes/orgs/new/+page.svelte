@@ -19,7 +19,7 @@
         description: form.description.trim() || undefined,
       });
 
-      goto(`/orgs/${organizationId}/settings`);
+      goto(`/orgs/${organizationId}`);
     } catch (error) {
       console.error("Failed to create organization:", error);
       alert("組織の作成に失敗しました");

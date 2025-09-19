@@ -62,7 +62,7 @@
             class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
           >
             <li role="menuitem">
-              <a href="/orgs/{organizationId}/settings">組織設定</a>
+              <a href="/orgs/{organizationId}">組織へ戻る</a>
             </li>
             <li role="menuitem">
               <a href="/">組織選択</a>
