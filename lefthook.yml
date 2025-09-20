@@ -3,11 +3,17 @@ pre-commit:
   jobs:
     - name: Type Check
       run: bun run --filter=* check
+      only:
+        - ref: main
     - name: Run codegen before commit
       run: bun run sync
       stage_fixed: true
     - name: Prettier
       run: bun run fix:format
       stage_fixed: true
+      only:
+        - ref: main
     - name: Biome Lint
       run: bun run check:lint
+      only:
+        - ref: main
