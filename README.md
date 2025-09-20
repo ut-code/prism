@@ -34,14 +34,16 @@ bun dev
 たまに Convex が Interactive でないと落ちるので、その場合は
 
 ```sh
-bun dev:web
-bun dev:convex
+bun run:web
+bun run:convex
 ```
 
 と別々で起動しましょう。
 
+#### Storybook
+
 ```sh
-bun dev:all
+bun dev:storybook
 ```
 
 で上に加え Storybook が起動します。
@@ -51,7 +53,6 @@ bun dev:all
 Tauri はコンパイルに時間と計算資源を使うので、
 
 ```sh
-bun dev:convex # Tauri の動作にバックエンドが必要
 bun dev:tauri
 ```
 
