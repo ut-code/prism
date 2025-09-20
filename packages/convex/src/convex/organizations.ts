@@ -26,6 +26,7 @@ export const create = mutation({
       userId,
       permission: "admin",
       joinedAt: Date.now(),
+      roleIds: [],
     });
 
     return organizationId;
@@ -51,7 +52,7 @@ export const list = query({
         return {
           ...org,
           permission: membership.permission,
-          role: membership.role,
+          roleIds: membership.roleIds,
         };
       }),
     );
@@ -68,7 +69,7 @@ export const get = query({
     return {
       ...perms.organization,
       permission: perms.membership.permission,
-      role: perms.membership.role,
+      roleIds: perms.membership.roleIds,
     };
   },
 });
@@ -95,7 +96,7 @@ export const addMember = mutation({
   args: {
     organizationId: v.id("organizations"),
     userId: v.id("users"),
-    role: v.optional(v.string()),
+    roleIds: v.array(v.id("roles")),
     permission: v.union(
       v.literal("admin"),
       v.literal("member"),
@@ -123,7 +124,7 @@ export const addMember = mutation({
     await ctx.db.insert("organizationMembers", {
       organizationId: args.organizationId,
       userId: args.userId,
-      role: args.role,
+      roleIds: args.roleIds,
       permission: args.permission,
       joinedAt: Date.now(),
     });

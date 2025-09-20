@@ -173,6 +173,7 @@ export async function getOrganizationPerms(
       invite: membership.permission === "admin",
       changePermission: membership.permission === "admin",
       kick: membership.permission === "admin",
+      updateRole: membership.permission === "admin",
     },
   };
 }

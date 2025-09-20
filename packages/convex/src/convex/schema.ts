@@ -17,7 +17,7 @@ export default defineSchema({
   organizationMembers: defineTable({
     organizationId: v.id("organizations"),
     userId: v.id("users"),
-    role: v.optional(v.string()),
+    roleIds: v.array(v.id("roles")),
     permission: v.union(
       v.literal("admin"),
       v.literal("member"),
@@ -27,6 +27,10 @@ export default defineSchema({
   })
     .index("by_organization", ["organizationId"])
     .index("by_user", ["userId"]),
+  roles: defineTable({
+    organizationId: v.id("organizations"),
+    roleName: v.string(),
+  }).index("by_organization", ["organizationId"]),
   channels: defineTable({
     name: v.string(),
     description: v.optional(v.string()),
