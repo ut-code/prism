@@ -16,7 +16,7 @@
   "dependencies": {
     "@auth/core": "^0.40.0",
     "@convex-dev/auth": "^0.0.87",
-    "convex": "^1.25.2",
+    "convex": "^1.27.1",
     "resend": "^4.7.0"
   }
 }

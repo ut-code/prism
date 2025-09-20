@@ -30,5 +30,5 @@
   {/if}
 </div>
 
-<MessageList channelId={selectedChannelId} bind:replyingTo />
+<MessageList {organizationId} channelId={selectedChannelId} bind:replyingTo />
 <MessageInput channelId={selectedChannelId} {organizationId} bind:replyingTo />
