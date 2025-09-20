@@ -28,8 +28,10 @@
   let selectedRoleIds: Id<"roles">[] = $state([]);
 
   let newRoleName = $state("");
+  let newRoleColor = $state("#CCCCCC"); // Default color
   let editingRole: Doc<"roles"> | null = $state(null);
   let editingRoleName = $state("");
+  let editingRoleColor = $state("");
 
   let isEditing = $state(false);
   let editForm = $state({
@@ -69,8 +71,13 @@
   async function handleCreateRole() {
     if (!newRoleName.trim()) return;
     try {
-      await createRole.run({ organizationId, roleName: newRoleName });
+      await createRole.run({
+        organizationId,
+        roleName: newRoleName,
+        color: newRoleColor,
+      });
       newRoleName = "";
+      newRoleColor = "#CCCCCC"; // Reset to default
     } catch (error) {
       console.error("Failed to create role:", error);
     }
@@ -87,6 +94,7 @@
   function startEditingRole(role: Doc<"roles">) {
     editingRole = role;
     editingRoleName = role.roleName;
+    editingRoleColor = role.color;
   }
 
   async function handleUpdateRole() {
@@ -95,6 +103,7 @@
       await updateRole.run({
         roleId: editingRole._id,
         roleName: editingRoleName,
+        color: editingRoleColor,
       });
       editingRole = null;
     } catch (error) {
@@ -225,7 +234,7 @@
           <div class="space-y-2">
             {#each members.data as member}
               <div
-                class="bg-base-300 flex items-center justify-between rounded-lg p-3"
+                class="bg-base-300 flex min-w-0 items-center justify-between rounded-lg p-3"
               >
                 <div class="flex items-center gap-3">
                   <div class="avatar placeholder">
@@ -246,7 +255,9 @@
                     </div>
                   </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
+                <div
+                  class="flex min-w-0 flex-grow items-center gap-2 overflow-hidden"
+                >
                   <div class="badge badge-outline capitalize">
                     {member.permission}
                   </div>
@@ -254,7 +265,15 @@
                     {#each member.roleIds as roleId}
                       {@const role = roles.data.find((r) => r._id === roleId)}
                       {#if role}
-                        <div class="badge badge-neutral">{role.roleName}</div>
+                        <div
+                          class="badge badge-neutral flex max-w-[calc(100%-2rem)] flex-shrink-0 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap"
+                        >
+                          <div
+                            class="border-base-content/20 h-3 w-3 rounded-full border"
+                            style="background-color: {role.color}"
+                          ></div>
+                          <span>{role.roleName}</span>
+                        </div>
                       {/if}
                     {/each}
                   {/if}
@@ -302,6 +321,11 @@
               bind:value={newRoleName}
               onkeydown={(e) => e.key === "Enter" && handleCreateRole()}
             />
+            <input
+              type="color"
+              class="border-base-content/20 h-10 w-10 border p-0"
+              bind:value={newRoleColor}
+            />
             <button
               class="btn btn-primary join-item"
               onclick={handleCreateRole}
@@ -315,26 +339,35 @@
             {#if roles.data}
               {#each roles.data as role}
                 <div
-                  class="bg-base-300 flex items-center justify-between rounded-lg p-3"
+                  class="bg-base-300 join flex items-center justify-between rounded-lg p-3"
                 >
                   {#if editingRole?._id === role._id}
                     <input
-                      class="input input-bordered input-sm w-full"
+                      class="input input-bordered input-sm join-item w-full"
                       bind:value={editingRoleName}
                       onkeydown={(e) => e.key === "Enter" && handleUpdateRole()}
                     />
-                    <div class="flex items-center gap-2">
-                      <button
-                        class="btn btn-primary btn-sm"
-                        onclick={handleUpdateRole}>保存</button
-                      >
-                      <button
-                        class="btn btn-ghost btn-sm"
-                        onclick={() => (editingRole = null)}>キャンセル</button
-                      >
-                    </div>
+                    <input
+                      type="color"
+                      class="border-base-content/20 h-8 w-8 border p-0"
+                      bind:value={editingRoleColor}
+                    />
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick={handleUpdateRole}>保存</button
+                    >
+                    <button
+                      class="btn btn-ghost btn-sm"
+                      onclick={() => (editingRole = null)}>キャンセル</button
+                    >
                   {:else}
-                    <div class="font-medium">{role.roleName}</div>
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="border-base-content/20 h-4 w-4 rounded-full border"
+                        style="background-color: {role.color}"
+                      ></div>
+                      <div class="font-medium">{role.roleName}</div>
+                    </div>
                     <div class="flex items-center gap-2">
                       <button
                         class="btn btn-ghost btn-sm"

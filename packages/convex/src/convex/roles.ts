@@ -20,11 +20,13 @@ export const createRole = mutation({
   args: {
     organizationId: v.id("organizations"),
     roleName: v.string(),
+    color: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("roles", {
       organizationId: args.organizationId,
       roleName: args.roleName,
+      color: args.color,
     });
   },
 });
@@ -33,10 +35,12 @@ export const updateRole = mutation({
   args: {
     roleId: v.id("roles"),
     roleName: v.string(),
+    color: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.patch(args.roleId, {
       roleName: args.roleName,
+      color: args.color,
     });
   },
 });

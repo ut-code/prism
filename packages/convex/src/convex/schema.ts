@@ -30,6 +30,7 @@ export default defineSchema({
   roles: defineTable({
     organizationId: v.id("organizations"),
     roleName: v.string(),
+    color: v.string(),
   }).index("by_organization", ["organizationId"]),
   channels: defineTable({
     name: v.string(),
