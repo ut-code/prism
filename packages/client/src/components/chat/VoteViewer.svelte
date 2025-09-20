@@ -11,12 +11,12 @@
 
   let isResultVisible = $state(false);
 
-  let numbersOfVotersPerOption = $state<Array<number>>(Array<number>());
+  let numbersOfVotersPerOption = $state<Array<number>>([] as number[]);
 
   let selectedOptions = $state<Array<number>>([]);
 
   if (vote.data) {
-    let tempNumbersOfVotersPerOption = Array<number>();
+    let tempNumbersOfVotersPerOption: number[] = [];
     for (let i = 0; i < vote.data.voteOptions.length; i++) {
       let num = 0;
       for (let j = 0; j < vote.data.voters.length; j++) {
@@ -40,7 +40,7 @@
 
   $effect(() => {
     if (vote.data) {
-      let tempNumbersOfVotersPerOption = Array<number>();
+      let tempNumbersOfVotersPerOption: number[] = [];
       for (let i = 0; i < vote.data.voteOptions.length; i++) {
         let num = 0;
         for (let j = 0; j < vote.data.voters.length; j++) {
