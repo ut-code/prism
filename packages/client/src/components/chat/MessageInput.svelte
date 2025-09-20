@@ -21,15 +21,18 @@
   const identity = useQuery(api.users.me, {});
 
   let messageContent = $state("");
-  let authorName = $state("");
   let showEmojiPalette = $state(false);
   let showFileSelector = $state(false);
   let attachedFiles = $state<File[]>([]);
 
-  $effect(() => {
-    if (identity?.data && !authorName) {
-      authorName = identity.data.name ?? identity.data.email ?? "匿名";
-    }
+  const clickable = $derived.by<boolean>(() => {
+    // empty content
+    if (!messageContent.trim() && attachedFiles.length === 0) return false;
+    // post ongoing
+    if (sendMessageMutation.processing) return false;
+    // identity not loaded yet
+    if (!identity.data) return false;
+    return true;
   });
 
   const uploader = new FileUploader(() => ({
@@ -38,6 +41,7 @@
 
   async function sendMessage() {
     if (!messageContent.trim() && attachedFiles.length === 0) return;
+    if (!identity.data) return;
 
     const attachments = (await uploader.uploadAll(attachedFiles)).map(
       (it) => it.id,
@@ -46,7 +50,7 @@
     await sendMessageMutation.run({
       channelId,
       content: messageContent.trim() || "",
-      author: authorName.trim() || "匿名",
+      author: identity.data.name,
       parentId: replyingTo?._id ?? undefined,
       attachments,
     });
@@ -116,14 +120,7 @@
     />
   {/if}
 
-  <div class="flex gap-2">
-    <input
-      type="text"
-      placeholder="ユーザー名"
-      class="input input-sm input-bordered w-32"
-      bind:value={authorName}
-    />
-  </div>
+  <div class="flex gap-2"></div>
 
   <div class="flex gap-2">
     <div class="flex-1 space-y-2">
@@ -164,8 +161,7 @@
     <button
       class="btn btn-primary self-end"
       onclick={sendMessage}
-      disabled={(!messageContent.trim() && attachedFiles.length === 0) ||
-        sendMessageMutation.processing}
+      disabled={clickable}
     >
       {#if sendMessageMutation.processing}
         <span class="loading loading-spinner loading-sm"></span>
