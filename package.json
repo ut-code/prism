@@ -12,7 +12,7 @@
   },
   "private": true,
   "scripts": {
-    "dev": "bun run --filter='@packages/{client,convex}' dev",
+    "dev": "hivemind ./tasks/web.Procfile",
     "dev:all": "(trap 'kill 0' EXIT; bun run dev:convex & bun run dev:web & bun run dev:storybook & wait",
     "dev:web": "cd packages/client; bun dev",
     "dev:convex": "cd packages/convex && bun run dev",

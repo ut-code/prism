@@ -6,9 +6,10 @@ Prism では、 Monorepo 構成を採用しており、 `packages/` にそれぞ
 
 ### セットアップ
 
-- インストール: Bun >= v1.2
+- インストール:
+  - Bun >= v1.2
+  - Hivemind <https://github.com/DarthSim/hivemind>
 - 実行: `bun install --frozen-lockfile`
-- 「開発用サーバー」の方法で Convex 起動後、Convex Dashboard で環境変数設定
 
 ### 開発用サーバー
 
@@ -30,7 +31,14 @@ bun dev
 
 でアプリケーションの動作に必要なものだけ (Convex + Web Client) を起動します。
 
-(Convex が頻繁に Interactive 性を要求するので、 `bun dev:web` と `bun dev:convex` で別々に起動したほうが安定して起動できるかもしれません)
+たまに Convex が Interactive でないと落ちるので、その場合は
+
+```sh
+bun dev:web
+bun dev:convex
+```
+
+と別々で起動しましょう。
 
 ```sh
 bun dev:all

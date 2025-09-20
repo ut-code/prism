@@ -14,6 +14,7 @@ in
   pkgs.mkShell {
     packages =
       [
+        pkgs.hivemind
         pkgs.pkg-config
         pkgs.cargo-tauri
         rustToolchain
