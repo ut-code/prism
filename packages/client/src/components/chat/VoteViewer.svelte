@@ -11,9 +11,9 @@
 
   let isResultVisible = $state(false);
 
-  let numbersOfVotersPerOption = $state<Array<number>>([] as number[]);
+  let numbersOfVotersPerOption: number[] = $state([]);
 
-  let selectedOptions = $state<Array<number>>([]);
+  let selectedOptions: number[] = $state([]);
 
   if (vote.data) {
     let tempNumbersOfVotersPerOption: number[] = [];

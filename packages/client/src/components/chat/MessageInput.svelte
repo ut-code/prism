@@ -71,7 +71,7 @@
       (it) => it.id,
     );
 
-    let voteId;
+    let voteId: Id<"votes"> | undefined;
     if (vote.title.trim() && vote.voteOptions.length !== 0) {
       voteId = await convex.mutation(api.vote.addVote, {
         title: vote.title,
