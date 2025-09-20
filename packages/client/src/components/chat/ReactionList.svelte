@@ -3,10 +3,11 @@
   import { useQuery } from "convex-svelte";
 
   interface Props {
+    organizationId: Id<"organizations">;
     messageId: Id<"messages">;
   }
 
-  let { messageId }: Props = $props();
+  let { organizationId, messageId }: Props = $props();
 
   const reactions = useQuery(api.messages.getReactions, () => ({ messageId }));
 
@@ -30,8 +31,13 @@
     reactions.data ? [...new Set(reactions.data.map((r) => r.userId))] : [],
   );
 
-  const userNamesById = useQuery(api.users.getUserNames, () => ({
+  // const userNamesById = useQuery(api.users.getUserNames, () => ({
+  //   userIds: allUserIdsInReactions,
+  // }));
+
+  const userNamesById = useQuery(api.users.getUserNicknames, () => ({
     userIds: allUserIdsInReactions,
+    organizationId: organizationId,
   }));
 
   function toggleUserList(emoji: string) {

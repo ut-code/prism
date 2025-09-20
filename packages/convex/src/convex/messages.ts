@@ -27,6 +27,7 @@ export const send = mutation({
     author: v.string(),
     parentId: v.optional(v.id("messages")),
     attachments: v.optional(v.array(v.id("files"))),
+    vote: v.optional(v.id("votes")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -54,6 +55,7 @@ export const send = mutation({
       createdAt: Date.now(),
       parentId: args.parentId,
       attachments: args.attachments,
+      vote: args.vote,
     });
   },
 });

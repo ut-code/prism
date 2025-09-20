@@ -42,6 +42,8 @@ export default defineSchema({
     parentId: v.optional(v.id("messages")),
     // 添付ファイル
     attachments: v.optional(v.array(v.id("files"))),
+    //投票
+    vote: v.optional(v.id("votes")),
   }).index("by_channel", ["channelId"]),
   reactions: defineTable({
     messageId: v.id("messages"),
@@ -51,6 +53,18 @@ export default defineSchema({
   })
     .index("by_message", ["messageId"])
     .index("by_user", ["userId"]),
+  votes: defineTable({
+    title: v.string(),
+    maxVotes: v.number(),
+    //numberOfOptions: v.number(),
+    voteOptions: v.array(v.string()),
+    voters: v.array(
+      v.object({
+        userId: v.id("users"),
+        votedOptions: v.array(v.number()),
+      }),
+    ),
+  }),
   personalization: defineTable({
     userId: v.id("users"),
     organizationId: v.id("organizations"),
