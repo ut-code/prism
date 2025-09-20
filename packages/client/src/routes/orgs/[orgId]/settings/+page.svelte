@@ -27,6 +27,21 @@
   let selectedMemberId: Id<"users"> | null = $state(null);
   let selectedRoleIds: Id<"roles">[] = $state([]);
 
+  const assignedRoles = $derived(
+    roles.data?.filter((role) => selectedRoleIds.includes(role._id)) || [],
+  );
+  const unassignedRoles = $derived(
+    roles.data?.filter((role) => !selectedRoleIds.includes(role._id)) || [],
+  );
+
+  function assignRole(roleId: Id<"roles">) {
+    selectedRoleIds = [...selectedRoleIds, roleId];
+  }
+
+  function unassignRole(roleId: Id<"roles">) {
+    selectedRoleIds = selectedRoleIds.filter((id) => id !== roleId);
+  }
+
   let newRoleName = $state("");
   let newRoleColor = $state("#CCCCCC"); // Default color
   let editingRole: Doc<"roles"> | null = $state(null);
@@ -361,14 +376,20 @@
                       onclick={() => (editingRole = null)}>キャンセル</button
                     >
                   {:else}
-                    <div class="flex items-center gap-2">
+                    <div
+                      class="flex min-w-0 flex-grow items-center gap-2 overflow-hidden"
+                    >
                       <div
-                        class="border-base-content/20 h-4 w-4 rounded-full border"
+                        class="border-base-content/20 h-4 w-4 flex-shrink-0 rounded-full border"
                         style="background-color: {role.color}"
                       ></div>
-                      <div class="font-medium">{role.roleName}</div>
+                      <div
+                        class="min-w-0 overflow-hidden font-medium text-ellipsis whitespace-nowrap"
+                      >
+                        {role.roleName}
+                      </div>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-shrink-0 items-center gap-2">
                       <button
                         class="btn btn-ghost btn-sm"
                         onclick={() => startEditingRole(role)}>名前変更</button
@@ -394,35 +415,89 @@
     <h3 class="text-lg font-bold">
       {members.data?.find((m) => m.userId === selectedMemberId)?.user?.name} のロールを編集
     </h3>
-    {#if roles.data && roles.data.length > 0}
-      <div class="py-4">
-        <div class="form-control space-y-2">
-          {#each roles.data as role}
-            <label class="label cursor-pointer">
-              <span class="label-text">{role.roleName}</span>
-              <input
-                type="checkbox"
-                class="checkbox"
-                value={role._id}
-                bind:group={selectedRoleIds}
-              />
-            </label>
-          {/each}
+    <div class="mx-auto max-w-lg">
+      {#if roles.data && roles.data.length > 0}
+        <div class="py-4">
+          <!-- Assigned Roles -->
+          <h4 class="mb-2 font-semibold">割り当て済みロール</h4>
+          <div
+            class="mb-4 flex max-h-32 flex-wrap gap-2 overflow-y-auto rounded border p-1"
+          >
+            {#if assignedRoles.length > 0}
+              {#each assignedRoles as role}
+                <div class="badge badge-neutral flex items-center gap-1">
+                  <div
+                    class="border-base-content/20 h-3 w-3 rounded-full border"
+                    style="background-color: {role.color}"
+                  ></div>
+                  <span
+                    class="min-w-0 flex-grow overflow-hidden text-ellipsis whitespace-nowrap"
+                    >{role.roleName}</span
+                  >
+                  <button
+                    class="btn btn-xs btn-ghost"
+                    onclick={() => unassignRole(role._id)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-base-content/70 text-sm">
+                割り当てられたロールはありません。
+              </p>
+            {/if}
+          </div>
+
+          <!-- Available Roles -->
+          <h4 class="mb-2 font-semibold">利用可能なロール</h4>
+          <div
+            class="max-h-32 space-y-2 overflow-x-hidden overflow-y-auto rounded border p-1"
+          >
+            {#if unassignedRoles.length > 0}
+              {#each unassignedRoles as role}
+                <div class="flex items-center justify-between">
+                  <div
+                    class="flex min-w-0 flex-grow items-center gap-2 overflow-hidden"
+                  >
+                    <div
+                      class="border-base-content/20 h-4 w-4 flex-shrink-0 rounded-full border"
+                      style="background-color: {role.color}"
+                    ></div>
+                    <span
+                      class="min-w-0 flex-grow overflow-hidden font-medium text-ellipsis whitespace-nowrap"
+                      >{role.roleName}</span
+                    >
+                  </div>
+                  <button
+                    class="btn btn-primary btn-sm flex-shrink-0"
+                    onclick={() => assignRole(role._id)}
+                  >
+                    追加
+                  </button>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-base-content/70 text-sm">
+                利用可能なロールはありません。
+              </p>
+            {/if}
+          </div>
         </div>
-      </div>
-      <div class="modal-action">
-        <button class="btn btn-ghost" onclick={() => roleModalManager.close()}
-          >キャンセル</button
-        >
-        <button class="btn btn-primary" onclick={handleUpdateMemberRoles}
-          >保存</button
-        >
-      </div>
-    {:else}
-      <div class="py-4">
-        <p>利用可能なロールがありません。</p>
-      </div>
-    {/if}
+        <div class="modal-action">
+          <button class="btn btn-ghost" onclick={() => roleModalManager.close()}
+            >キャンセル</button
+          >
+          <button class="btn btn-primary" onclick={handleUpdateMemberRoles}
+            >保存</button
+          >
+        </div>
+      {:else}
+        <div class="py-4">
+          <p>利用可能なロールがありません。</p>
+        </div>
+      {/if}
+    </div>
   {/if}
 {/snippet}
 
