@@ -8,15 +8,16 @@
     "sync": "bun run convex codegen"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.18"
+    "@types/bun": "^1.2.23"
   },
   "peerDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@auth/core": "^0.40.0",
-    "@convex-dev/auth": "^0.0.87",
-    "convex": "^1.27.1",
-    "resend": "^4.7.0"
+    "@convex-dev/auth": "^0.0.90",
+    "convex": "^1.27.3",
+    "oslo": "^1.2.1",
+    "resend": "^6.1.2"
   }
 }

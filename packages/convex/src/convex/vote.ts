@@ -36,6 +36,7 @@ export const vote = mutation({
   },
   handler: async (ctx, args) => {
     const vote = await ctx.db.get(args.voteId);
+    if (!vote) return;
     const tempVoters = vote?.voters.filter(
       (v: { userId: Id<"users">; votedOptions: Array<number> }) =>
         v.userId !== args.userId,

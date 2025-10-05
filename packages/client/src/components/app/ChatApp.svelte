@@ -5,10 +5,7 @@
   import Channel from "../channels/Channel.svelte";
   import ChannelList from "../channels/ChannelList.svelte";
   import Personalization from "../chat/Personalization.svelte";
-
-  type Selection =
-    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
-    | { type: "personalization"; selectedChannelId: undefined };
+  import type { Selection } from "../chat/types.ts";
 
   interface Props {
     organizationId: Id<"organizations">;

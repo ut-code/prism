@@ -6,7 +6,4 @@
   const orgId = $derived(page.params.orgId as Id<"organizations">);
 </script>
 
-<ChatApp
-  organizationId={orgId}
-  screenMode={{ type: "chat", selectedChannelId: undefined }}
-/>
+<ChatApp organizationId={orgId} screenMode={{ type: "top" }} />

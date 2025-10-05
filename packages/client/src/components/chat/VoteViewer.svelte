@@ -1,6 +1,7 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import { useConvexClient, useQuery } from "convex-svelte";
+  import { proxify } from "~/lib/proxify.svelte";
 
   const { voteId }: { voteId: Id<"votes"> } = $props();
 
@@ -9,7 +10,9 @@
 
   const convex = useConvexClient();
 
-  let isResultVisible = $state(false);
+  const { numbersOfVotersPerOption } = $derived(calculateVotes());
+  const { isResultVisible } = $derived(myVotes());
+  let { selectedOptions } = $derived(proxify(myVotes()));
 
   let numberOfAllVotes = $state(0);
 
@@ -41,14 +44,35 @@
     voteShareOfMostVotedOption = tempNumberOfAllVotes? (max / tempNumberOfAllVotes) : 0;
     numberOfVotesOfMostVotedOption = max;
 
+  interface CalculateVotesReturn {
+    numbersOfVotersPerOption: number[];
+  }
+  interface MyVotesReturn {
+    isResultVisible: boolean;
+    selectedOptions: number[];
+  }
+
+  function myVotes(): MyVotesReturn {
+    let isResultVisible = false;
+    let selectedOptions: number[] = [];
+    if (!vote.data) {
+      return {
+        selectedOptions,
+        isResultVisible,
+      };
+    }
     if (me.data) {
-      for (let i = 0; i < vote.data.voters.length; i++) {
-        if (vote.data.voters[i].userId === me.data._id) {
-          selectedOptions = vote.data.voters[i].votedOptions;
+      for (const voter of vote.data.voters) {
+        if (voter.userId === me.data._id) {
+          selectedOptions = voter.votedOptions;
           isResultVisible = true;
         }
       }
     }
+    return {
+      isResultVisible: false,
+      selectedOptions: [],
+    };
   }
 
   $effect(() => {
@@ -80,8 +104,39 @@
           }
         }
       }
+      numbersOfVotersPerOption.push(num);
     }
-  });
+    numbersOfVotersPerOption;
+
+    return {
+      numbersOfVotersPerOption,
+    };
+  }
+
+  function clickableStatus(i: number): "selected" | "can select" | "capped" {
+    if (hasInSelectedOptions(i)) return "selected";
+    if (vote.data && selectedOptions.length < vote.data.maxVotes)
+      return "can select";
+    return "capped";
+  }
+  function toggleSelectionOption(i: number) {
+    if (selectedOptions.includes(i)) {
+      removeFromSelectedOptions(i);
+    } else {
+      addToSelectedOptions(i);
+    }
+  }
+  function hasInSelectedOptions(i: number) {
+    return selectedOptions.includes(i);
+  }
+  function removeFromSelectedOptions(i: number) {
+    selectedOptions = selectedOptions.filter((op) => op !== i);
+  }
+  function addToSelectedOptions(i: number) {
+    if (vote.data && selectedOptions.length < vote.data.maxVotes) {
+      selectedOptions.push(i);
+    }
+  }
 </script>
 
 <div class="card bg-base-200 rounded p-2 shadow">
@@ -105,19 +160,18 @@
       </div>
       
       <button
-        class="btn m-1 ml-auto {selectedOptions.includes(i)
-          ? 'btn-secondary'
-          : 'btn-primary'}"
-        onclick={() => {
-          if (selectedOptions.includes(i)) {
-            selectedOptions = selectedOptions.filter((op) => op !== i);
-          } else {
-            if (vote.data && selectedOptions.length < vote.data.maxVotes) {
-              selectedOptions.push(i);
-            }
-          }
-        }}>{selectedOptions.includes(i) ? "削除" : "選択"}</button
-      >
+          class={[
+            "btn {selectedOptions.includes(i) m-1 ml-auto",
+            status === "can select" && "btn-primary",
+            status === "selected" && "btn-error",
+          ]}
+          disabled={status === "capped"}
+          onclick={() => {
+            toggleSelectionOption(i);
+          }}
+        >
+          {hasInSelectedOptions(i) ? "解除" : "選択"}
+        </button>
     </div>
   {/each}
   <button
@@ -133,3 +187,4 @@
     }}>投票</button
   >
 </div>
+
