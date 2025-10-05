@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { api, type Id, type Doc } from "@packages/convex";
+  import { api, type Doc, type Id } from "@packages/convex";
   import { useConvexClient, useQuery } from "convex-svelte";
-
-  import { useMutation } from "~/lib/useMutation.svelte.ts";
-  import MdiClose from "~/icons/mdi-close.svelte";
-  import Attachment from "~/icons/attachment.svelte";
-
   import FilePreview from "~/features/files/upload/FilePreview.svelte";
   import FileSelector from "~/features/files/upload/Selector.svelte";
   import { FileUploader } from "~/features/files/upload/uploader.svelte";
+  import Attachment from "~/icons/attachment.svelte";
+  import MdiClose from "~/icons/mdi-close.svelte";
+  import { useMutation } from "~/lib/useMutation.svelte.ts";
 
   import EmojiPalette from "./EmojiPalette.svelte";
   import VoteMaker from "./VoteMaker.svelte";

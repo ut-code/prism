@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api, type Id, type Doc } from "@packages/convex";
+  import { api, type Doc, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
