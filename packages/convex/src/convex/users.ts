@@ -72,6 +72,6 @@ export const getUsersByEmail = query({
   handler: async (ctx, args) => {
     return await ctx.db.query("users")
       .filter((q) => q.eq(q.field("email"), args.email))
-      .collect();;
+      .collect();
   }
 });
