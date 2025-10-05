@@ -1,11 +1,8 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
+  import type { Selection } from "$components/chat/types";
   import CreateChannelButton from "./CreateChannelButton.svelte";
-
-  type Selection =
-    | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
-    | { type: "personalization"; selectedChannelId: undefined };
 
   interface Props {
     organizationId: Id<"organizations">;
@@ -28,25 +25,21 @@
   <div class="flex-1 overflow-y-auto">
     {#if channels.data}
       {#each channels.data as channel (channel._id)}
-        <button
+        {@const active =
+          screenMode.type === "chat" &&
+          screenMode.selectedChannelId === channel._id}
+        <a
           class={[
-            "border-base-300 w-full border-b p-3 text-left",
-            screenMode.selectedChannelId === channel._id
-              ? "bg-primary text-primary-content"
-              : "hover:bg-base-300",
-          ].join(" ")}
-          onclick={() => {
-            screenMode = {
-              type: "chat",
-              selectedChannelId: channel._id as Id<"channels">,
-            };
-          }}
+            "border-base-300 block w-full border-b p-3 text-left",
+            active ? "bg-primary text-primary-content" : "hover:bg-base-300",
+          ]}
+          href={`/orgs/${organizationId}/chat/${channel._id}`}
         >
-          <div class="font-medium"># {channel.name}</div>
+          <span class="font-medium"># {channel.name}</span>
           {#if channel.description}
-            <div class="text-sm opacity-70">{channel.description}</div>
+            <span class="text-sm opacity-70">{channel.description}</span>
           {/if}
-        </button>
+        </a>
       {/each}
     {:else}
       <div class="text-base-content/60 p-4 text-center">
@@ -60,10 +53,8 @@
       </div>
     {/if}
   </div>
-  <button
+  <a
     class="btn btn-primary mt-auto mb-2 w-full"
-    onclick={() => {
-      screenMode = { type: "personalization", selectedChannelId: undefined };
-    }}>個人用設定</button
+    href={`/orgs/${organizationId}/personalization`}>個人用設定</a
   >
 </div>
