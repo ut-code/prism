@@ -5,7 +5,6 @@ import type { UserConfig } from "vite";
 
 export default {
   plugins: [tailwindcss(), sveltekit()],
-  // @ts-ignore: we should use vitest/config, but it's not up to date with vite v7
   test: {
     projects: [
       {
