@@ -11,22 +11,35 @@
 
   let isResultVisible = $state(false);
 
+  let numberOfAllVotes = $state(0);
+
+  let numberOfVotesOfMostVotedOption = $state(0);
+
+  let voteShareOfMostVotedOption = $state(0.0);
+
   let numbersOfVotersPerOption: number[] = $state([]);
 
   let selectedOptions: number[] = $state([]);
 
   if (vote.data) {
     let tempNumbersOfVotersPerOption: number[] = [];
+    let tempNumberOfAllVotes = 0;
+    let max = 0;
     for (let i = 0; i < vote.data.voteOptions.length; i++) {
       let num = 0;
       for (let j = 0; j < vote.data.voters.length; j++) {
         if (vote.data.voters[j].votedOptions.includes(i)) {
           num++;
-        }
+        }   
       }
+      if(num > max) max = num;
+      tempNumberOfAllVotes += num;
       tempNumbersOfVotersPerOption.push(num);
     }
     numbersOfVotersPerOption = tempNumbersOfVotersPerOption;
+    numberOfAllVotes = tempNumberOfAllVotes;
+    voteShareOfMostVotedOption = tempNumberOfAllVotes? (max / tempNumberOfAllVotes) : 0;
+    numberOfVotesOfMostVotedOption = max;
 
     if (me.data) {
       for (let i = 0; i < vote.data.voters.length; i++) {
@@ -41,16 +54,24 @@
   $effect(() => {
     if (vote.data) {
       let tempNumbersOfVotersPerOption: number[] = [];
+      let tempNumberOfAllVotes = 0;
+      let max = 0;
       for (let i = 0; i < vote.data.voteOptions.length; i++) {
         let num = 0;
         for (let j = 0; j < vote.data.voters.length; j++) {
           if (vote.data.voters[j].votedOptions.includes(i)) {
             num++;
           }
+          
         }
+        if(num > max) max = num;
+        tempNumberOfAllVotes += num;
         tempNumbersOfVotersPerOption.push(num);
       }
       numbersOfVotersPerOption = tempNumbersOfVotersPerOption;
+      numberOfAllVotes = tempNumberOfAllVotes;
+      voteShareOfMostVotedOption = tempNumberOfAllVotes? (max / tempNumberOfAllVotes) : 0;
+      numberOfVotesOfMostVotedOption = max;
       if (me.data) {
         for (let i = 0; i < vote.data.voters.length; i++) {
           if (vote.data.voters[i].userId === me.data._id) {
@@ -71,11 +92,18 @@
   </p>
   {#each vote.data?.voteOptions as option, i}
     <div class="flex">
-      <p class="m-1 text-xl">
-        {option}{isResultVisible
-          ? "：" + numbersOfVotersPerOption[i] + "人"
-          : ""}
-      </p>
+      <div class="relative w-full mr-3">
+        <div class="transition transition-all rounded absolute mt-2 h-[28px] z-0 {(numbersOfVotersPerOption[i] === numberOfVotesOfMostVotedOption) ? "bg-orange-500" : "bg-blue-500"}"
+          style={
+            "width:" + ((numbersOfVotersPerOption[i] && numberOfAllVotes && voteShareOfMostVotedOption) ? (numbersOfVotersPerOption[i] / numberOfAllVotes / voteShareOfMostVotedOption * 100) : 0) + "%;"
+          }></div>
+        <p class="relative mt-2 ml-1 text-xl">
+          {option}{isResultVisible
+            ? "：" + numbersOfVotersPerOption[i] + "人"
+            : ""}
+        </p>
+      </div>
+      
       <button
         class="btn m-1 ml-auto {selectedOptions.includes(i)
           ? 'btn-secondary'
