@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { api, type Id } from "@packages/convex";
-  import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
+  import { api, type Doc, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
@@ -30,5 +29,5 @@
   {/if}
 </div>
 
-<MessageList channelId={selectedChannelId} bind:replyingTo />
+<MessageList {organizationId} channelId={selectedChannelId} bind:replyingTo />
 <MessageInput channelId={selectedChannelId} {organizationId} bind:replyingTo />

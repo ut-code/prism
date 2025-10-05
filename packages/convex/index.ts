@@ -1,5 +1,5 @@
 export { api } from "./src/convex/_generated/api";
-export type { Id } from "./src/convex/_generated/dataModel";
+export type { Doc, Id } from "./src/convex/_generated/dataModel";
 
 import type { DataModel } from "./src/convex/_generated/dataModel";
 export type Task = DataModel["tasks"]["document"];

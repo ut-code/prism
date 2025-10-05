@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { api, type Id } from "@packages/convex";
-  import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
+  import { api, type Doc, type Id } from "@packages/convex";
   import { useQuery } from "convex-svelte";
   import { onMount } from "svelte";
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
@@ -11,13 +10,15 @@
   import MessageDropdown from "./MessageDropdown.svelte";
   import ReactionButtons from "./ReactionButtons.svelte";
   import ReactionList from "./ReactionList.svelte";
+  import VoteViewer from "./VoteViewer.svelte";
 
   interface Props {
+    organizationId: Id<"organizations">;
     channelId: Id<"channels">;
     replyingTo: Doc<"messages"> | null;
   }
 
-  let { channelId, replyingTo = $bindable() }: Props = $props();
+  let { organizationId, channelId, replyingTo = $bindable() }: Props = $props();
 
   const messages = useQuery(api.messages.list, () => ({
     channelId,
@@ -71,7 +72,7 @@
   {#if messages.data}
     {#each messages.data as message (message._id)}
       {#snippet reactionListSnippet()}
-        <ReactionList messageId={message._id} />
+        <ReactionList {organizationId} messageId={message._id} />
       {/snippet}
 
       {#snippet dropdownContent()}
@@ -167,6 +168,9 @@
                 <FileAttachment {fileId} compact={false} />
               {/each}
             </div>
+          {/if}
+          {#if message.vote}
+            <VoteViewer voteId={message.vote} />
           {/if}
           <div
             class="bg-base-100 absolute top-4 right-4 -translate-y-1/2 rounded-md border opacity-0 group-hover:opacity-100"

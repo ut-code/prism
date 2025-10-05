@@ -31,3 +31,36 @@ export const getUserNames = query({
     return userNames;
   },
 });
+
+export const getUserNicknames = query({
+  args: {
+    userIds: v.array(v.id("users")),
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, { userIds, organizationId }) => {
+    const users = await Promise.all(
+      userIds.map((userId) => ctx.db.get(userId)),
+    );
+    const personalizations = await Promise.all(
+      userIds.map((userId) =>
+        ctx.db
+          .query("personalization")
+          .filter((q) => q.eq(q.field("userId"), userId))
+          .filter((q) => q.eq(q.field("organizationId"), organizationId))
+          .unique(),
+      ),
+    );
+    const userNicknames: Record<Id<"users">, string> = Object.fromEntries(
+      users
+        .filter((user) => user !== null)
+        .map((user) => [
+          user._id,
+          personalizations.find((p) => p?.userId === user._id)?.nickname ??
+            user.name ??
+            "",
+        ]),
+    );
+
+    return userNicknames;
+  },
+});
