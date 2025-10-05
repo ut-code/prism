@@ -1,6 +1,6 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
-  import { useQuery } from "convex-svelte";
+  import { useConvexClient, useQuery } from "convex-svelte";
   import { page } from "$app/stores";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
 
@@ -14,6 +14,7 @@
   }));
   const updateOrganization = useMutation(api.organizations.update);
   const removeMember = useMutation(api.organizations.removeMember);
+  const convex = useConvexClient();
 
   let isEditing = $state(false);
   let editForm = $state({
@@ -53,6 +54,39 @@
       } catch (error) {
         console.error("Failed to remove member:", error);
       }
+    }
+  }
+
+  async function addMember(){
+    let email = prompt("追加するメンバーのメールアドレスを入力してください");
+    if(!email?.trim()) return;
+
+    if(members.data){
+      for(const m of members.data){
+        if(m.user?.email === email){
+          alert("そのメンバーはもう存在します");
+          return;
+        }
+      }
+    }
+    const users = await convex.query(api.users.getUsersByEmail, {email});
+    if(!users.length){
+      alert("ユーザーが見つかりませんでした");
+      return;
+    }
+    if(users.length > 1){
+      alert("同じメールアドレスで登録されている人物が複数確認されました。開発者に報告してください。");
+      return;
+    }
+    let message = "以下のユーザーが見つかりました\n" + users[0]?.name + "\n組織に追加しますか？";
+
+    const answer = confirm(message);
+    if(answer && users[0]){
+      convex.mutation(api.organizations.addMember, {
+        organizationId: organizationId,
+        userId: users[0]._id as Id<"users">,
+        permission: "member",
+      });
     }
   }
 </script>
@@ -143,7 +177,7 @@
         <div class="mb-4 flex items-center justify-between">
           <h2 class="card-title">メンバー</h2>
           {#if organization.data?.permission === "admin"}
-            <button class="btn btn-primary btn-sm"> メンバーを追加 </button>
+            <button class="btn btn-primary btn-sm" onclick={addMember}> メンバーを追加 </button>
           {/if}
         </div>
 

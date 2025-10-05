@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 
 export const me = query({
   args: {},
@@ -63,4 +63,15 @@ export const getUserNicknames = query({
 
     return userNicknames;
   },
+});
+
+export const getUsersByEmail = query({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.query("users")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .collect();;
+  }
 });
