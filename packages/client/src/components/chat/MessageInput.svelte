@@ -87,7 +87,7 @@
     await sendMessageMutation.run({
       channelId,
       content: messageContent.trim() || "",
-      author: identity.data.name,
+      author: identity.data.name || "unregistered",
       parentId: replyingTo?._id ?? undefined,
       attachments,
       vote: voteId,
