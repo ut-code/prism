@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { api, type Id } from "@packages/convex";
-  import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
+  import { api, type Id, type Doc } from "@packages/convex";
   import { useConvexClient, useQuery } from "convex-svelte";
+
+  import { useMutation } from "~/lib/useMutation.svelte.ts";
+  import MdiClose from "~/icons/mdi-close.svelte";
+  import Attachment from "~/icons/attachment.svelte";
+
   import FilePreview from "~/features/files/upload/FilePreview.svelte";
   import FileSelector from "~/features/files/upload/Selector.svelte";
   import { FileUploader } from "~/features/files/upload/uploader.svelte";
-  import MdiClose from "~/icons/mdi-close.svelte";
-  import { useMutation } from "~/lib/useMutation.svelte.ts";
+
   import EmojiPalette from "./EmojiPalette.svelte";
   import VoteMaker from "./VoteMaker.svelte";
 
@@ -38,12 +41,13 @@
   let attachedFiles = $state<File[]>([]);
 
   const clickable = $derived.by<boolean>(() => {
-    // empty content
-    if (!messageContent.trim() && attachedFiles.length === 0) return false;
     // post ongoing
     if (sendMessageMutation.processing) return false;
     // identity not loaded yet
     if (!identity.data) return false;
+    // empty content
+    if (!messageContent.trim() && attachedFiles.length === 0 && !voteIsValid())
+      return false;
     return true;
   });
 
@@ -54,16 +58,19 @@
     voteOptions: [],
     voters: [],
   });
+  function voteIsValid() {
+    if (!vote.title.trim()) return false;
+    if (vote.voteOptions.length === 0) return false;
+    if (vote.maxVotes === 0) return false;
+    return true;
+  }
 
-  const personalization = useQuery(api.personalization.getPersonalization, {
-    organizationId: organizationId,
-  });
   const uploader = new FileUploader(() => ({
     organizationId,
   }));
 
   async function sendMessage() {
-    if (!messageContent.trim() && attachedFiles.length === 0) return;
+    if (!clickable) return;
     if (!identity.data) return;
 
     const attachments = (await uploader.uploadAll(attachedFiles)).map(
@@ -71,7 +78,7 @@
     );
 
     let voteId: Id<"votes"> | undefined;
-    if (vote.title.trim() && vote.voteOptions.length !== 0) {
+    if (voteIsValid()) {
       voteId = await convex.mutation(api.vote.addVote, {
         title: vote.title,
         maxVotes: vote.maxVotes,
@@ -186,19 +193,7 @@
           title="ファイルを添付"
           type="button"
         >
-          <svg
-            class="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-            ></path>
-          </svg>
+          <Attachment />
           {showFileSelector ? "キャンセル" : "ファイル添付"}
         </button>
         <button
@@ -215,7 +210,7 @@
     <button
       class="btn btn-primary self-end"
       onclick={sendMessage}
-      disabled={clickable}
+      disabled={!clickable}
     >
       {#if sendMessageMutation.processing}
         <span class="loading loading-spinner loading-sm"></span>
