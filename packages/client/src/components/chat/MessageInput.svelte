@@ -1,13 +1,14 @@
 <script lang="ts">
   import { api, type Id } from "@packages/convex";
   import type { Doc } from "@packages/convex/src/convex/_generated/dataModel";
-  import { useQuery } from "convex-svelte";
+  import { useConvexClient, useQuery } from "convex-svelte";
   import FilePreview from "~/features/files/upload/FilePreview.svelte";
   import FileSelector from "~/features/files/upload/Selector.svelte";
   import { FileUploader } from "~/features/files/upload/uploader.svelte";
   import MdiClose from "~/icons/mdi-close.svelte";
   import { useMutation } from "~/lib/useMutation.svelte.ts";
   import EmojiPalette from "./EmojiPalette.svelte";
+  import VoteMaker from "./VoteMaker.svelte";
 
   interface Props {
     organizationId: Id<"organizations">;
@@ -17,8 +18,19 @@
 
   let { channelId, organizationId, replyingTo = $bindable() }: Props = $props();
 
+  type Vote = {
+    title: string;
+    maxVotes: number;
+    voteOptions: Array<string>;
+    voters: Array<{
+      userId: Id<"users">;
+      votedOptions: Array<number>;
+    }>;
+  };
+
   const sendMessageMutation = useMutation(api.messages.send);
   const identity = useQuery(api.users.me, {});
+  const convex = useConvexClient();
 
   let messageContent = $state("");
   let showEmojiPalette = $state(false);
@@ -35,6 +47,17 @@
     return true;
   });
 
+  let showVoteMaker = $state(false);
+  let vote = $state<Vote>({
+    title: "",
+    maxVotes: 1,
+    voteOptions: [],
+    voters: [],
+  });
+
+  const personalization = useQuery(api.personalization.getPersonalization, {
+    organizationId: organizationId,
+  });
   const uploader = new FileUploader(() => ({
     organizationId,
   }));
@@ -47,18 +70,34 @@
       (it) => it.id,
     );
 
+    let voteId: Id<"votes"> | undefined;
+    if (vote.title.trim() && vote.voteOptions.length !== 0) {
+      voteId = await convex.mutation(api.vote.addVote, {
+        title: vote.title,
+        maxVotes: vote.maxVotes,
+        voteOptions: vote.voteOptions,
+      });
+    }
+
     await sendMessageMutation.run({
       channelId,
       content: messageContent.trim() || "",
       author: identity.data.name,
       parentId: replyingTo?._id ?? undefined,
       attachments,
+      vote: voteId,
     });
 
     messageContent = "";
     attachedFiles = [];
     replyingTo = null;
     showFileSelector = false;
+    vote = {
+      title: "",
+      maxVotes: 1,
+      voteOptions: [],
+      voters: [],
+    };
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -70,6 +109,10 @@
 
   function toggleFileUploader() {
     showFileSelector = !showFileSelector;
+  }
+
+  function toggleVoteMaker() {
+    showVoteMaker = !showVoteMaker;
   }
 </script>
 
@@ -120,6 +163,9 @@
     />
   {/if}
 
+  {#if showVoteMaker}
+    <VoteMaker bind:vote />
+  {/if}
   <div class="flex gap-2"></div>
 
   <div class="flex gap-2">
@@ -154,6 +200,14 @@
             ></path>
           </svg>
           {showFileSelector ? "キャンセル" : "ファイル添付"}
+        </button>
+        <button
+          class="btn btn-ghost btn-sm"
+          onclick={toggleVoteMaker}
+          title="投票を作成"
+          type="button"
+        >
+          {showVoteMaker ? "キャンセル" : "投票を作成"}
         </button>
       </div>
     </div>

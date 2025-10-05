@@ -7,15 +7,6 @@
     | { type: "chat"; selectedChannelId: Id<"channels"> | undefined }
     | { type: "personalization"; selectedChannelId: undefined };
 
-  /*<<<<<<< HEAD:packages/client/src/components/chat/ChannelList.svelte
-    screenMode: Selection;
-  }
-
-  let {
-    screenMode = $bindable(),
-  }: Props = $props();
-=======
-*/
   interface Props {
     organizationId: Id<"organizations">;
     screenMode: Selection;
@@ -45,7 +36,10 @@
               : "hover:bg-base-300",
           ].join(" ")}
           onclick={() => {
-            screenMode = { type: "chat", selectedChannelId: channel._id };
+            screenMode = {
+              type: "chat",
+              selectedChannelId: channel._id as Id<"channels">,
+            };
           }}
         >
           <div class="font-medium"># {channel.name}</div>
