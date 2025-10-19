@@ -1,6 +1,6 @@
 export const AUTH_RESEND_KEY = assert(
   "AUTH_RESEND_KEY",
-  process.env.AUTH_RESEND_KEY,
+  process.env.AUTH_RESEND_KEY ?? "nokey",
 );
 
 function assert(envName: string, val: string | undefined | null): string {
