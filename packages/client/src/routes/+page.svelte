@@ -3,6 +3,7 @@
   import { type Id } from "@packages/convex";
   import { goto } from "$app/navigation";
   import OrganizationSelector from "~/components/organization/OrganizationSelector.svelte";
+  import VideoCall from "~/features/livekit-vc/components/VideoCall.svelte";
 
   const auth = useAuth();
 
@@ -28,3 +29,5 @@
     </div>
   </div>
 {/if}
+
+<VideoCall />

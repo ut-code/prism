@@ -14,6 +14,7 @@ in
   pkgs.mkShell {
     packages =
       [
+        pkgs.livekit
         pkgs.hivemind
         pkgs.pkg-config
         pkgs.cargo-tauri

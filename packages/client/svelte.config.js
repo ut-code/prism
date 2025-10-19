@@ -22,6 +22,9 @@ const config = {
       dir: "../..",
     },
   },
+  compilerOptions: {
+    runes: true,
+  },
 };
 
 export default config;

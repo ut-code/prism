@@ -1,10 +1,11 @@
-export const PUBLIC_CONVEX_URL = assert(
-  "PUBLIC_CONVEX_URL",
-  import.meta.env.PUBLIC_CONVEX_URL,
-);
+import * as v from "valibot";
 
-function assert(envName: string, val: string | undefined | null): string {
-  if (val == null)
-    throw new Error(`Environment variable not found: ${envName}`);
-  return String(val);
-}
+const Env = v.object({
+  PUBLIC_CONVEX_URL: v.string(),
+  PUBLIC_LIVEKIT_WSURL: v.string(),
+});
+
+export const env = v.parse(Env, {
+  PUBLIC_CONVEX_URL: import.meta.env.PUBLIC_CONVEX_URL,
+  PUBLIC_LIVEKIT_WSURL: import.meta.env.PUBLIC_LIVEKIT_WSURL,
+});
