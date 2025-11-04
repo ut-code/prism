@@ -68,7 +68,7 @@
       },
     },
     {
-      "includes": ["packages/convex/**/*"],
+      "includes": ["apps/convex/**/*"],
       "linter": {
         "rules": {
           "correctness": {

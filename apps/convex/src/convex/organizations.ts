@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server.ts";
-import { getOrganizationPerms } from "./perms.ts";
+import { mutation, query } from "./_generated/server";
+import { getOrganizationPerms } from "./perms";
 
 export const create = mutation({
   args: {

@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server.ts";
-import { getMessagePerms, validateFileAttachments } from "./perms.ts";
+import { mutation, query } from "./_generated/server";
+import { getMessagePerms, validateFileAttachments } from "./perms";
 
 export const list = query({
   args: { channelId: v.id("channels") },

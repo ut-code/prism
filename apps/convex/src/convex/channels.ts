@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server.ts";
-import { getChannelPerms } from "./perms.ts";
+import { mutation, query } from "./_generated/server";
+import { getChannelPerms } from "./perms";
 
 export const list = query({
   args: { organizationId: v.id("organizations") },

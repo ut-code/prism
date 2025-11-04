@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel.ts";
-import { mutation, query } from "./_generated/server.ts";
+import type { Id } from "./_generated/dataModel";
+import { mutation, query } from "./_generated/server";
 
 export const addVote = mutation({
   args: {

@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel.ts";
-import { query } from "./_generated/server.ts";
+import type { Id } from "./_generated/dataModel";
+import { query } from "./_generated/server";
 
 export const me = query({
   args: {},

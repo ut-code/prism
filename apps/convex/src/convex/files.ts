@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server.ts";
-import { getFilePerms } from "./perms.ts";
+import { mutation, query } from "./_generated/server";
+import { getFilePerms } from "./perms";
 
 // ファイルのMIMEタイプを検証
 function isValidMimeType(mimeType: string): boolean {

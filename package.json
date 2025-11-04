@@ -3,17 +3,16 @@
   "type": "module",
   "private": true,
   "workspaces": [
-    "packages/*",
     "apps/*"
   ],
   "scripts": {
     "dev": "hivemind ./tasks/web.Procfile",
     "dev:storybook": "hivemind ./tasks/storybook.Procfile",
     "dev:tauri": "hivemind ./tasks/tauri.Procfile",
-    "run:web": "cd packages/client && bun dev",
-    "run:convex": "cd packages/convex && bun run dev",
-    "run:tauri": "cd packages/client && bun run dev:tauri",
-    "run:storybook": "cd packages/client && bun run storybook",
+    "run:web": "cd apps/desktop && bun dev",
+    "run:convex": "cd apps/convex && bun run dev",
+    "run:tauri": "cd apps/desktop && bun run dev:tauri",
+    "run:storybook": "cd apps/desktop && bun run storybook",
     "prepare": "bun run sync && bun lefthook install",
     "sync": "bun run --filter=* sync",
     "test": "bun run --filter=* test",
@@ -23,8 +22,8 @@
     "fix:format": "prettier --write .",
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
-    "convex": "cd packages/convex && bun run convex",
-    "paraglide": "cd packages/client && bun run paraglide"
+    "convex": "cd apps/convex && bun run convex",
+    "paraglide": "cd apps/desktop && bun run paraglide"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.3",

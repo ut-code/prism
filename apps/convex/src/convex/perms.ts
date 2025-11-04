@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import type { Id } from "./_generated/dataModel.ts";
-import type { QueryCtx } from "./_generated/server.ts";
+import type { Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 
 /**
 

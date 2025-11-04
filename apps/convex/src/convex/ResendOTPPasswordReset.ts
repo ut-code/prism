@@ -1,7 +1,7 @@
 import Resend from "@auth/core/providers/resend";
 import { alphabet, generateRandomString } from "oslo/crypto";
 import { Resend as ResendAPI } from "resend";
-import { AUTH_RESEND_KEY } from "./env.ts";
+import { AUTH_RESEND_KEY } from "./env";
 
 export const ResendOTPPasswordReset = Resend({
   id: "resend-otp",
