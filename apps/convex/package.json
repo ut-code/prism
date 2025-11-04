@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run convex dev --env-file=../../.env",
-    "sync": "bun run convex codegen"
+    "sync": "bun run convex codegen || true"
   },
   "devDependencies": {
     "@types/bun": "^1.2.23"
