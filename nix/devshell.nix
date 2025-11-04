@@ -1,12 +1,4 @@
-{
-  pkgs ?
-    import <nixpkgs> {
-      overlays = [
-        rust-overlay.overlays.default
-      ];
-    },
-  rust-overlay ? builtins.getFlake "github:oxalica/rust-overlay",
-}: let
+{pkgs}: let
   rustToolchain = pkgs.rust-bin.stable.latest.default.override {
     extensions = ["rust-src"];
   };
