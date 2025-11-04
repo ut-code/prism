@@ -30,8 +30,8 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
   - `@` → `src`
   - `@@` → `../..` (workspace root)
   - `$components` → `src/components`
-  - `~` → `src/`
-  - `@packages/{package}` → monorepo
+  - `@` → `src/`
+  - `@apps/{package}` → monorepo
 - **Convex Integration**: Uses `convex-svelte` for reactive queries
 - **State Pattern**: Logic components (e.g., TaskList.svelte) separate from presentation (TaskListSkin.svelte)
 
@@ -53,7 +53,7 @@ This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with
 ### Convex の Import について
 
 ```ts
-import { api, type Id } from "@packages/convex";
+import { api, type Id } from "@apps/convex";
 
 // use api and type Id ...
 ```
@@ -85,7 +85,7 @@ import { api, type Id } from "@packages/convex";
 Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.svelte.ts`:
 
 ```typescript
-import { useMutation } from "~/lib/useMutation.svelte.ts";
+import { useMutation } from "@/lib/useMutation.svelte.ts";
 
 const createOrganization = useMutation(api.organizations.create);
 
@@ -135,14 +135,14 @@ class MyController {
 
 ### Common Rules
 
-- FILE LENGTH: Prefer short files, 30 ~ 50 lines recommended, 100 lines MAX.
+- FILE LENGTH: Prefer short files, 30 @ 50 lines recommended, 100 lines MAX.
 - CHECK: Always run `bun check` after writing code.
 - DOCUMENTATION: document the behavior (and optionally the expected usage) of the code, not the implementation
 
 ### Svelte
 
 - NAMING: Name snippets with camelCase instead of PascalCase to avoid confusion with components.
-- ALIAS: Use TypeScript import alias for client code. `import component from "~/features/foo/component.svelte";`
+- ALIAS: Use TypeScript import alias for client code. `import component from "@/features/foo/component.svelte";`
 - STYLING: Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
 - STYLING: Always prefer using DaisyUI classes, and use minimal Tailwind classes.
 - SEPARATE COMPONENTS: Separate components into smallest pieces for readability.

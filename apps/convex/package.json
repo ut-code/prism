@@ -1,0 +1,23 @@
+{
+  "name": "@apps/convex",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run convex dev --env-file=../../.env",
+    "sync": "bun run convex codegen"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.23"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@auth/core": "^0.40.0",
+    "@convex-dev/auth": "^0.0.90",
+    "convex": "^1.27.3",
+    "oslo": "^1.2.1",
+    "resend": "^6.1.2"
+  }
+}
