@@ -8,7 +8,7 @@ export const extensions = [
   baseSetup,
   highlights,
   markdown({
-    // @ts-expect-error: fix later
+    // @ts-expect-error
     extensions: [Strikethrough],
   }),
 ];

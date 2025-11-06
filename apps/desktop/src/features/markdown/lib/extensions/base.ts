@@ -43,7 +43,7 @@ export const baseSetup = [
   // highlightActiveLine(),
   // highlightSelectionMatches(),
 
-  // @ts-expect-error: fix later
+  // @ts-expect-error
   keymap.of([
     ...closeBracketsKeymap,
     ...defaultKeymap,
