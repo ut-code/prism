@@ -1,2 +1,2 @@
 web: bun run:web
-convex: bun run:convex
+convex: cd .. && bun convex dev
