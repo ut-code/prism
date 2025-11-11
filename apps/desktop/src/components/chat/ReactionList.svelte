@@ -1,6 +1,7 @@
 <script lang="ts">
   import { api, type Id } from "@apps/convex";
   import { useQuery } from "convex-svelte";
+  import { uniqueBy } from "@/lib/utils";
 
   interface Props {
     organizationId: Id<"organizations">;
@@ -28,7 +29,9 @@
   });
 
   const allUserIdsInReactions = $derived(
-    reactions.data ? [...new Set(reactions.data.map((r) => r.userId))] : [],
+    reactions.data
+      ? uniqueBy(reactions.data, (r) => r.userId).map((r) => r.userId)
+      : [],
   );
 
   // const userNamesById = useQuery(api.users.getUserNames, () => ({

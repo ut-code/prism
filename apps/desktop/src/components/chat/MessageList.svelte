@@ -27,7 +27,9 @@
   const addReaction = useMutation(api.messages.addReaction);
 
   const messagesById = $derived(
-    new Map(messages.data?.map((message) => [message._id, message])),
+    new Map(
+      messages.data?.map((message: Doc<"messages">) => [message._id, message]),
+    ),
   );
 
   let messagesContainer: HTMLDivElement;
@@ -139,7 +141,7 @@
           visibleDropdown = message._id;
         }}
       >
-        {#if message.parentId && messages.data.find((m) => m._id === message.parentId)}
+        {#if message.parentId && messages.data.find((m: Doc<"messages">) => m._id === message.parentId)}
           <div class="flex items-center gap-2">
             <span class="text-base-content/60 text-xs">返信</span>
             <span class="text-primary font-semibold"

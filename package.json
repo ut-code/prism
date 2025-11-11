@@ -19,7 +19,7 @@
     "check": "bun run check:lint && bun run --filter=* check && bun run check:format",
     "fix": "bun run fix:lint && bun run fix:format",
     "check:format": "prettier --check .",
-    "fix:format": "prettier --write .",
+    "fix:format": "prettier --write . --log-level warn",
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
     "convex": "cd apps/convex && bun run convex",
