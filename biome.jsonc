@@ -7,6 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
+    "includes": ["**", "!apps/convex/src/convex/_generated"],
   },
   "formatter": {
     "enabled": false,
