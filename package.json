@@ -10,6 +10,7 @@
     "dev:storybook": "hivemind ./tasks/storybook.Procfile",
     "dev:tauri": "hivemind ./tasks/tauri.Procfile",
     "run:web": "cd apps/desktop && bun dev",
+    "run:server": "cd apps/server && bun run dev",
     "run:convex": "cd apps/convex && bun run dev",
     "run:tauri": "cd apps/desktop && bun run dev:tauri",
     "run:storybook": "cd apps/desktop && bun run storybook",
@@ -23,7 +24,9 @@
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
     "convex": "cd apps/convex && bun run convex",
-    "paraglide": "cd apps/desktop && bun run paraglide"
+    "paraglide": "cd apps/desktop && bun run paraglide",
+    "db:generate": "cd apps/server && bun run drizzle-kit generate",
+    "db:migrate": "cd apps/server && bun run drizzle-kit migrate"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",

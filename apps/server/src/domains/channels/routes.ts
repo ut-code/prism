@@ -1,0 +1,77 @@
+import { desc, eq } from "drizzle-orm";
+import { Elysia, t } from "elysia";
+import { db } from "../../db";
+import { channels } from "../../db/schema";
+import { authMiddleware } from "../../middleware/auth";
+import { getOrganizationPermissions } from "../organizations/permissions";
+
+export const channelRoutes = new Elysia({ prefix: "/channels" })
+  .use(authMiddleware)
+  .get("/", async ({ user, error, query }) => {
+    if (!user) return error(401, { message: "Unauthorized" });
+    if (!query.organizationId)
+      return error(400, { message: "organizationId is required" });
+
+    await getOrganizationPermissions(user.id, query.organizationId);
+
+    const channelList = await db
+      .select()
+      .from(channels)
+      .where(eq(channels.organizationId, query.organizationId))
+      .orderBy(desc(channels.createdAt));
+
+    return channelList;
+  })
+  .get("/:id", async ({ user, error, params }) => {
+    if (!user) return error(401, { message: "Unauthorized" });
+
+    const [channel] = await db
+      .select()
+      .from(channels)
+      .where(eq(channels.id, params.id))
+      .limit(1);
+
+    if (!channel) {
+      return error(404, { message: "Channel not found" });
+    }
+
+    await getOrganizationPermissions(user.id, channel.organizationId);
+
+    return channel;
+  })
+  .post(
+    "/",
+    async ({ user, error, body }) => {
+      if (!user) return error(401, { message: "Unauthorized" });
+
+      const perms = await getOrganizationPermissions(
+        user.id,
+        body.organizationId,
+      );
+
+      if (!perms.canCreateChannels) {
+        return error(403, { message: "Insufficient permissions" });
+      }
+
+      const [channel] = await db
+        .insert(channels)
+        .values({
+          name: body.name,
+          description: body.description,
+          organizationId: body.organizationId,
+        })
+        .returning();
+
+      return channel;
+    },
+    {
+      body: t.Object({
+        name: t.String({ minLength: 1 }),
+        description: t.Optional(t.String()),
+        organizationId: t.String(),
+      }),
+      query: t.Object({
+        organizationId: t.Optional(t.String()),
+      }),
+    },
+  );
