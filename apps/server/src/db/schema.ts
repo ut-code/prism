@@ -162,9 +162,9 @@ export const votes = pgTable("votes", {
   title: text("title").notNull(),
   maxVotes: integer("max_votes").notNull(),
   voteOptions: jsonb("vote_options").notNull().$type<string[]>(),
-  voters: jsonb("voters").notNull().$type<
-    Array<{ userId: string; votedOptions: number[] }>
-  >(),
+  voters: jsonb("voters")
+    .notNull()
+    .$type<Array<{ userId: string; votedOptions: number[] }>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

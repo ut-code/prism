@@ -131,7 +131,7 @@
         if (me.data) {
           await convex.mutation(api.vote.vote, {
             voteId: voteId,
-            userId: me.data._id as Id<"users">,
+            userId: me.data._id as Id,
             votedOptions: selectedOptions,
           });
         }

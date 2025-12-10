@@ -7,6 +7,6 @@
 </script>
 
 <ChatApp
-  organizationId={orgId as Id<"organizations">}
-  screenMode={{ type: "chat", selectedChannelId: channelId as Id<"channels"> }}
+  organizationId={orgId as Id}
+  screenMode={{ type: "chat", selectedChannelId: channelId as Id }}
 />

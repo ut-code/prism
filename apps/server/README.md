@@ -35,11 +35,13 @@ bun run dev
 ## API エンドポイント
 
 ### 認証 (Auth)
+
 - `GET /auth/me` - 現在のユーザー情報を取得
 - `POST /auth/signin` - サインイン
 - `POST /auth/signout` - サインアウト
 
 ### Organizations
+
 - `GET /organizations` - 組織一覧を取得
 - `POST /organizations` - 組織を作成
 - `GET /organizations/:id` - 組織詳細を取得
@@ -49,11 +51,13 @@ bun run dev
 - `DELETE /organizations/:id/members/:userId` - メンバーを削除
 
 ### Channels
+
 - `GET /channels?organizationId=xxx` - チャンネル一覧を取得
 - `POST /channels` - チャンネルを作成
 - `GET /channels/:id` - チャンネル詳細を取得
 
 ### Messages
+
 - `GET /messages?channelId=xxx` - メッセージ一覧を取得
 - `POST /messages` - メッセージを送信
 - `GET /messages/:id/reactions` - リアクション一覧を取得
@@ -61,23 +65,27 @@ bun run dev
 - `DELETE /messages/:id/reactions/:emoji` - リアクションを削除
 
 ### Users
+
 - `GET /users/me` - 現在のユーザー情報を取得
 - `POST /users/names` - ユーザー名の一括取得
 - `POST /users/nicknames` - ニックネームの一括取得
 - `GET /users/search?email=xxx` - メールアドレスでユーザーを検索
 
 ### Files
+
 - `GET /files?organizationId=xxx` - ファイル一覧を取得
 - `POST /files` - ファイルを登録
 - `GET /files/:id` - ファイル詳細を取得
 - `DELETE /files/:id` - ファイルを削除
 
 ### Tasks
+
 - `GET /tasks` - タスク一覧を取得
 - `POST /tasks` - タスクを作成
 - `PATCH /tasks/:id` - タスクを更新
 
 ### Votes
+
 - `GET /votes/:id` - 投票詳細を取得
 - `POST /votes` - 投票を作成
 - `POST /votes/:id/cast` - 投票する

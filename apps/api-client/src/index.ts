@@ -27,10 +27,7 @@ export class ApiClient {
     this.fetchFn = config.fetch || globalThis.fetch;
   }
 
-  private async request<T>(
-    path: string,
-    options?: RequestInit,
-  ): Promise<T> {
+  private async request<T>(path: string, options?: RequestInit): Promise<T> {
     const response = await this.fetchFn(`${this.baseUrl}${path}`, {
       ...options,
       credentials: "include",
