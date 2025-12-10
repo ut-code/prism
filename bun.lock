@@ -15,6 +15,13 @@
         "typescript": "^5.9.3",
       },
     },
+    "apps/api-client": {
+      "name": "@apps/api-client",
+      "version": "0.0.1",
+      "peerDependencies": {
+        "typescript": "^5.9.3",
+      },
+    },
     "apps/convex": {
       "name": "@apps/convex",
       "dependencies": {
@@ -107,6 +114,8 @@
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],
 
     "@antfu/install-pkg": ["@antfu/install-pkg@1.1.0", "", { "dependencies": { "package-manager-detector": "^1.3.0", "tinyexec": "^1.0.1" } }, "sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ=="],
+
+    "@apps/api-client": ["@apps/api-client@workspace:apps/api-client"],
 
     "@apps/convex": ["@apps/convex@workspace:apps/convex"],
 
