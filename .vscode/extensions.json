@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "inlang.vs-code-extension",
     "svelte.svelte-vscode",
     "rust-lang.rust-analyzer"
   ]
