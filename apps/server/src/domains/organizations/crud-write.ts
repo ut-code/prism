@@ -2,25 +2,17 @@ import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
 import { organizationMembers, organizations } from "../../db/schema.ts";
-import type { AuthUser } from "../../middleware/auth.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
 import { getOrganizationPermissions } from "./permissions.ts";
 
 /**
  * Organization write routes
  * Handles: create organization, update organization
  */
-export const organizationWriteRoutes = new Elysia()
+export const organizationWriteRoutes = new Elysia().use(authMiddleware)
   .post(
     "/",
-    async ({
-      user,
-      body,
-      set,
-    }: {
-      user: AuthUser | null;
-      body: { name: string; description?: string };
-      set: any;
-    }) => {
+    async ({ user, body, set }) => {
       if (!user) {
         set.status = 401;
         return { message: "Unauthorized" };
@@ -54,17 +46,7 @@ export const organizationWriteRoutes = new Elysia()
   )
   .patch(
     "/:id",
-    async ({
-      user,
-      body,
-      params,
-      set,
-    }: {
-      user: AuthUser | null;
-      body: { name?: string; description?: string };
-      params: { id: string };
-      set: any;
-    }) => {
+    async ({ user, body, params, set }) => {
       if (!user) {
         set.status = 401;
         return { message: "Unauthorized" };

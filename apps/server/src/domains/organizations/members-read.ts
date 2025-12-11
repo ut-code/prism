@@ -2,24 +2,16 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../../db/index.ts";
 import { organizationMembers, users } from "../../db/schema.ts";
-import type { AuthUser } from "../../middleware/auth.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
 import { getOrganizationPermissions } from "./permissions.ts";
 
 /**
  * Organization member read routes
  * Handles: list members
  */
-export const organizationMemberReadRoutes = new Elysia().get(
+export const organizationMemberReadRoutes = new Elysia().use(authMiddleware).get(
   "/:id/members",
-  async ({
-    user,
-    params,
-    set,
-  }: {
-    user: AuthUser | null;
-    params: { id: string };
-    set: any;
-  }) => {
+  async ({ user, params, set }) => {
     if (!user) {
       set.status = 401;
       return { message: "Unauthorized" };

@@ -15,7 +15,7 @@ if (!jwtSecret) {
 export const authMiddleware = new Elysia({ name: "auth" })
   .use(jwt({ name: "jwt", secret: jwtSecret }))
   .derive({ as: "global" }, async ({ jwt, cookie }) => {
-    const tokenValue = cookie.token.value;
+    const tokenValue = cookie.token?.value;
 
     if (!tokenValue || typeof tokenValue !== "string") {
       return { user: null as AuthUser | null };

@@ -45,7 +45,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       });
 
       // Set cookie
-      cookie.token.set({
+      cookie.token?.set({
         value: token,
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60, // 7 days
@@ -61,7 +61,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     },
   )
   .post("/signout", async ({ cookie }) => {
-    cookie.token.set({
+    cookie.token?.set({
       value: "",
       httpOnly: true,
       maxAge: 0,
