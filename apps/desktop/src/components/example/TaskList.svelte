@@ -1,6 +1,11 @@
 <script lang="ts">
   import { type Task } from "@apps/api-client";
-  import { getApiClient, getTask, unwrapResponse, useQuery } from "@/lib/api.svelte";
+  import {
+    getApiClient,
+    getTask,
+    unwrapResponse,
+    useQuery,
+  } from "@/lib/api.svelte";
   import TaskListSkin from "./TaskListSkin.svelte";
 
   const api = getApiClient();

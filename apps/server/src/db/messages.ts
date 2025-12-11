@@ -7,10 +7,10 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
-import { channels } from "./channels";
-import { files } from "./files";
-import { votes } from "./votes";
+import { users } from "./auth.ts";
+import { channels } from "./channels.ts";
+import { files } from "./files.ts";
+import { votes } from "./votes.ts";
 
 // Messages - self-referencing table
 // Using AnyPgColumn to avoid circular type inference errors

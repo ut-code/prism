@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { organizationMembers, organizations } from "../../db/schema";
-import type { AuthUser } from "../../middleware/auth";
-import { getOrganizationPermissions } from "./permissions";
+import { db } from "../../db/index.ts";
+import { organizationMembers, organizations } from "../../db/schema.ts";
+import type { AuthUser } from "../../middleware/auth.ts";
+import { getOrganizationPermissions } from "./permissions.ts";
 
 /**
  * Organization write routes
@@ -12,7 +12,15 @@ import { getOrganizationPermissions } from "./permissions";
 export const organizationWriteRoutes = new Elysia()
   .post(
     "/",
-    async ({ user, body, set }: { user: AuthUser | null; body: { name: string; description?: string }; set: any }) => {
+    async ({
+      user,
+      body,
+      set,
+    }: {
+      user: AuthUser | null;
+      body: { name: string; description?: string };
+      set: any;
+    }) => {
       if (!user) {
         set.status = 401;
         return { message: "Unauthorized" };
@@ -46,7 +54,12 @@ export const organizationWriteRoutes = new Elysia()
   )
   .patch(
     "/:id",
-    async ({ user, body, params, set }: {
+    async ({
+      user,
+      body,
+      params,
+      set,
+    }: {
       user: AuthUser | null;
       body: { name?: string; description?: string };
       params: { id: string };
@@ -57,10 +70,7 @@ export const organizationWriteRoutes = new Elysia()
         return { message: "Unauthorized" };
       }
 
-      const perms = await getOrganizationPermissions(
-        user.id,
-        params.id,
-      );
+      const perms = await getOrganizationPermissions(user.id, params.id);
 
       if (!perms.canUpdate) {
         set.status = 403;

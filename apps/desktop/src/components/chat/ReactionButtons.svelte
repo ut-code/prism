@@ -1,7 +1,13 @@
 <script lang="ts">
   import type { Reaction, User } from "@apps/api-client";
   import { fly } from "svelte/transition";
-  import { getApiClient, getMessage, unwrapResponse, useMutation, useQuery } from "@/lib/api.svelte";
+  import {
+    getApiClient,
+    getMessage,
+    unwrapResponse,
+    useMutation,
+    useQuery,
+  } from "@/lib/api.svelte";
 
   interface Props {
     messageId: string;

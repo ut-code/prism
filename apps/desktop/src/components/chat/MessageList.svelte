@@ -17,7 +17,10 @@
 
   let { organizationId, channelId, replyingTo = $bindable() }: Props = $props();
 
-  const controller = new MessageListController(() => ({ organizationId, channelId }));
+  const controller = new MessageListController(() => ({
+    organizationId,
+    channelId,
+  }));
   const modalManager = new ModalManager();
 
   let messagesContainer: HTMLDivElement;

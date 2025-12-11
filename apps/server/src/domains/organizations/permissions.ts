@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "../../db";
-import { organizationMembers, organizations } from "../../db/schema";
+import { db } from "../../db/index.ts";
+import { organizationMembers, organizations } from "../../db/schema.ts";
 
 export async function getOrganizationPermissions(
   userId: string,

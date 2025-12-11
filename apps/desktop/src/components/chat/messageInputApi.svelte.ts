@@ -1,5 +1,10 @@
 import type { User } from "@apps/api-client";
-import { getApiClient, unwrapResponse, useMutation, useQuery } from "@/lib/api.svelte";
+import {
+  getApiClient,
+  unwrapResponse,
+  useMutation,
+  useQuery,
+} from "@/lib/api.svelte";
 import type { Vote } from "./messageInputUtils.ts";
 
 /**

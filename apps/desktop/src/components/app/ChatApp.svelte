@@ -31,14 +31,16 @@
   <OrganizationSidebar organization={organization.data} {organizationId}>
     <ChannelList
       {organizationId}
-      bind:screenMode={() => screenMode,
-      (val) => {
-        if (val.type === "chat") {
-          goto(`/orgs/${organizationId}/chat/${val.selectedChannelId}`);
-        } else if (val.type === "personalization") {
-          goto(`/orgs/${organizationId}/personalization`);
+      bind:screenMode={
+        () => screenMode,
+        (val) => {
+          if (val.type === "chat") {
+            goto(`/orgs/${organizationId}/chat/${val.selectedChannelId}`);
+          } else if (val.type === "personalization") {
+            goto(`/orgs/${organizationId}/personalization`);
+          }
         }
-      }}
+      }
     />
   </OrganizationSidebar>
 

@@ -1,9 +1,9 @@
-import type { ApiClient } from "./index";
+import type { ApiClient } from "./index.ts";
 import type {
   DynamicRoute,
   MessagesRoute,
   OrganizationRoute,
-} from "./route-types";
+} from "./route-types.ts";
 
 /**
  * Helper functions for type-safe dynamic route access.

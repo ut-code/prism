@@ -1,15 +1,9 @@
 import { relations } from "drizzle-orm";
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
-import { users } from "./auth";
-import { channels } from "./channels";
-import { files } from "./files";
-import { personalizations } from "./personalizations";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { users } from "./auth.ts";
+import { channels } from "./channels.ts";
+import { files } from "./files.ts";
+import { personalizations } from "./personalizations.ts";
 
 // Organizations
 export const organizations = pgTable("organizations", {

@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { reactions } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
+import { db } from "../../db/index.ts";
+import { reactions } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
 
 /**
  * Handles reaction-related operations for messages.

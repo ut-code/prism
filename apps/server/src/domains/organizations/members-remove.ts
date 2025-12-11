@@ -1,16 +1,21 @@
 import { and, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { db } from "../../db";
-import { organizationMembers } from "../../db/schema";
-import type { AuthUser } from "../../middleware/auth";
-import { getOrganizationPermissions } from "./permissions";
+import { db } from "../../db/index.ts";
+import { organizationMembers } from "../../db/schema.ts";
+import type { AuthUser } from "../../middleware/auth.ts";
+import { getOrganizationPermissions } from "./permissions.ts";
 
 /**
  * Organization member removal route
  * Handles: remove member from organization
  */
-export const organizationMemberRemoveRoute = new Elysia()
-  .delete("/:id/members/:userId", async ({ user, params, set }: {
+export const organizationMemberRemoveRoute = new Elysia().delete(
+  "/:id/members/:userId",
+  async ({
+    user,
+    params,
+    set,
+  }: {
     user: AuthUser | null;
     params: { id: string; userId: string };
     set: any;
@@ -42,4 +47,5 @@ export const organizationMemberRemoveRoute = new Elysia()
       );
 
     return { success: true };
-  });
+  },
+);

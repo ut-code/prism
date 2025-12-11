@@ -1,11 +1,6 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
-import { users } from "./auth";
-import { organizations } from "./organizations";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { users } from "./auth.ts";
+import { organizations } from "./organizations.ts";
 
 // Personalization
 export const personalizations = pgTable("personalizations", {

@@ -1,5 +1,10 @@
 import type { File } from "@apps/api-client";
-import { getApiClient, getFile, unwrapResponse, useQuery } from "@/lib/api.svelte";
+import {
+  getApiClient,
+  getFile,
+  unwrapResponse,
+  useQuery,
+} from "@/lib/api.svelte";
 import { isImage } from "../utils.ts";
 
 export interface FileAttachmentProps {

@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { Reaction } from "@apps/api-client";
-  import { getApiClient, getMessage, unwrapResponse, useQuery } from "@/lib/api.svelte";
+  import {
+    getApiClient,
+    getMessage,
+    unwrapResponse,
+    useQuery,
+  } from "@/lib/api.svelte";
   import { uniqueBy } from "@/lib/utils";
 
   interface Props {
@@ -40,7 +45,10 @@
   );
 
   const userNamesById = useQuery<Record<string, string>>(async () => {
-    const response = await api.users.nicknames.post({ userIds: allUserIdsInReactions, organizationId });
+    const response = await api.users.nicknames.post({
+      userIds: allUserIdsInReactions,
+      organizationId,
+    });
     return unwrapResponse(response);
   });
 

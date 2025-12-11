@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { tasks } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
+import { db } from "../../db/index.ts";
+import { tasks } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
 
 export const taskRoutes = new Elysia({ prefix: "/tasks" })
   .use(authMiddleware)
@@ -62,8 +62,7 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
       if (body.text !== undefined) updateData.text = body.text;
       if (body.isCompleted !== undefined)
         updateData.isCompleted = body.isCompleted;
-      if (body.assigner !== undefined)
-        updateData.assigner = body.assigner;
+      if (body.assigner !== undefined) updateData.assigner = body.assigner;
 
       const [task] = await db
         .update(tasks)

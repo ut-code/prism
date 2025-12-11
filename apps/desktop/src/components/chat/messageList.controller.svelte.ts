@@ -1,5 +1,11 @@
 import type { Message } from "@apps/api-client";
-import { getApiClient, getMessage, unwrapResponse, useMutation, useQuery } from "@/lib/api.svelte";
+import {
+  getApiClient,
+  getMessage,
+  unwrapResponse,
+  useMutation,
+  useQuery,
+} from "@/lib/api.svelte";
 
 /**
  * Controller for managing message list state and operations.
@@ -29,12 +35,16 @@ export class MessageListController {
     this.channelId = props().channelId;
 
     this.messages = useQuery<Message[]>(async () => {
-      const response = await api.messages.get({ query: { channelId: this.channelId } });
+      const response = await api.messages.get({
+        query: { channelId: this.channelId },
+      });
       return unwrapResponse(response);
     });
 
     this.messagesById = $derived(
-      new Map(this.messages.data?.map((message: Message) => [message.id, message]))
+      new Map(
+        this.messages.data?.map((message: Message) => [message.id, message]),
+      ),
     );
 
     this.addReaction = useMutation(
@@ -43,7 +53,7 @@ export class MessageListController {
           emoji: args.emoji,
         });
         return unwrapResponse(response);
-      }
+      },
     );
 
     // Close dropdowns on click outside
@@ -58,7 +68,9 @@ export class MessageListController {
   calculateMenuPosition(e: MouseEvent) {
     const menuWidth = 160; // w-40
     this.clientX =
-      e.clientX + menuWidth > window.innerWidth ? e.clientX - menuWidth : e.clientX;
+      e.clientX + menuWidth > window.innerWidth
+        ? e.clientX - menuWidth
+        : e.clientX;
     this.clientY = e.clientY;
   }
 

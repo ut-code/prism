@@ -1,4 +1,7 @@
-import { useOrganizationData, useOrganizationMutations } from "./data-hooks.svelte.ts";
+import {
+  useOrganizationData,
+  useOrganizationMutations,
+} from "./data-hooks.svelte.ts";
 import { searchAndAddMember } from "./member-utils.ts";
 
 /**

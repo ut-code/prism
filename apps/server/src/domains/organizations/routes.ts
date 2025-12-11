@@ -1,10 +1,10 @@
 import { Elysia } from "elysia";
-import { authMiddleware } from "../../middleware/auth";
-import { organizationReadRoutes } from "./crud-read";
-import { organizationWriteRoutes } from "./crud-write";
-import { organizationMemberAddRoute } from "./members-add";
-import { organizationMemberReadRoutes } from "./members-read";
-import { organizationMemberRemoveRoute } from "./members-remove";
+import { authMiddleware } from "../../middleware/auth.ts";
+import { organizationReadRoutes } from "./crud-read.ts";
+import { organizationWriteRoutes } from "./crud-write.ts";
+import { organizationMemberAddRoute } from "./members-add.ts";
+import { organizationMemberReadRoutes } from "./members-read.ts";
+import { organizationMemberRemoveRoute } from "./members-remove.ts";
 
 /**
  * Organization routes aggregator

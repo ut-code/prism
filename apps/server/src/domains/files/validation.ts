@@ -25,10 +25,7 @@ export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
  * Validates file size and mime type.
  * Returns error message if validation fails, null if valid.
  */
-export function validateFile(
-  size: number,
-  mimeType: string,
-): string | null {
+export function validateFile(size: number, mimeType: string): string | null {
   if (size > MAX_FILE_SIZE) {
     return "File size exceeds limit (max 10MB)";
   }

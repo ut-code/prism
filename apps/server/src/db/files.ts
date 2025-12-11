@@ -6,8 +6,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { users } from "./auth";
-import { organizations } from "./organizations";
+import { users } from "./auth.ts";
+import { organizations } from "./organizations.ts";
 
 // Files
 export const files = pgTable(

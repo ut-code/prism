@@ -12,7 +12,13 @@
   "formatter": {
     "enabled": false,
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+      },
+    },
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -62,34 +68,14 @@
             "useImportType": "off",
           },
           "correctness": {
-            "noUnusedVariables": "warn",
-            "noUnusedImports": "warn",
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off",
           },
         },
       },
     },
     {
       "includes": ["apps/convex/**/*"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "useImportExtensions": "off",
-          },
-        },
-      },
-    },
-    {
-      "includes": ["apps/server/**/*"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "useImportExtensions": "off",
-          },
-        },
-      },
-    },
-    {
-      "includes": ["apps/api-client/**/*"],
       "linter": {
         "rules": {
           "correctness": {

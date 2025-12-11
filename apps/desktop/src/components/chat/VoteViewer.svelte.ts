@@ -1,5 +1,10 @@
 import type { User, Vote } from "@apps/api-client";
-import { getApiClient, getVote, unwrapResponse, useQuery } from "@/lib/api.svelte";
+import {
+  getApiClient,
+  getVote,
+  unwrapResponse,
+  useQuery,
+} from "@/lib/api.svelte";
 import { proxify } from "@/lib/proxify.svelte";
 
 /**
@@ -88,11 +93,16 @@ export class VoteViewerController {
   }
 
   removeFromSelectedOptions(i: number) {
-    this.myVotesData.selectedOptions = this.selectedOptions.filter((op) => op !== i);
+    this.myVotesData.selectedOptions = this.selectedOptions.filter(
+      (op) => op !== i,
+    );
   }
 
   addToSelectedOptions(i: number) {
-    if (this.vote.data && this.selectedOptions.length < this.vote.data.maxVotes) {
+    if (
+      this.vote.data &&
+      this.selectedOptions.length < this.vote.data.maxVotes
+    ) {
       this.myVotesData.selectedOptions.push(i);
     }
   }

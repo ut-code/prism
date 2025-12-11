@@ -6,8 +6,8 @@
 import type { App } from "@apps/server";
 import { treaty } from "@elysiajs/eden";
 
-export * from "./route-helpers";
-export type * from "./types";
+export * from "./route-helpers.ts";
+export type * from "./types.ts";
 
 export interface ApiConfig {
   baseUrl: string;

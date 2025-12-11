@@ -1,13 +1,7 @@
 import { relations } from "drizzle-orm";
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
-import { messages } from "./messages";
-import { organizations } from "./organizations";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { messages } from "./messages.ts";
+import { organizations } from "./organizations.ts";
 
 // Channels
 export const channels = pgTable(

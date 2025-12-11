@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { db } from "../../db";
-import { organizationMembers, organizations } from "../../db/schema";
-import type { AuthUser } from "../../middleware/auth";
-import { getOrganizationPermissions } from "./permissions";
+import { db } from "../../db/index.ts";
+import { organizationMembers, organizations } from "../../db/schema.ts";
+import type { AuthUser } from "../../middleware/auth.ts";
+import { getOrganizationPermissions } from "./permissions.ts";
 
 /**
  * Organization read routes
@@ -34,17 +34,28 @@ export const organizationReadRoutes = new Elysia()
       role: m.membership.role,
     }));
   })
-  .get("/:id", async ({ user, params, set }: { user: AuthUser | null; params: { id: string }; set: any }) => {
-    if (!user) {
-      set.status = 401;
-      return { message: "Unauthorized" };
-    }
+  .get(
+    "/:id",
+    async ({
+      user,
+      params,
+      set,
+    }: {
+      user: AuthUser | null;
+      params: { id: string };
+      set: any;
+    }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
-    const perms = await getOrganizationPermissions(user.id, params.id);
+      const perms = await getOrganizationPermissions(user.id, params.id);
 
-    return {
-      ...perms.organization,
-      permission: perms.membership.permission,
-      role: perms.membership.role,
-    };
-  });
+      return {
+        ...perms.organization,
+        permission: perms.membership.permission,
+        role: perms.membership.role,
+      };
+    },
+  );

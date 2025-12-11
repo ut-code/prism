@@ -15,7 +15,10 @@ export type DynamicRoute<T> = {
   cast?: {
     post: (body: {
       votedOptions: number[];
-    }) => Promise<{ data?: unknown; error?: { status: number; value: unknown } }>;
+    }) => Promise<{
+      data?: unknown;
+      error?: { status: number; value: unknown };
+    }>;
   };
 };
 

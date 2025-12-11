@@ -15,9 +15,7 @@ export async function searchAndAddMember(
   organizationId: string,
   currentMembers: OrganizationMember[] | undefined,
 ): Promise<void> {
-  const email = prompt(
-    "追加するメンバーのメールアドレスを入力してください",
-  );
+  const email = prompt("追加するメンバーのメールアドレスを入力してください");
   if (!email?.trim()) return;
 
   // Check if member already exists

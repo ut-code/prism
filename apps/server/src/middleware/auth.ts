@@ -51,11 +51,13 @@ export const authMiddleware = new Elysia({ name: "auth" })
     requireAuth(enabled: boolean) {
       if (!enabled) return;
 
-      onBeforeHandle(({ user, set }: { user: AuthUser | null; set: { status: number } }) => {
-        if (!user) {
-          set.status = 401;
-          return { message: "Unauthorized" };
-        }
-      });
+      onBeforeHandle(
+        ({ user, set }: { user: AuthUser | null; set: { status: number } }) => {
+          if (!user) {
+            set.status = 401;
+            return { message: "Unauthorized" };
+          }
+        },
+      );
     },
   }));

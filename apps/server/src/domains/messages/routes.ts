@@ -1,10 +1,10 @@
 import { asc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { channels, messageAttachments, messages } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { requireOrganizationMembership } from "../organizations/permissions";
-import { messageReactionRoutes } from "./reactions";
+import { db } from "../../db/index.ts";
+import { channels, messageAttachments, messages } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
+import { requireOrganizationMembership } from "../organizations/permissions.ts";
+import { messageReactionRoutes } from "./reactions.ts";
 
 /**
  * Handles message-related operations for channels.

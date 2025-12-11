@@ -1,9 +1,9 @@
 import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { channels } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { getOrganizationPermissions } from "../organizations/permissions";
+import { db } from "../../db/index.ts";
+import { channels } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
+import { getOrganizationPermissions } from "../organizations/permissions.ts";
 
 export const channelRoutes = new Elysia({ prefix: "/channels" })
   .use(authMiddleware)

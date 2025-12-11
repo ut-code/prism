@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { Channel as ChannelType, Message } from "@apps/api-client";
-  import { getApiClient, getChannel, unwrapResponse, useQuery } from "@/lib/api.svelte";
+  import {
+    getApiClient,
+    getChannel,
+    unwrapResponse,
+    useQuery,
+  } from "@/lib/api.svelte";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
 

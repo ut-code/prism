@@ -1,12 +1,12 @@
 import { Elysia } from "elysia";
-import { authRoutes } from "./domains/auth/routes";
-import { channelRoutes } from "./domains/channels/routes";
-import { fileRoutes } from "./domains/files/routes";
-import { messageRoutes } from "./domains/messages/routes";
-import { organizationRoutes } from "./domains/organizations/routes";
-import { taskRoutes } from "./domains/tasks/routes";
-import { userRoutes } from "./domains/users/routes";
-import { voteRoutes } from "./domains/votes/routes";
+import { authRoutes } from "./domains/auth/routes.ts";
+import { channelRoutes } from "./domains/channels/routes.ts";
+import { fileRoutes } from "./domains/files/routes.ts";
+import { messageRoutes } from "./domains/messages/routes.ts";
+import { organizationRoutes } from "./domains/organizations/routes.ts";
+import { taskRoutes } from "./domains/tasks/routes.ts";
+import { userRoutes } from "./domains/users/routes.ts";
+import { voteRoutes } from "./domains/votes/routes.ts";
 
 const app = new Elysia()
   .get("/", () => ({ message: "Prism API Server" }))

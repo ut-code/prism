@@ -1,8 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import { personalizations, users } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
+import { db } from "../../db/index.ts";
+import { personalizations, users } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
   .use(authMiddleware)

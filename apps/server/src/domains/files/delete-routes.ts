@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { db } from "../../db";
-import { files } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { requireOrganizationMembership } from "../organizations/permissions";
+import { db } from "../../db/index.ts";
+import { files } from "../../db/schema.ts";
+import { authMiddleware } from "../../middleware/auth.ts";
+import { requireOrganizationMembership } from "../organizations/permissions.ts";
 
 /**
  * Handles file deletion operations (DELETE).

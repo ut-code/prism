@@ -26,10 +26,7 @@ export function useOrganizationData(organizationId: () => string) {
   });
 
   const members = useQuery(async () => {
-    const response = await getOrganization(
-      api,
-      organizationId(),
-    ).members.get();
+    const response = await getOrganization(api, organizationId()).members.get();
     return unwrapResponse<OrganizationMember[]>(
       response as {
         data?: OrganizationMember[] | null;
