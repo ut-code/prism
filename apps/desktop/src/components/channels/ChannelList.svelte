@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Channel } from "@apps/api-client";
-  import { getApiClient, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import type { Selection } from "$components/chat/types";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
@@ -15,17 +15,7 @@
 
   const channels = useQuery<Channel[]>(async () => {
     const response = await api.channels.get({ query: { organizationId } });
-    if (response.error) {
-      throw new Error(
-        typeof response.error.value === "string"
-          ? response.error.value
-          : JSON.stringify(response.error.value),
-      );
-    }
-    if (!response.data) {
-      throw new Error("No channel data returned");
-    }
-    return response.data;
+    return unwrapResponse(response);
   });
 </script>
 

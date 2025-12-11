@@ -1,0 +1,85 @@
+import { and, eq } from "drizzle-orm";
+import { Elysia, t } from "elysia";
+import { db } from "../../db";
+import { reactions } from "../../db/schema";
+import { authMiddleware } from "../../middleware/auth";
+
+/**
+ * Handles reaction-related operations for messages.
+ * Provides endpoints to list, create, and delete reactions on messages.
+ */
+export const messageReactionRoutes = new Elysia()
+  .use(authMiddleware)
+  .get("/:id/reactions", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+
+    const reactionList = await db
+      .select()
+      .from(reactions)
+      .where(eq(reactions.messageId, params.id));
+
+    return reactionList;
+  })
+  .post(
+    "/:id/reactions",
+    async ({ user, params, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
+
+      // Check if reaction already exists
+      const [existing] = await db
+        .select()
+        .from(reactions)
+        .where(
+          and(
+            eq(reactions.messageId, params.id),
+            eq(reactions.userId, user.id),
+            eq(reactions.emoji, body.emoji),
+          ),
+        )
+        .limit(1);
+
+      if (existing) {
+        return existing;
+      }
+
+      const [reaction] = await db
+        .insert(reactions)
+        .values({
+          messageId: params.id,
+          userId: user.id,
+          emoji: body.emoji,
+        })
+        .returning();
+
+      return reaction;
+    },
+    {
+      body: t.Object({
+        emoji: t.String(),
+      }),
+    },
+  )
+  .delete("/:id/reactions/:emoji", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+
+    await db
+      .delete(reactions)
+      .where(
+        and(
+          eq(reactions.messageId, params.id),
+          eq(reactions.userId, user.id),
+          eq(reactions.emoji, params.emoji),
+        ),
+      );
+
+    return { success: true };
+  });

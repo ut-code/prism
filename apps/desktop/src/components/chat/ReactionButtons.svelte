@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Reaction, User } from "@apps/api-client";
   import { fly } from "svelte/transition";
-  import { getApiClient, getMessage, useMutation, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getMessage, unwrapResponse, useMutation, useQuery } from "@/lib/api.svelte";
 
   interface Props {
     messageId: string;
@@ -13,32 +13,12 @@
 
   const reactions = useQuery<Reaction[]>(async () => {
     const response = await getMessage(api, messageId).reactions.get();
-    if (response.error) {
-      throw new Error(
-        typeof response.error.value === "string"
-          ? response.error.value
-          : JSON.stringify(response.error.value),
-      );
-    }
-    if (!response.data) {
-      throw new Error("No reaction data returned");
-    }
-    return response.data;
+    return unwrapResponse(response);
   });
 
   const me = useQuery<User>(async () => {
     const response = await api.users.me.get();
-    if (response.error) {
-      throw new Error(
-        typeof response.error.value === "string"
-          ? response.error.value
-          : JSON.stringify(response.error.value),
-      );
-    }
-    if (!response.data) {
-      throw new Error("No user data returned");
-    }
-    return response.data;
+    return unwrapResponse(response);
   });
 
   const addReaction = useMutation(
@@ -46,28 +26,14 @@
       const response = await getMessage(api, mid).reactions.post({
         emoji,
       });
-      if (response.error) {
-        throw new Error(
-          typeof response.error.value === "string"
-            ? response.error.value
-            : JSON.stringify(response.error.value),
-        );
-      }
-      return response.data;
+      return unwrapResponse(response);
     },
   );
   const removeReaction = useMutation(
     async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
       const messageRoute = getMessage(api, mid);
       const response = await messageRoute.reactions[emoji].delete();
-      if (response.error) {
-        throw new Error(
-          typeof response.error.value === "string"
-            ? response.error.value
-            : JSON.stringify(response.error.value),
-        );
-      }
-      return response.data;
+      return unwrapResponse(response);
     },
   );
 

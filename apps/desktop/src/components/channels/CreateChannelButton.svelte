@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getApiClient } from "@/lib/api.svelte";
+  import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
 
   const api = getApiClient();
@@ -25,13 +25,7 @@
           name: newChannelName.trim(),
           organizationId,
         });
-        if (response.error) {
-          throw new Error(
-            typeof response.error.value === "string"
-              ? response.error.value
-              : JSON.stringify(response.error.value),
-          );
-        }
+        unwrapResponse(response);
       }
     } catch (error) {
       console.error(error);

@@ -1,31 +1,20 @@
-import { desc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { files } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { requireOrganizationMembership } from "../organizations/permissions";
+import { fileDeleteRoutes } from "./delete-routes";
+import { fileReadRoutes } from "./read-routes";
+import { sanitizeFilename, validateFile } from "./validation";
 
-const ALLOWED_MIME_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/gif",
-  "image/webp",
-  "image/svg+xml",
-  "application/pdf",
-  "text/plain",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/json",
-  "text/csv",
-];
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
+/**
+ * Handles file-related operations.
+ * Provides endpoints to upload, retrieve, list, and delete files.
+ */
 export const fileRoutes = new Elysia({ prefix: "/files" })
   .use(authMiddleware)
+  .use(fileReadRoutes)
+  .use(fileDeleteRoutes)
   .post(
     "/",
     async ({ user, body, set }) => {
@@ -36,19 +25,13 @@ export const fileRoutes = new Elysia({ prefix: "/files" })
 
       await requireOrganizationMembership(user.id, body.organizationId);
 
-      if (body.size > MAX_FILE_SIZE) {
+      const validationError = validateFile(body.size, body.mimeType);
+      if (validationError) {
         set.status = 400;
-        return { message: "File size exceeds limit (max 10MB)" };
+        return { message: validationError };
       }
 
-      if (!ALLOWED_MIME_TYPES.includes(body.mimeType)) {
-        set.status = 400;
-        return { message: "Unsupported file type" };
-      }
-
-      const sanitizedFilename = body.filename
-        .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF._-]/g, "_")
-        .substring(0, 255);
+      const sanitizedFilename = sanitizeFilename(body.filename);
 
       const [file] = await db
         .insert(files)
@@ -79,79 +62,4 @@ export const fileRoutes = new Elysia({ prefix: "/files" })
         height: t.Optional(t.Number()),
       }),
     },
-  )
-  .get("/:id", async ({ user, params, set }) => {
-    if (!user) {
-      set.status = 401;
-      return { message: "Unauthorized" };
-    }
-
-    const [file] = await db
-      .select()
-      .from(files)
-      .where(eq(files.id, params.id))
-      .limit(1);
-
-    if (!file) {
-      set.status = 404;
-      return { message: "File not found" };
-    }
-
-    await requireOrganizationMembership(user.id, file.organizationId);
-
-    return file;
-  })
-  .get("/", async ({ user, query, set }) => {
-    if (!user) {
-      set.status = 401;
-      return { message: "Unauthorized" };
-    }
-    if (!query.organizationId) {
-      set.status = 400;
-      return { message: "organizationId is required" };
-    }
-
-    await requireOrganizationMembership(user.id, query.organizationId);
-
-    const limit = query.limit ? Math.min(Number(query.limit), 100) : 50;
-
-    const fileList = await db
-      .select()
-      .from(files)
-      .where(eq(files.organizationId, query.organizationId))
-      .orderBy(desc(files.uploadedAt))
-      .limit(limit);
-
-    return fileList;
-  })
-  .delete("/:id", async ({ user, params, set }) => {
-    if (!user) {
-      set.status = 401;
-      return { message: "Unauthorized" };
-    }
-
-    const [file] = await db
-      .select()
-      .from(files)
-      .where(eq(files.id, params.id))
-      .limit(1);
-
-    if (!file) {
-      set.status = 404;
-      return { message: "File not found" };
-    }
-
-    const membership = await requireOrganizationMembership(
-      user.id,
-      file.organizationId,
-    );
-
-    if (file.uploadedBy !== user.id && membership.permission !== "admin") {
-      set.status = 403;
-      return { message: "Insufficient permissions" };
-    }
-
-    await db.delete(files).where(eq(files.id, params.id));
-
-    return { success: true };
-  });
+  );

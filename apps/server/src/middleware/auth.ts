@@ -1,5 +1,5 @@
 import { jwt } from "@elysiajs/jwt";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 
 export interface AuthUser {
   id: string;
@@ -7,8 +7,13 @@ export interface AuthUser {
   name?: string;
 }
 
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+
 export const authMiddleware = new Elysia({ name: "auth" })
-  .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET || "your-secret-key" }))
+  .use(jwt({ name: "jwt", secret: jwtSecret }))
   .derive({ as: "global" }, async ({ jwt, cookie }) => {
     const tokenValue = cookie.token.value;
 

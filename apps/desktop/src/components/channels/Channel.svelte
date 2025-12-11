@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Channel as ChannelType, Message } from "@apps/api-client";
-  import { getApiClient, getChannel, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getChannel, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
 
@@ -15,14 +15,7 @@
 
   const selectedChannel = useQuery<ChannelType>(async () => {
     const response = await getChannel(api, selectedChannelId).get();
-    if (response.error) {
-      throw new Error(
-        typeof response.error.value === "string"
-          ? response.error.value
-          : JSON.stringify(response.error.value),
-      );
-    }
-    return response.data;
+    return unwrapResponse(response);
   });
 
   let replyingTo = $state<Message | null>(null);
