@@ -1,21 +1,31 @@
 <script lang="ts">
-  import { api, type Doc, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Message } from "@apps/api-client";
+  import { getApiClient, useQuery } from "@/lib/api.svelte";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
 
+  const api = getApiClient();
+
   interface Props {
-    selectedChannelId: Id<"channels">;
-    organizationId: Id<"organizations">;
+    selectedChannelId: string;
+    organizationId: string;
   }
 
   let { selectedChannelId, organizationId }: Props = $props();
 
-  const selectedChannel = useQuery(api.channels.get, () => ({
-    channelId: selectedChannelId,
-  }));
+  const selectedChannel = useQuery(async () => {
+    const response = await (api.channels as any)[selectedChannelId].get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data;
+  });
 
-  let replyingTo = $state<Doc<"messages"> | null>(null);
+  let replyingTo = $state<Message | null>(null);
 </script>
 
 <div class="border-base-300 bg-base-200 border-b p-4">

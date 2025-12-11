@@ -1,20 +1,42 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
-  import { useMutation } from "@/lib/useMutation.svelte.ts";
+  import type { Organization, OrganizationMember } from "@apps/api-client";
+  import {
+    getApiClient,
+    unwrapResponse,
+    useMutation,
+    useQuery,
+  } from "@/lib/api.svelte";
   import { page } from "$app/stores";
 
-  const organizationId = $derived($page.params.orgId as Id<"organizations">);
+  const organizationId = $derived($page.params.orgId as string);
 
-  const organization = useQuery(api.organizations.get, () => ({
-    id: organizationId,
-  }));
-  const members = useQuery(api.organizations.getMembers, () => ({
-    organizationId,
-  }));
-  const updateOrganization = useMutation(api.organizations.update);
-  const removeMember = useMutation(api.organizations.removeMember);
-  const convex = useConvexClient();
+  const api = getApiClient();
+  const organization = useQuery<Organization>(async () => {
+    const response = await (api.organizations as any)[organizationId].get();
+    return (await unwrapResponse(response)) as unknown as Organization;
+  });
+  const members = useQuery<OrganizationMember[]>(async () => {
+    const response = await (api.organizations as any)[
+      organizationId
+    ].members.get();
+    return (await unwrapResponse(response)) as unknown as OrganizationMember[];
+  });
+  const updateOrganization = useMutation(
+    async (args: { id: string; name: string; description: string }) => {
+      const response = await (api.organizations as any)[args.id].patch({
+        body: { name: args.name, description: args.description },
+      });
+      return unwrapResponse(response);
+    },
+  );
+  const removeMember = useMutation(
+    async (args: { organizationId: string; userId: string }) => {
+      const response = await (api.organizations as any)[
+        args.organizationId
+      ].members[args.userId].delete();
+      return unwrapResponse(response);
+    },
+  );
 
   let isEditing = $state(false);
   let editForm = $state({
@@ -45,7 +67,7 @@
     }
   }
 
-  async function handleRemoveMember(userId: Id<"users">) {
+  async function handleRemoveMember(userId: string) {
     if (!organizationId) return;
 
     if (confirm("このメンバーを削除しますか？")) {
@@ -69,8 +91,9 @@
         }
       }
     }
-    const users = await convex.query(api.users.getUsersByEmail, { email });
-    if (!users.length) {
+    const usersResponse = await api.users.search.get({ query: { email } });
+    const users = (await unwrapResponse(usersResponse)) as any[];
+    if (!users || !users.length) {
       alert("ユーザーが見つかりませんでした");
       return;
     }
@@ -80,15 +103,22 @@
       );
       return;
     }
-    let message = `以下のユーザーが見つかりました\n${users[0]?.name}\n組織に追加しますか？`;
+    const foundUser = users[0];
+    if (!foundUser) {
+      alert("ユーザーが見つかりませんでした");
+      return;
+    }
+    let message = `以下のユーザーが見つかりました\n${foundUser.name}\n組織に追加しますか？`;
 
     const answer = confirm(message);
-    if (answer && users[0]) {
-      convex.mutation(api.organizations.addMember, {
-        organizationId: organizationId,
-        userId: users[0]._id as Id<"users">,
+    if (answer) {
+      const response = await (api.organizations as any)[
+        organizationId
+      ].members.post({
+        userId: foundUser.id,
         permission: "member",
       });
+      await unwrapResponse(response);
     }
   }
 </script>

@@ -1,18 +1,11 @@
 <script lang="ts">
   import "@/app.css";
+  import { setupApi } from "@/lib/api.svelte.ts";
 
-  import { setupConvexAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
-  import { setupConvex } from "convex-svelte";
-  import { PUBLIC_CONVEX_URL } from "$lib/env.ts";
+  const { children } = $props();
 
-  const { children, data } = $props();
-
-  setupConvex(PUBLIC_CONVEX_URL);
-
-  setupConvexAuth({
-    getServerState: () => data.authState,
-    convexUrl: PUBLIC_CONVEX_URL,
-  });
+  // Initialize API client
+  setupApi("http://localhost:3000");
 </script>
 
 {@render children()}

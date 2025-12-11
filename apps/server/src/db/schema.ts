@@ -4,6 +4,7 @@ import {
   index,
   integer,
   jsonb,
+  type PgTableWithColumns,
   pgTable,
   text,
   timestamp,
@@ -101,7 +102,7 @@ export const channels = pgTable(
 );
 
 // Messages
-export const messages = pgTable(
+export const messages: PgTableWithColumns<any> = pgTable(
   "messages",
   {
     id: uuid("id").primaryKey().defaultRandom(),

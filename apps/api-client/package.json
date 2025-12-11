@@ -6,6 +6,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "@apps/server": "workspace:*",
+    "@elysiajs/eden": "^1.2.7"
+  },
   "peerDependencies": {
     "typescript": "^5.9.3"
   }

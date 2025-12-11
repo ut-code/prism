@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { type Id } from "@apps/convex";
-
   type Vote = {
     title: string;
     maxVotes: number;
     voteOptions: Array<string>;
     voters: Array<{
-      userId: Id<"users">;
+      userId: string;
       votedOptions: Array<number>;
     }>;
   };

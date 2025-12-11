@@ -1,14 +1,33 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import type { User, Vote } from "@apps/api-client";
+  import { getApiClient, useQuery } from "@/lib/api.svelte";
   import { proxify } from "@/lib/proxify.svelte";
 
-  const { voteId }: { voteId: Id<"votes"> } = $props();
+  const { voteId }: { voteId: string } = $props();
 
-  const vote = useQuery(api.vote.getVote, () => ({ id: voteId }));
-  const me = useQuery(api.users.me, () => ({}));
-
-  const convex = useConvexClient();
+  const api = getApiClient();
+  const vote = useQuery<Vote>(async () => {
+    const response = await (api.votes as any)[voteId].get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as Vote;
+  });
+  const me = useQuery<User>(async () => {
+    const response = await api.users.me.get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as User;
+  });
 
   const { numbersOfVotersPerOption } = $derived(calculateVotes());
   const { isResultVisible } = $derived(myVotes());
@@ -33,7 +52,7 @@
     }
     if (me.data) {
       for (const voter of vote.data.voters) {
-        if (voter.userId === me.data._id) {
+        if (voter.userId === me.data.id) {
           selectedOptions = voter.votedOptions;
           isResultVisible = true;
         }
@@ -129,11 +148,12 @@
       class="btn btn-primary w-16"
       onclick={async () => {
         if (me.data) {
-          await convex.mutation(api.vote.vote, {
-            voteId: voteId,
-            userId: me.data._id,
-            votedOptions: selectedOptions,
+          const response = await (api.votes as any)[voteId].cast.post({
+            body: { votedOptions: selectedOptions },
           });
+          if (response.error) {
+            console.error("Failed to cast vote:", response.error);
+          }
         }
       }}
     >

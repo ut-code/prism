@@ -7,58 +7,58 @@ import { getOrganizationPermissions } from "../organizations/permissions";
 
 export const channelRoutes = new Elysia({ prefix: "/channels" })
   .use(authMiddleware)
-  .get("/", async ({ user, error, query }) => {
-    if (!user) return error(401, { message: "Unauthorized" });
-    if (!query.organizationId)
-      return error(400, { message: "organizationId is required" });
+  .get("/", async (ctx: any) => {
+    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    if (!ctx.query.organizationId)
+      return ctx.error(400, { message: "organizationId is required" });
 
-    await getOrganizationPermissions(user.id, query.organizationId);
+    await getOrganizationPermissions(ctx.user.id, ctx.query.organizationId);
 
     const channelList = await db
       .select()
       .from(channels)
-      .where(eq(channels.organizationId, query.organizationId))
+      .where(eq(channels.organizationId, ctx.query.organizationId))
       .orderBy(desc(channels.createdAt));
 
     return channelList;
   })
-  .get("/:id", async ({ user, error, params }) => {
-    if (!user) return error(401, { message: "Unauthorized" });
+  .get("/:id", async (ctx: any) => {
+    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
     const [channel] = await db
       .select()
       .from(channels)
-      .where(eq(channels.id, params.id))
+      .where(eq(channels.id, ctx.params.id))
       .limit(1);
 
     if (!channel) {
-      return error(404, { message: "Channel not found" });
+      return ctx.error(404, { message: "Channel not found" });
     }
 
-    await getOrganizationPermissions(user.id, channel.organizationId);
+    await getOrganizationPermissions(ctx.user.id, channel.organizationId);
 
     return channel;
   })
   .post(
     "/",
-    async ({ user, error, body }) => {
-      if (!user) return error(401, { message: "Unauthorized" });
+    async (ctx: any) => {
+      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
       const perms = await getOrganizationPermissions(
-        user.id,
-        body.organizationId,
+        ctx.user.id,
+        ctx.body.organizationId,
       );
 
       if (!perms.canCreateChannels) {
-        return error(403, { message: "Insufficient permissions" });
+        return ctx.error(403, { message: "Insufficient permissions" });
       }
 
       const [channel] = await db
         .insert(channels)
         .values({
-          name: body.name,
-          description: body.description,
-          organizationId: body.organizationId,
+          name: ctx.body.name,
+          description: ctx.body.description,
+          organizationId: ctx.body.organizationId,
         })
         .returning();
 

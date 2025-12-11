@@ -1,7 +1,5 @@
-import type { Id } from "@apps/convex";
-
 export interface SelectorProps {
-  organizationId: Id<"organizations">;
+  organizationId: string;
   onselect: (files: File[]) => void;
   multiple?: boolean;
 }

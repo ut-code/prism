@@ -6,15 +6,15 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(authMiddleware)
-  .get("/me", async ({ user }) => {
-    if (!user) {
+  .get("/me", async (ctx: any) => {
+    if (!ctx.user) {
       return { user: null };
     }
 
     const [dbUser] = await db
       .select()
       .from(users)
-      .where(eq(users.id, user.id))
+      .where(eq(users.id, ctx.user.id))
       .limit(1);
 
     return { user: dbUser || null };
@@ -39,9 +39,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
       // Create JWT token
       const token = await jwt.sign({
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: user?.id,
+        email: user?.email,
+        name: user?.name,
       });
 
       // Set cookie

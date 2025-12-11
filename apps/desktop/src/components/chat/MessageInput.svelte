@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { api, type Doc, type Id } from "@apps/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import type { Message, User } from "@apps/api-client";
   import FilePreview from "@/features/files/upload/FilePreview.svelte";
   import FileSelector from "@/features/files/upload/Selector.svelte";
   import { FileUploader } from "@/features/files/upload/uploader.svelte";
   import Attachment from "@/icons/attachment.svelte";
   import MdiClose from "@/icons/mdi-close.svelte";
-  import { useMutation } from "@/lib/useMutation.svelte.ts";
+  import { getApiClient, useMutation, useQuery } from "@/lib/api.svelte";
 
   import EmojiPalette from "./EmojiPalette.svelte";
   import VoteMaker from "./VoteMaker.svelte";
 
   interface Props {
-    organizationId: Id<"organizations">;
-    channelId: Id<"channels">;
-    replyingTo: Doc<"messages"> | null;
+    organizationId: string;
+    channelId: string;
+    replyingTo: Message | null;
   }
 
   let { channelId, organizationId, replyingTo = $bindable() }: Props = $props();
@@ -24,14 +23,43 @@
     maxVotes: number;
     voteOptions: Array<string>;
     voters: Array<{
-      userId: Id<"users">;
+      userId: string;
       votedOptions: Array<number>;
     }>;
   };
 
-  const sendMessageMutation = useMutation(api.messages.send);
-  const identity = useQuery(api.users.me, {});
-  const convex = useConvexClient();
+  const api = getApiClient();
+  const sendMessageMutation = useMutation(
+    async (args: {
+      channelId: string;
+      content: string;
+      author: string;
+      parentId?: string;
+      attachments?: string[];
+      voteId?: string;
+    }) => {
+      const response = await api.messages.post(args);
+      if (response.error) {
+        throw new Error(
+          typeof response.error.value === "string"
+            ? response.error.value
+            : JSON.stringify(response.error.value),
+        );
+      }
+      return response.data;
+    },
+  );
+  const identity = useQuery<User>(async () => {
+    const response = await api.users.me.get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as User;
+  });
 
   let messageContent = $state("");
   let showEmojiPalette = $state(false);
@@ -75,22 +103,25 @@
       (it) => it.id,
     );
 
-    let voteId: Id<"votes"> | undefined;
+    let voteId: string | undefined;
     if (voteIsValid()) {
-      voteId = await convex.mutation(api.vote.addVote, {
+      const voteResponse = await api.votes.post({
         title: vote.title,
         maxVotes: vote.maxVotes,
         voteOptions: vote.voteOptions,
       });
+      if (!voteResponse.error && voteResponse.data) {
+        voteId = (voteResponse.data as any).id;
+      }
     }
 
     await sendMessageMutation.run({
       channelId,
       content: messageContent.trim() || "",
-      author: identity.data.name || "unregistered",
-      parentId: replyingTo?._id ?? undefined,
+      author: identity.data?.name || "unregistered",
+      parentId: replyingTo?.id ?? undefined,
       attachments,
-      vote: voteId,
+      voteId,
     });
 
     messageContent = "";

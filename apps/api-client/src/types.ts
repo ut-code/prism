@@ -40,6 +40,9 @@ export interface Message {
   voteId?: string;
   createdAt: Date;
   updatedAt: Date;
+  // Extended fields (may be populated by joins or separate queries)
+  attachments?: string[]; // Array of file IDs
+  vote?: string; // Vote ID (alias for voteId)
 }
 
 export interface Reaction {

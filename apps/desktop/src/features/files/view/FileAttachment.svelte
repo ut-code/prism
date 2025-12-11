@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { type Id } from "@apps/convex";
   import { formatFileSize, getFileIcon } from "../utils.ts";
   import { FileAttachmentController } from "./FileAttachment.svelte.ts";
 
   interface Props {
-    fileId: Id<"files">;
+    fileId: string;
     compact?: boolean;
     showPreview?: boolean;
   }

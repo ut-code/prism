@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Organization } from "@apps/api-client";
+  import { getApiClient, useQuery } from "@/lib/api.svelte";
   import { goto } from "$app/navigation";
   import Channel from "../channels/Channel.svelte";
   import ChannelList from "../channels/ChannelList.svelte";
@@ -8,15 +8,18 @@
   import type { Selection } from "../chat/types.ts";
 
   interface Props {
-    organizationId: Id<"organizations">;
+    organizationId: string;
     screenMode: Selection;
   }
 
   const { organizationId, screenMode }: Props = $props();
+  const api = getApiClient();
 
-  const organization = useQuery(api.organizations.get, () => ({
-    id: organizationId,
-  }));
+  const organization = useQuery<Organization>(() =>
+    (api.organizations as any)[organizationId]
+      .get()
+      .then((res: any) => res.data as Organization),
+  );
 </script>
 
 <div class="bg-base-100 flex h-screen">
@@ -111,7 +114,7 @@
         </div>
       {/if}
     {:else if screenMode.type == "personalization"}
-      <Personalization {organizationId} />
+      <Personalization />
     {/if}
   </div>
 </div>

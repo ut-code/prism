@@ -6,32 +6,32 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const voteRoutes = new Elysia({ prefix: "/votes" })
   .use(authMiddleware)
-  .get("/:id", async ({ user, error, params }) => {
-    if (!user) return error(401, { message: "Unauthorized" });
+  .get("/:id", async (ctx: any) => {
+    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
     const [vote] = await db
       .select()
       .from(votes)
-      .where(eq(votes.id, params.id))
+      .where(eq(votes.id, ctx.params.id))
       .limit(1);
 
     if (!vote) {
-      return error(404, { message: "Vote not found" });
+      return ctx.error(404, { message: "Vote not found" });
     }
 
     return vote;
   })
   .post(
     "/",
-    async ({ user, error, body }) => {
-      if (!user) return error(401, { message: "Unauthorized" });
+    async (ctx: any) => {
+      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
       const [vote] = await db
         .insert(votes)
         .values({
-          title: body.title,
-          maxVotes: body.maxVotes,
-          voteOptions: body.voteOptions,
+          title: ctx.body.title,
+          maxVotes: ctx.body.maxVotes,
+          voteOptions: ctx.body.voteOptions,
           voters: [],
         })
         .returning();
@@ -48,22 +48,22 @@ export const voteRoutes = new Elysia({ prefix: "/votes" })
   )
   .post(
     "/:id/cast",
-    async ({ user, error, params, body }) => {
-      if (!user) return error(401, { message: "Unauthorized" });
+    async (ctx: any) => {
+      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
       const [vote] = await db
         .select()
         .from(votes)
-        .where(eq(votes.id, params.id))
+        .where(eq(votes.id, ctx.params.id))
         .limit(1);
 
       if (!vote) {
-        return error(404, { message: "Vote not found" });
+        return ctx.error(404, { message: "Vote not found" });
       }
 
       // Check if user already voted
       const existingVoterIndex = vote.voters.findIndex(
-        (v) => v.userId === user.id,
+        (v) => v.userId === ctx.user.id,
       );
 
       const newVoters = [...vote.voters];
@@ -71,21 +71,21 @@ export const voteRoutes = new Elysia({ prefix: "/votes" })
       if (existingVoterIndex >= 0) {
         // Update existing vote
         newVoters[existingVoterIndex] = {
-          userId: user.id,
-          votedOptions: body.votedOptions,
+          userId: ctx.user.id,
+          votedOptions: ctx.body.votedOptions,
         };
       } else {
         // Add new vote
         newVoters.push({
-          userId: user.id,
-          votedOptions: body.votedOptions,
+          userId: ctx.user.id,
+          votedOptions: ctx.body.votedOptions,
         });
       }
 
       const [updatedVote] = await db
         .update(votes)
         .set({ voters: newVoters, updatedAt: new Date() })
-        .where(eq(votes.id, params.id))
+        .where(eq(votes.id, ctx.params.id))
         .returning();
 
       return updatedVote;

@@ -6,8 +6,8 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const taskRoutes = new Elysia({ prefix: "/tasks" })
   .use(authMiddleware)
-  .get("/", async ({ user, error }) => {
-    if (!user) return error(401, { message: "Unauthorized" });
+  .get("/", async (ctx: any) => {
+    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
     const taskList = await db.select().from(tasks);
 
@@ -15,14 +15,14 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
   })
   .post(
     "/",
-    async ({ user, error, body }) => {
-      if (!user) return error(401, { message: "Unauthorized" });
+    async (ctx: any) => {
+      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
       const [task] = await db
         .insert(tasks)
         .values({
-          text: body.text,
-          assigner: body.assigner,
+          text: ctx.body.text,
+          assigner: ctx.body.assigner,
           isCompleted: false,
         })
         .returning();
@@ -38,8 +38,8 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
   )
   .patch(
     "/:id",
-    async ({ user, error, params, body }) => {
-      if (!user) return error(401, { message: "Unauthorized" });
+    async (ctx: any) => {
+      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
 
       const updateData: {
         text?: string;
@@ -50,15 +50,16 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
         updatedAt: new Date(),
       };
 
-      if (body.text !== undefined) updateData.text = body.text;
-      if (body.isCompleted !== undefined)
-        updateData.isCompleted = body.isCompleted;
-      if (body.assigner !== undefined) updateData.assigner = body.assigner;
+      if (ctx.body.text !== undefined) updateData.text = ctx.body.text;
+      if (ctx.body.isCompleted !== undefined)
+        updateData.isCompleted = ctx.body.isCompleted;
+      if (ctx.body.assigner !== undefined)
+        updateData.assigner = ctx.body.assigner;
 
       const [task] = await db
         .update(tasks)
         .set(updateData)
-        .where(eq(tasks.id, params.id))
+        .where(eq(tasks.id, ctx.params.id))
         .returning();
 
       return task;

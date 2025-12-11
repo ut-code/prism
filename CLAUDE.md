@@ -154,3 +154,21 @@ class MyController {
 ### Convex Rules
 
 - AUTHORIZATION: write authorization determinator in `packages/convex/src/convex/perms.ts`
+
+## Framework - Elysia
+
+### Eden Treaty によるデータフェッチング
+
+Elysia サーバーとの通信には `@elysiajs/eden` の Treaty を使用する。
+
+```ts
+import { treaty } from "@elysiajs/eden";
+import type { App } from "@apps/server";
+
+const client = treaty<App>("http://localhost:8080");
+
+const { data, error } = await client.products.get(); // GET
+const { data } = await client.products["123"].get(); // 動的パラメータ
+const { data } = await client.products.get({ query: { category: "foo" } }); // クエリ
+const { data } = await client.products.post({ name: "bar", price: 100 }); // POST
+```

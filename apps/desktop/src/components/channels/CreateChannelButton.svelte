@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useConvexClient } from "convex-svelte";
+  import { getApiClient } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
 
-  const convex = useConvexClient();
+  const api = getApiClient();
 
   interface Props {
-    organizationId: Id<"organizations">;
+    organizationId: string;
   }
   const { organizationId }: Props = $props();
 
@@ -22,10 +21,17 @@
     disabled = true;
     try {
       if (newChannelName.trim()) {
-        await convex.mutation(api.channels.create, {
+        const response = await api.channels.post({
           name: newChannelName.trim(),
           organizationId,
         });
+        if (response.error) {
+          throw new Error(
+            typeof response.error.value === "string"
+              ? response.error.value
+              : JSON.stringify(response.error.value),
+          );
+        }
       }
     } catch (error) {
       console.error(error);

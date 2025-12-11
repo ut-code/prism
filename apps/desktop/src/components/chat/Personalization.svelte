@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
+  import type { User } from "@apps/api-client";
+  import { getApiClient, useQuery } from "@/lib/api.svelte";
 
-  const { organizationId }: { organizationId: Id<"organizations"> } = $props();
+  // organizationId not used in this component currently
+  // const { organizationId }: { organizationId: string } = $props();
 
-  const convex = useConvexClient();
+  const api = getApiClient();
 
-  const identity = useQuery(api.users.me, {});
-  const personalization = useQuery(api.personalization.getPersonalization, {
-    organizationId: organizationId,
-  });
+  const identity = useQuery<User>(() =>
+    api.users.me.get().then((res) => res.data as User),
+  );
+  const personalization = useQuery<User>(() =>
+    api.users.me.get().then((res) => res.data as User),
+  ); // TODO: Replace with actual personalization endpoint
   let iconURL = $state<string | null>("");
   let imageURL = $derived(iconURL || identity.data?.image);
   let userName = $derived(
-    personalization.data?.nickname || identity.data?.name,
+    // personalization.data?.nickname ||
+    identity.data?.name,
   );
   let changedImage = $state<string>("");
   let changedImageFile = $state<File | undefined>();
@@ -25,25 +29,26 @@
     }
     if (personalization.data) {
       new Promise((resolve) => {
-        resolve(personalization.data?.icon);
+        // resolve(personalization.data?.icon);  // icon property doesn't exist on User
+        resolve(null);
       })
         .then((value) => {
           return new Promise((resolve, reject) => {
-            const storageId = value as Id<"_storage">;
+            const storageId = value as string;
             if (storageId) {
-              resolve(
-                convex.mutation(api.personalization.getImageUrl, {
-                  storageId: storageId,
-                }),
-              );
+              // TODO: Implement getImageUrl endpoint in REST API
+              // Currently using placeholder - personalization.getImageUrl not available
+              resolve(null);
             } else {
               reject();
             }
           });
         })
         .then((value) => {
-          const url = value as string;
-          iconURL = url;
+          if (value) {
+            const url = value as string;
+            iconURL = url;
+          }
         });
     }
   });
@@ -52,29 +57,35 @@
     const image = changedImageFile;
     changedImage = "";
     changedImageFile = undefined;
-    if (changedUserName?.trim() && !(userName === changedUserName)) {
-      await convex.mutation(api.personalization.save, {
-        nickName: changedUserName,
-        organizationId: organizationId,
-      });
-    }
-    if (image) {
-      const postUrl = await convex.mutation(
-        api.personalization.generateUploadUrl,
-        {},
-      );
-      const result = await fetch(postUrl, {
-        method: "POST",
-        headers: { "Content-Type": image.type },
-        body: image,
-      });
 
-      const { storageId } = await result.json();
+    try {
+      if (changedUserName?.trim() && !(userName === changedUserName)) {
+        // TODO: Implement save endpoint in REST API for personalization nickname
+        // await api.personalization.save({
+        //   nickname: changedUserName,
+        //   organizationId: organizationId,
+        // });
+        console.warn("Personalization save not implemented in REST API yet");
+      }
 
-      await convex.mutation(api.personalization.saveImage, {
-        icon: storageId,
-        organizationId: organizationId,
-      });
+      if (image) {
+        // TODO: Implement generateUploadUrl endpoint in REST API
+        // const postUrl = await api.personalization.generateUploadUrl();
+        // const result = await fetch(postUrl, {
+        //   method: "POST",
+        //   headers: { "Content-Type": image.type },
+        //   body: image,
+        // });
+        // const { storageId } = await result.json();
+        // TODO: Implement saveImage endpoint in REST API
+        // await api.personalization.saveImage({
+        //   icon: storageId,
+        //   organizationId: organizationId,
+        // });
+        console.warn("Image upload not implemented in REST API yet");
+      }
+    } catch (error) {
+      console.error("Error saving personalization:", error);
     }
   }
 </script>

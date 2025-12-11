@@ -1,19 +1,31 @@
-import { api, type Id } from "@apps/convex";
-import { useQuery } from "convex-svelte";
+import { getApiClient, useQuery } from "@/lib/api.svelte";
 import { isImage } from "../utils.ts";
 
 export interface FileAttachmentProps {
-  fileId: Id<"files">;
+  fileId: string;
   compact?: boolean;
   showPreview?: boolean;
 }
 
 export class FileAttachmentController {
-  fileId: Id<"files">;
+  fileId: string;
   compact: boolean;
   showPreview: boolean;
 
-  file = $derived(useQuery(api.files.getFile, () => ({ fileId: this.fileId })));
+  #api = getApiClient();
+  file = $derived(
+    useQuery(async () => {
+      const response = await (this.#api.files as any)[this.fileId].get();
+      if (response.error) {
+        throw new Error(
+          typeof response.error.value === "string"
+            ? response.error.value
+            : JSON.stringify(response.error.value),
+        );
+      }
+      return response.data;
+    }),
+  );
   fileData = $derived(this.file?.data);
   isLoading = $derived(this.file?.isLoading ?? true);
   isImage = $derived(isImage(this.fileData?.mimeType));

@@ -1,19 +1,29 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Channel } from "@apps/api-client";
+  import { getApiClient, useQuery } from "@/lib/api.svelte";
   import type { Selection } from "$components/chat/types";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
+  const api = getApiClient();
+
   interface Props {
-    organizationId: Id<"organizations">;
+    organizationId: string;
     screenMode: Selection;
   }
 
   let { organizationId, screenMode = $bindable() }: Props = $props();
 
-  const channels = useQuery(api.channels.list, () => ({
-    organizationId,
-  }));
+  const channels = useQuery<Channel[]>(async () => {
+    const response = await api.channels.get({ query: { organizationId } });
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as Channel[];
+  });
 </script>
 
 <div class="flex h-full flex-col">
@@ -24,16 +34,16 @@
 
   <div class="flex-1 overflow-y-auto">
     {#if channels.data}
-      {#each channels.data as channel (channel._id)}
+      {#each channels.data as channel (channel.id)}
         {@const active =
           screenMode.type === "chat" &&
-          screenMode.selectedChannelId === channel._id}
+          screenMode.selectedChannelId === channel.id}
         <a
           class={[
             "border-base-300 block w-full border-b p-3 text-left",
             active ? "bg-primary text-primary-content" : "hover:bg-base-300",
           ]}
-          href={`/orgs/${organizationId}/chat/${channel._id}`}
+          href={`/orgs/${organizationId}/chat/${channel.id}`}
         >
           <span class="font-medium"># {channel.name}</span>
           {#if channel.description}

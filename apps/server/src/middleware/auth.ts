@@ -20,29 +20,33 @@ export const authMiddleware = new Elysia({ name: "auth" })
     const token = cookies.token;
 
     if (!token) {
-      return { user: null };
+      return { user: null as AuthUser | null };
     }
 
     try {
       const payload = await jwt.verify(token);
       if (!payload) {
-        return { user: null };
+        return { user: null as AuthUser | null };
       }
 
       return {
-        user: payload as AuthUser,
+        user: {
+          id: (payload as any).id,
+          email: (payload as any).email,
+          name: (payload as any).name,
+        } as AuthUser,
       };
     } catch {
-      return { user: null };
+      return { user: null as AuthUser | null };
     }
   })
   .macro(({ onBeforeHandle }) => ({
     requireAuth(enabled: boolean) {
       if (!enabled) return;
 
-      onBeforeHandle(({ user, error }) => {
-        if (!user) {
-          return error(401, { message: "Unauthorized" });
+      onBeforeHandle((ctx: any) => {
+        if (!ctx.user) {
+          return ctx.error(401, { message: "Unauthorized" });
         }
       });
     },

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { type Id } from "@apps/convex";
-  import { useAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
   import OrganizationSelector from "@/components/organization/OrganizationSelector.svelte";
   import { goto } from "$app/navigation";
 
-  const auth = useAuth();
+  // TODO: Implement auth when ready
+  const auth = { isLoading: false, isAuthenticated: true };
 
-  function handleOrganizationSelect(organizationId: Id<"organizations">) {
+  function handleOrganizationSelect(organizationId: string) {
     goto(`/orgs/${organizationId}`);
   }
 </script>

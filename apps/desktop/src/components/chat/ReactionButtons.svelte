@@ -1,23 +1,70 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Reaction, User } from "@apps/api-client";
   import { fly } from "svelte/transition";
-  import { useMutation } from "@/lib/useMutation.svelte.ts";
+  import { getApiClient, useMutation, useQuery } from "@/lib/api.svelte";
 
   interface Props {
-    messageId: Id<"messages">;
+    messageId: string;
   }
 
   let { messageId }: Props = $props();
 
-  const reactions = useQuery(api.messages.getReactions, () => ({
-    messageId,
-  }));
+  const api = getApiClient();
 
-  const me = useQuery(api.users.me, {});
+  const reactions = useQuery<Reaction[]>(async () => {
+    const response = await (api.messages as any)[messageId].reactions.get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as Reaction[];
+  });
 
-  const addReaction = useMutation(api.messages.addReaction);
-  const removeReaction = useMutation(api.messages.removeReaction);
+  const me = useQuery<User>(async () => {
+    const response = await api.users.me.get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    return response.data as User;
+  });
+
+  const addReaction = useMutation(
+    async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
+      const response = await (api.messages as any)[mid].reactions.post({
+        body: { emoji },
+      });
+      if (response.error) {
+        throw new Error(
+          typeof response.error.value === "string"
+            ? response.error.value
+            : JSON.stringify(response.error.value),
+        );
+      }
+      return response.data;
+    },
+  );
+  const removeReaction = useMutation(
+    async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
+      const response = await (api.messages as any)[mid].reactions[
+        emoji
+      ].delete();
+      if (response.error) {
+        throw new Error(
+          typeof response.error.value === "string"
+            ? response.error.value
+            : JSON.stringify(response.error.value),
+        );
+      }
+      return response.data;
+    },
+  );
 
   const reactionsByEmoji = $derived.by(() => {
     const counts = new Map<string, { count: number; me: boolean }>();
@@ -27,7 +74,7 @@
     for (const r of reactions.data) {
       counts.set(r.emoji, {
         count: (counts.get(r.emoji)?.count ?? 0) + 1,
-        me: counts.get(r.emoji)?.me || r.userId === me.data?._id,
+        me: counts.get(r.emoji)?.me || r.userId === me.data?.id,
       });
     }
     return counts;

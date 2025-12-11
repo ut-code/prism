@@ -13,13 +13,16 @@
   const paletteWidth = 350; // emoji-picker-element default width
   const paletteHeight = 450; // emoji-picker-element default height
 
-  let finalX = $state(x);
-  let finalY = $state(y);
+  let finalX = $state(0);
+  let finalY = $state(0);
 
   $effect(() => {
     if (x !== undefined && y !== undefined) {
       finalX = x + paletteWidth > window.innerWidth ? x - paletteWidth : x;
       finalY = y + paletteHeight > window.innerHeight ? y - paletteHeight : y;
+    } else {
+      finalX = x || 0;
+      finalY = y || 0;
     }
   });
 
