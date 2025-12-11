@@ -1,5 +1,17 @@
-import { type ApiClient, createApiClient } from "@apps/api-client";
+import {
+  type ApiClient,
+  createApiClient,
+  getChannel,
+  getFile,
+  getMessage,
+  getOrganization,
+  getTask,
+  getVote,
+} from "@apps/api-client";
 import { untrack } from "svelte";
+
+// Re-export helper functions
+export { getChannel, getFile, getMessage, getOrganization, getTask, getVote };
 
 // Global Eden Treaty client instance
 let apiClient: ApiClient | null = null;
@@ -20,10 +32,10 @@ export function getApiClient(): ApiClient {
 export const api = () => getApiClient();
 
 // Helper to unwrap Eden Treaty responses
-export async function unwrapResponse<T>(response: {
-  data?: T;
-  error?: any;
-}): Promise<T> {
+export function unwrapResponse<T>(response: {
+  data?: T | null;
+  error?: { status: number; value: unknown } | null;
+}): T {
   if (response.error) {
     throw new Error(
       typeof response.error.value === "string"
@@ -31,7 +43,10 @@ export async function unwrapResponse<T>(response: {
         : JSON.stringify(response.error.value),
     );
   }
-  return response.data as T;
+  if (response.data === undefined || response.data === null) {
+    throw new Error("Response data is undefined or null");
+  }
+  return response.data;
 }
 
 // Query state type
@@ -83,7 +98,7 @@ export function useQuery<T>(
     };
   });
 
-  return {
+  const state = {
     get isLoading() {
       return isLoading;
     },
@@ -93,7 +108,9 @@ export function useQuery<T>(
     get data() {
       return data;
     },
-  } as QueryState<T>;
+  };
+
+  return state as QueryState<T>;
 }
 
 /**

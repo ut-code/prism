@@ -14,9 +14,8 @@
         onsubmit={(event) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
-          void signIn("password", formData).then(
-            () => (step = { email: formData.get("email") as string }),
-          );
+          const email = String(formData.get("email") ?? "");
+          void signIn("password", formData).then(() => (step = { email }));
         }}
       >
         <h1 class="text-2xl font-bold">Reset Password</h1>

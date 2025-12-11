@@ -2,7 +2,7 @@
   import type { Message } from "@apps/api-client";
   import { onMount } from "svelte";
   import MdiDotsVertical from "@/icons/mdi-dots-vertical.svelte";
-  import { getApiClient, useMutation, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getMessage, useMutation, useQuery } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
   import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
@@ -22,17 +22,28 @@
   const api = getApiClient();
   const messages = useQuery<Message[]>(async () => {
     const response = await api.messages.get({ query: { channelId } });
-    if (response.error) throw new Error(response.error.value as string);
-    return response.data as Message[];
+    if (response.error) {
+      const errorMsg = typeof response.error.value === "string"
+        ? response.error.value
+        : JSON.stringify(response.error.value);
+      throw new Error(errorMsg);
+    }
+    if (!response.data) {
+      throw new Error("No message data returned");
+    }
+    return response.data;
   });
   const addReaction = useMutation(
     async (args: { messageId: string; emoji: string }) => {
-      const response = await (api.messages as any)[
-        args.messageId
-      ].reactions.post({
-        body: { emoji: args.emoji },
+      const response = await getMessage(api, args.messageId).reactions.post({
+        emoji: args.emoji,
       });
-      if (response.error) throw new Error(response.error.value as string);
+      if (response.error) {
+        const errorMsg = typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value);
+        throw new Error(errorMsg);
+      }
       return response.data;
     },
   );

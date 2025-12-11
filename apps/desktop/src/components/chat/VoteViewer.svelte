@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { User, Vote } from "@apps/api-client";
-  import { getApiClient, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getVote, useQuery } from "@/lib/api.svelte";
   import { proxify } from "@/lib/proxify.svelte";
 
   const { voteId }: { voteId: string } = $props();
 
   const api = getApiClient();
   const vote = useQuery<Vote>(async () => {
-    const response = await (api.votes as any)[voteId].get();
+    const response = await getVote(api, voteId).get();
     if (response.error) {
       throw new Error(
         typeof response.error.value === "string"
@@ -15,7 +15,10 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as Vote;
+    if (!response.data) {
+      throw new Error("No vote data returned");
+    }
+    return response.data;
   });
   const me = useQuery<User>(async () => {
     const response = await api.users.me.get();
@@ -26,7 +29,10 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as User;
+    if (!response.data) {
+      throw new Error("No user data returned");
+    }
+    return response.data;
   });
 
   const { numbersOfVotersPerOption } = $derived(calculateVotes());
@@ -148,11 +154,14 @@
       class="btn btn-primary w-16"
       onclick={async () => {
         if (me.data) {
-          const response = await (api.votes as any)[voteId].cast.post({
-            body: { votedOptions: selectedOptions },
-          });
-          if (response.error) {
-            console.error("Failed to cast vote:", response.error);
+          const voteRoute = getVote(api, voteId);
+          if (voteRoute.cast) {
+            const response = await voteRoute.cast.post({
+              votedOptions: selectedOptions,
+            });
+            if (response.error) {
+              console.error("Failed to cast vote:", response.error);
+            }
           }
         }
       }}

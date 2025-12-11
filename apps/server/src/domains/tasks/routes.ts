@@ -6,8 +6,11 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const taskRoutes = new Elysia({ prefix: "/tasks" })
   .use(authMiddleware)
-  .get("/", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .get("/", async ({ user, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const taskList = await db.select().from(tasks);
 
@@ -15,14 +18,17 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
   })
   .post(
     "/",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
       const [task] = await db
         .insert(tasks)
         .values({
-          text: ctx.body.text,
-          assigner: ctx.body.assigner,
+          text: body.text,
+          assigner: body.assigner,
           isCompleted: false,
         })
         .returning();
@@ -38,8 +44,11 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
   )
   .patch(
     "/:id",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    async ({ user, body, params, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
       const updateData: {
         text?: string;
@@ -50,16 +59,16 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
         updatedAt: new Date(),
       };
 
-      if (ctx.body.text !== undefined) updateData.text = ctx.body.text;
-      if (ctx.body.isCompleted !== undefined)
-        updateData.isCompleted = ctx.body.isCompleted;
-      if (ctx.body.assigner !== undefined)
-        updateData.assigner = ctx.body.assigner;
+      if (body.text !== undefined) updateData.text = body.text;
+      if (body.isCompleted !== undefined)
+        updateData.isCompleted = body.isCompleted;
+      if (body.assigner !== undefined)
+        updateData.assigner = body.assigner;
 
       const [task] = await db
         .update(tasks)
         .set(updateData)
-        .where(eq(tasks.id, ctx.params.id))
+        .where(eq(tasks.id, params.id))
         .returning();
 
       return task;

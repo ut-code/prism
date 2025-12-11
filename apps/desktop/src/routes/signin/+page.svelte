@@ -68,9 +68,10 @@
               alert("Passwords do not match!");
               return;
             }
+            const email = String(formData.get("email") ?? "");
             signIn("password", formData).then(() => {
               step = {
-                email: formData.get("email") as string,
+                email,
                 flow: "signUp-verification",
               };
             });

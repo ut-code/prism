@@ -2,38 +2,41 @@
   import type { Organization, OrganizationMember } from "@apps/api-client";
   import {
     getApiClient,
+    getOrganization,
     unwrapResponse,
     useMutation,
     useQuery,
   } from "@/lib/api.svelte";
   import { page } from "$app/stores";
 
-  const organizationId = $derived($page.params.orgId as string);
+  const organizationId = $derived($page.params.orgId ?? "");
 
   const api = getApiClient();
   const organization = useQuery<Organization>(async () => {
-    const response = await (api.organizations as any)[organizationId].get();
-    return (await unwrapResponse(response)) as unknown as Organization;
+    const response = await getOrganization(api, organizationId).get();
+    return unwrapResponse(response);
   });
   const members = useQuery<OrganizationMember[]>(async () => {
-    const response = await (api.organizations as any)[
-      organizationId
-    ].members.get();
-    return (await unwrapResponse(response)) as unknown as OrganizationMember[];
+    const response = await getOrganization(api, organizationId).members.get();
+    return unwrapResponse<OrganizationMember[]>(response);
   });
   const updateOrganization = useMutation(
     async (args: { id: string; name: string; description: string }) => {
-      const response = await (api.organizations as any)[args.id].patch({
-        body: { name: args.name, description: args.description },
+      const response = await getOrganization(api, args.id).patch({
+        name: args.name,
+        description: args.description,
       });
       return unwrapResponse(response);
     },
   );
   const removeMember = useMutation(
     async (args: { organizationId: string; userId: string }) => {
-      const response = await (api.organizations as any)[
-        args.organizationId
-      ].members[args.userId].delete();
+      const orgRoute = getOrganization(api, args.organizationId);
+      const memberRoute = orgRoute.members[args.userId];
+      if (!memberRoute) {
+        throw new Error("Member route not found");
+      }
+      const response = await memberRoute.delete();
       return unwrapResponse(response);
     },
   );
@@ -92,7 +95,7 @@
       }
     }
     const usersResponse = await api.users.search.get({ query: { email } });
-    const users = (await unwrapResponse(usersResponse)) as any[];
+    const users = unwrapResponse(usersResponse);
     if (!users || !users.length) {
       alert("ユーザーが見つかりませんでした");
       return;
@@ -112,9 +115,7 @@
 
     const answer = confirm(message);
     if (answer) {
-      const response = await (api.organizations as any)[
-        organizationId
-      ].members.post({
+      const response = await getOrganization(api, organizationId).members.post({
         userId: foundUser.id,
         permission: "member",
       });

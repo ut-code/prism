@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Reaction } from "@apps/api-client";
-  import { getApiClient, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getMessage, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { uniqueBy } from "@/lib/utils";
 
   interface Props {
@@ -12,11 +12,10 @@
 
   const api = getApiClient();
 
-  const reactions = useQuery<Reaction[]>(() =>
-    (api.messages as any)[messageId].reactions
-      .get()
-      .then((res: any) => res.data as Reaction[]),
-  );
+  const reactions = useQuery<Reaction[]>(async () => {
+    const response = await getMessage(api, messageId).reactions.get();
+    return unwrapResponse(response);
+  });
 
   let selectedEmoji = $state<string | null>(null);
 
@@ -40,11 +39,10 @@
       : [],
   );
 
-  const userNamesById = useQuery<Record<string, string>>(() =>
-    api.users.nicknames
-      .post({ userIds: allUserIdsInReactions, organizationId })
-      .then((res: any) => res.data as Record<string, string>),
-  );
+  const userNamesById = useQuery<Record<string, string>>(async () => {
+    const response = await api.users.nicknames.post({ userIds: allUserIdsInReactions, organizationId });
+    return unwrapResponse(response);
+  });
 
   function toggleUserList(emoji: string) {
     selectedEmoji = emoji;

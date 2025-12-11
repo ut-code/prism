@@ -65,6 +65,7 @@ export interface File {
   width?: number;
   height?: number;
   uploadedAt: Date;
+  url?: string; // Generated URL for file access
 }
 
 export interface Task {

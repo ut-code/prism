@@ -22,8 +22,8 @@
         description: form.description.trim() || undefined,
       });
 
-      if (result && typeof result === "object" && "id" in result) {
-        goto(`/orgs/${(result as any).id}/settings`);
+      if (result) {
+        goto(`/orgs/${result.id}/settings`);
       }
     } catch (error) {
       console.error("Failed to create organization:", error);

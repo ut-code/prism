@@ -1,6 +1,6 @@
 import { cookie } from "@elysiajs/cookie";
 import { jwt } from "@elysiajs/jwt";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 
 export interface AuthUser {
   id: string;
@@ -9,33 +9,37 @@ export interface AuthUser {
 }
 
 export const authMiddleware = new Elysia({ name: "auth" })
-  .use(
-    jwt({
-      name: "jwt",
-      secret: process.env.JWT_SECRET || "your-secret-key",
-    }),
-  )
+  .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET || "your-secret-key" }))
   .use(cookie())
-  .derive(async ({ jwt, cookie: cookies }) => {
-    const token = cookies.token;
+  .derive({ as: "global" }, async ({ jwt, cookie }) => {
+    const tokenValue = cookie.token?.value;
 
-    if (!token) {
+    if (!tokenValue || typeof tokenValue !== "string") {
       return { user: null as AuthUser | null };
     }
 
     try {
-      const payload = await jwt.verify(token);
+      const payload = await jwt.verify(tokenValue);
       if (!payload) {
         return { user: null as AuthUser | null };
       }
 
-      return {
-        user: {
-          id: (payload as any).id,
-          email: (payload as any).email,
-          name: (payload as any).name,
-        } as AuthUser,
-      };
+      // Safely extract user data from JWT payload
+      if (
+        typeof payload === "object" &&
+        payload !== null &&
+        "id" in payload &&
+        "email" in payload
+      ) {
+        const user: AuthUser = {
+          id: String(payload.id),
+          email: String(payload.email),
+          name: "name" in payload ? String(payload.name) : undefined,
+        };
+        return { user: user as AuthUser | null };
+      }
+
+      return { user: null as AuthUser | null };
     } catch {
       return { user: null as AuthUser | null };
     }
@@ -44,9 +48,10 @@ export const authMiddleware = new Elysia({ name: "auth" })
     requireAuth(enabled: boolean) {
       if (!enabled) return;
 
-      onBeforeHandle((ctx: any) => {
-        if (!ctx.user) {
-          return ctx.error(401, { message: "Unauthorized" });
+      onBeforeHandle(({ user, set }: { user: AuthUser | null; set: { status: number } }) => {
+        if (!user) {
+          set.status = 401;
+          return { message: "Unauthorized" };
         }
       });
     },

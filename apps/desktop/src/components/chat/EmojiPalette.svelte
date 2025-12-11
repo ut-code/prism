@@ -30,8 +30,9 @@
     const handleClickOutside = (event: MouseEvent) => {
       if (
         paletteRef &&
-        !paletteRef.contains(event.target as Node)
-        // !toggleButtonRef?.contains(event.target as Node)
+        event.target instanceof Node &&
+        !paletteRef.contains(event.target)
+        // !toggleButtonRef?.contains(event.target)
       ) {
         onClose();
       }

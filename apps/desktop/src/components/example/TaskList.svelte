@@ -1,17 +1,18 @@
 <script lang="ts">
   import { type Task } from "@apps/api-client";
-  import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getTask, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import TaskListSkin from "./TaskListSkin.svelte";
 
   const api = getApiClient();
 
-  const todosQuery = useQuery<Task[]>(
-    async () =>
-      (await unwrapResponse(await api.tasks.get())) as unknown as Task[],
-  );
+  const todosQuery = useQuery<Task[]>(async () => {
+    const response = await api.tasks.get();
+    return unwrapResponse(response);
+  });
 
   async function updateTodo(id: string, data: Partial<Task>) {
-    unwrapResponse(await (api.tasks as any)[id].patch(data));
+    const response = await getTask(api, id).patch(data);
+    return unwrapResponse(response);
   }
 
   async function createTodo() {

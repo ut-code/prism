@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
   jsonb,
-  type PgTableWithColumns,
   pgTable,
   text,
   timestamp,
@@ -101,8 +101,10 @@ export const channels = pgTable(
   (table) => [index("channels_org_idx").on(table.organizationId)],
 );
 
-// Messages
-export const messages: PgTableWithColumns<any> = pgTable(
+// Messages - self-referencing table
+// Using AnyPgColumn to avoid circular type inference errors
+// See: https://github.com/drizzle-team/drizzle-orm/issues/2476
+export const messages = pgTable(
   "messages",
   {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -114,7 +116,7 @@ export const messages: PgTableWithColumns<any> = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    parentId: uuid("parent_id").references(() => messages.id, {
+    parentId: uuid("parent_id").references((): AnyPgColumn => messages.id, {
       onDelete: "set null",
     }),
     voteId: uuid("vote_id").references(() => votes.id, {

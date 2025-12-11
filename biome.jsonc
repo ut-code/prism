@@ -79,7 +79,17 @@
       },
     },
     {
-      "includes": ["apps/server/**/*", "apps/api-client/**/*"],
+      "includes": ["apps/server/**/*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useImportExtensions": "off",
+          },
+        },
+      },
+    },
+    {
+      "includes": ["apps/api-client/**/*"],
       "linter": {
         "rules": {
           "correctness": {

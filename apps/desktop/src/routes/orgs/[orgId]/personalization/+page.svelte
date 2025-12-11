@@ -6,6 +6,6 @@
 </script>
 
 <ChatApp
-  organizationId={orgId as string}
+  organizationId={orgId ?? ""}
   screenMode={{ type: "personalization" }}
 />

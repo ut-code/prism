@@ -11,7 +11,7 @@
   const api = getApiClient();
   const organizations = useQuery<Organization[]>(async () => {
     const response = await api.organizations.get();
-    return (await unwrapResponse(response)) as unknown as Organization[];
+    return unwrapResponse<Organization[]>(response);
   });
 </script>
 

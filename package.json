@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@sveltejs/mcp": "^0.1.13",
     "lefthook": "^2.0.8",
     "prettier": "^3.7.4",
     "prettier-plugin-svelte": "^3.4.0",

@@ -6,7 +6,7 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(authMiddleware)
-  .get("/me", async (ctx: any) => {
+  .get("/me", async (ctx) => {
     if (!ctx.user) {
       return { user: null };
     }
@@ -21,7 +21,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   })
   .post(
     "/signin",
-    async ({ body, jwt, setCookie }) => {
+    async ({ body, jwt, cookie }) => {
       const { email } = body;
 
       // Find or create user
@@ -45,7 +45,8 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       });
 
       // Set cookie
-      setCookie("token", token, {
+      cookie.token.set({
+        value: token,
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60, // 7 days
         path: "/",
@@ -59,8 +60,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       }),
     },
   )
-  .post("/signout", async ({ setCookie }) => {
-    setCookie("token", "", {
+  .post("/signout", async ({ cookie }) => {
+    cookie.token.set({
+      value: "",
       httpOnly: true,
       maxAge: 0,
       path: "/",

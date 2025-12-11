@@ -6,24 +6,27 @@ import { authMiddleware } from "../../middleware/auth";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
   .use(authMiddleware)
-  .get("/me", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .get("/me", async ({ user, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const [dbUser] = await db
       .select()
       .from(users)
-      .where(eq(users.id, ctx.user.id))
+      .where(eq(users.id, user.id))
       .limit(1);
 
     return dbUser || null;
   })
   .post(
     "/names",
-    async (ctx: any) => {
+    async ({ body }) => {
       const userList = await db
         .select()
         .from(users)
-        .where(inArray(users.id, ctx.body.userIds));
+        .where(inArray(users.id, body.userIds));
 
       const userNames: Record<string, string> = {};
       for (const user of userList) {
@@ -40,19 +43,19 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   )
   .post(
     "/nicknames",
-    async (ctx: any) => {
+    async ({ body }) => {
       const userList = await db
         .select()
         .from(users)
-        .where(inArray(users.id, ctx.body.userIds));
+        .where(inArray(users.id, body.userIds));
 
       const personalizationList = await db
         .select()
         .from(personalizations)
         .where(
           and(
-            inArray(personalizations.userId, ctx.body.userIds),
-            eq(personalizations.organizationId, ctx.body.organizationId),
+            inArray(personalizations.userId, body.userIds),
+            eq(personalizations.organizationId, body.organizationId),
           ),
         );
 
@@ -71,13 +74,13 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       }),
     },
   )
-  .get("/search", async (ctx: any) => {
-    if (!ctx.query.email) return [];
+  .get("/search", async ({ query }) => {
+    if (!query.email) return [];
 
     const userList = await db
       .select()
       .from(users)
-      .where(eq(users.email, ctx.query.email));
+      .where(eq(users.email, query.email));
 
     return userList;
   });

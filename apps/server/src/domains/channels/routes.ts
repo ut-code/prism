@@ -7,58 +7,71 @@ import { getOrganizationPermissions } from "../organizations/permissions";
 
 export const channelRoutes = new Elysia({ prefix: "/channels" })
   .use(authMiddleware)
-  .get("/", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
-    if (!ctx.query.organizationId)
-      return ctx.error(400, { message: "organizationId is required" });
+  .get("/", async ({ user, query, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+    if (!query.organizationId) {
+      set.status = 400;
+      return { message: "organizationId is required" };
+    }
 
-    await getOrganizationPermissions(ctx.user.id, ctx.query.organizationId);
+    await getOrganizationPermissions(user.id, query.organizationId);
 
     const channelList = await db
       .select()
       .from(channels)
-      .where(eq(channels.organizationId, ctx.query.organizationId))
+      .where(eq(channels.organizationId, query.organizationId))
       .orderBy(desc(channels.createdAt));
 
     return channelList;
   })
-  .get("/:id", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .get("/:id", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const [channel] = await db
       .select()
       .from(channels)
-      .where(eq(channels.id, ctx.params.id))
+      .where(eq(channels.id, params.id))
       .limit(1);
 
     if (!channel) {
-      return ctx.error(404, { message: "Channel not found" });
+      set.status = 404;
+      return { message: "Channel not found" };
     }
 
-    await getOrganizationPermissions(ctx.user.id, channel.organizationId);
+    await getOrganizationPermissions(user.id, channel.organizationId);
 
     return channel;
   })
   .post(
     "/",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
       const perms = await getOrganizationPermissions(
-        ctx.user.id,
-        ctx.body.organizationId,
+        user.id,
+        body.organizationId,
       );
 
       if (!perms.canCreateChannels) {
-        return ctx.error(403, { message: "Insufficient permissions" });
+        set.status = 403;
+        return { message: "Insufficient permissions" };
       }
 
       const [channel] = await db
         .insert(channels)
         .values({
-          name: ctx.body.name,
-          description: ctx.body.description,
-          organizationId: ctx.body.organizationId,
+          name: body.name,
+          description: body.description,
+          organizationId: body.organizationId,
         })
         .returning();
 

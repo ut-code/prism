@@ -94,13 +94,16 @@ export class FileUploader {
       );
     }
 
-    const fileData = response.data as any;
+    if (!response.data) {
+      throw new Error("No file data returned");
+    }
+
     return {
-      id: fileData.id,
-      filename: fileData.filename,
-      originalFilename: fileData.originalFilename,
-      mimeType: fileData.mimeType,
-      size: fileData.size,
+      id: response.data.id,
+      filename: response.data.filename,
+      originalFilename: response.data.originalFilename,
+      mimeType: response.data.mimeType,
+      size: response.data.size,
     };
   }
 }

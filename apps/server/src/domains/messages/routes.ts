@@ -12,64 +12,74 @@ import { requireOrganizationMembership } from "../organizations/permissions";
 
 export const messageRoutes = new Elysia({ prefix: "/messages" })
   .use(authMiddleware)
-  .get("/", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
-    if (!ctx.query.channelId)
-      return ctx.error(400, { message: "channelId is required" });
+  .get("/", async ({ user, query, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+    if (!query.channelId) {
+      set.status = 400;
+      return { message: "channelId is required" };
+    }
 
     const [channel] = await db
       .select()
       .from(channels)
-      .where(eq(channels.id, ctx.query.channelId))
+      .where(eq(channels.id, query.channelId))
       .limit(1);
 
     if (!channel) {
-      return ctx.error(404, { message: "Channel not found" });
+      set.status = 404;
+      return { message: "Channel not found" };
     }
 
-    await requireOrganizationMembership(ctx.user.id, channel.organizationId);
+    await requireOrganizationMembership(user.id, channel.organizationId);
 
     const messageList = await db
       .select()
       .from(messages)
-      .where(eq(messages.channelId, ctx.query.channelId))
+      .where(eq(messages.channelId, query.channelId))
       .orderBy(asc(messages.createdAt));
 
     return messageList;
   })
   .post(
     "/",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
       const [channel] = await db
         .select()
         .from(channels)
-        .where(eq(channels.id, ctx.body.channelId))
+        .where(eq(channels.id, body.channelId))
         .limit(1);
 
       if (!channel) {
-        return ctx.error(404, { message: "Channel not found" });
+        set.status = 404;
+        return { message: "Channel not found" };
       }
 
-      await requireOrganizationMembership(ctx.user.id, channel.organizationId);
+      await requireOrganizationMembership(user.id, channel.organizationId);
 
       const [message] = await db
         .insert(messages)
         .values({
-          channelId: ctx.body.channelId,
-          content: ctx.body.content,
-          author: ctx.body.author,
-          userId: ctx.user.id,
-          parentId: ctx.body.parentId,
-          voteId: ctx.body.voteId,
+          channelId: body.channelId,
+          content: body.content,
+          author: body.author,
+          userId: user.id,
+          parentId: body.parentId,
+          voteId: body.voteId,
         })
         .returning();
 
       // Handle attachments
-      if (ctx.body.attachments && ctx.body.attachments.length > 0 && message) {
+      if (body.attachments && body.attachments.length > 0 && message) {
         await db.insert(messageAttachments).values(
-          ctx.body.attachments.map((fileId: string) => ({
+          body.attachments.map((fileId: string) => ({
             messageId: message.id,
             fileId,
           })),
@@ -92,20 +102,26 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
       }),
     },
   )
-  .get("/:id/reactions", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .get("/:id/reactions", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const reactionList = await db
       .select()
       .from(reactions)
-      .where(eq(reactions.messageId, ctx.params.id));
+      .where(eq(reactions.messageId, params.id));
 
     return reactionList;
   })
   .post(
     "/:id/reactions",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+    async ({ user, params, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
 
       // Check if reaction already exists
       const [existing] = await db
@@ -113,9 +129,9 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
         .from(reactions)
         .where(
           and(
-            eq(reactions.messageId, ctx.params.id),
-            eq(reactions.userId, ctx.user.id),
-            eq(reactions.emoji, ctx.body.emoji),
+            eq(reactions.messageId, params.id),
+            eq(reactions.userId, user.id),
+            eq(reactions.emoji, body.emoji),
           ),
         )
         .limit(1);
@@ -127,9 +143,9 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
       const [reaction] = await db
         .insert(reactions)
         .values({
-          messageId: ctx.params.id,
-          userId: ctx.user.id,
-          emoji: ctx.body.emoji,
+          messageId: params.id,
+          userId: user.id,
+          emoji: body.emoji,
         })
         .returning();
 
@@ -141,16 +157,19 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
       }),
     },
   )
-  .delete("/:id/reactions/:emoji", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .delete("/:id/reactions/:emoji", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     await db
       .delete(reactions)
       .where(
         and(
-          eq(reactions.messageId, ctx.params.id),
-          eq(reactions.userId, ctx.user.id),
-          eq(reactions.emoji, ctx.params.emoji),
+          eq(reactions.messageId, params.id),
+          eq(reactions.userId, user.id),
+          eq(reactions.emoji, params.emoji),
         ),
       );
 

@@ -1,4 +1,5 @@
-import { getApiClient, useQuery } from "@/lib/api.svelte";
+import type { File } from "@apps/api-client";
+import { getApiClient, getFile, unwrapResponse, useQuery } from "@/lib/api.svelte";
 import { isImage } from "../utils.ts";
 
 export interface FileAttachmentProps {
@@ -14,16 +15,9 @@ export class FileAttachmentController {
 
   #api = getApiClient();
   file = $derived(
-    useQuery(async () => {
-      const response = await (this.#api.files as any)[this.fileId].get();
-      if (response.error) {
-        throw new Error(
-          typeof response.error.value === "string"
-            ? response.error.value
-            : JSON.stringify(response.error.value),
-        );
-      }
-      return response.data;
+    useQuery<File>(async () => {
+      const response = await getFile(this.#api, this.fileId).get();
+      return unwrapResponse(response);
     }),
   );
   fileData = $derived(this.file?.data);

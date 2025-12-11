@@ -28,37 +28,40 @@ export const fileRoutes = new Elysia({ prefix: "/files" })
   .use(authMiddleware)
   .post(
     "/",
-    async (ctx: any) => {
-      if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
-
-      await requireOrganizationMembership(ctx.user.id, ctx.body.organizationId);
-
-      if (ctx.body.size > MAX_FILE_SIZE) {
-        return ctx.error(400, {
-          message: "File size exceeds limit (max 10MB)",
-        });
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
       }
 
-      if (!ALLOWED_MIME_TYPES.includes(ctx.body.mimeType)) {
-        return ctx.error(400, { message: "Unsupported file type" });
+      await requireOrganizationMembership(user.id, body.organizationId);
+
+      if (body.size > MAX_FILE_SIZE) {
+        set.status = 400;
+        return { message: "File size exceeds limit (max 10MB)" };
       }
 
-      const sanitizedFilename = ctx.body.filename
+      if (!ALLOWED_MIME_TYPES.includes(body.mimeType)) {
+        set.status = 400;
+        return { message: "Unsupported file type" };
+      }
+
+      const sanitizedFilename = body.filename
         .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF._-]/g, "_")
         .substring(0, 255);
 
       const [file] = await db
         .insert(files)
         .values({
-          storageId: ctx.body.storageId,
+          storageId: body.storageId,
           filename: sanitizedFilename,
-          originalFilename: ctx.body.originalFilename,
-          mimeType: ctx.body.mimeType,
-          size: ctx.body.size,
-          uploadedBy: ctx.user.id,
-          organizationId: ctx.body.organizationId,
-          width: ctx.body.width,
-          height: ctx.body.height,
+          originalFilename: body.originalFilename,
+          mimeType: body.mimeType,
+          size: body.size,
+          uploadedBy: user.id,
+          organizationId: body.organizationId,
+          width: body.width,
+          height: body.height,
         })
         .returning();
 
@@ -77,64 +80,78 @@ export const fileRoutes = new Elysia({ prefix: "/files" })
       }),
     },
   )
-  .get("/:id", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .get("/:id", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const [file] = await db
       .select()
       .from(files)
-      .where(eq(files.id, ctx.params.id))
+      .where(eq(files.id, params.id))
       .limit(1);
 
     if (!file) {
-      return ctx.error(404, { message: "File not found" });
+      set.status = 404;
+      return { message: "File not found" };
     }
 
-    await requireOrganizationMembership(ctx.user.id, file.organizationId);
+    await requireOrganizationMembership(user.id, file.organizationId);
 
     return file;
   })
-  .get("/", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
-    if (!ctx.query.organizationId)
-      return ctx.error(400, { message: "organizationId is required" });
+  .get("/", async ({ user, query, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+    if (!query.organizationId) {
+      set.status = 400;
+      return { message: "organizationId is required" };
+    }
 
-    await requireOrganizationMembership(ctx.user.id, ctx.query.organizationId);
+    await requireOrganizationMembership(user.id, query.organizationId);
 
-    const limit = ctx.query.limit ? Math.min(Number(ctx.query.limit), 100) : 50;
+    const limit = query.limit ? Math.min(Number(query.limit), 100) : 50;
 
     const fileList = await db
       .select()
       .from(files)
-      .where(eq(files.organizationId, ctx.query.organizationId))
+      .where(eq(files.organizationId, query.organizationId))
       .orderBy(desc(files.uploadedAt))
       .limit(limit);
 
     return fileList;
   })
-  .delete("/:id", async (ctx: any) => {
-    if (!ctx.user) return ctx.error(401, { message: "Unauthorized" });
+  .delete("/:id", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
     const [file] = await db
       .select()
       .from(files)
-      .where(eq(files.id, ctx.params.id))
+      .where(eq(files.id, params.id))
       .limit(1);
 
     if (!file) {
-      return ctx.error(404, { message: "File not found" });
+      set.status = 404;
+      return { message: "File not found" };
     }
 
     const membership = await requireOrganizationMembership(
-      ctx.user.id,
+      user.id,
       file.organizationId,
     );
 
-    if (file.uploadedBy !== ctx.user.id && membership.permission !== "admin") {
-      return ctx.error(403, { message: "Insufficient permissions" });
+    if (file.uploadedBy !== user.id && membership.permission !== "admin") {
+      set.status = 403;
+      return { message: "Insufficient permissions" };
     }
 
-    await db.delete(files).where(eq(files.id, ctx.params.id));
+    await db.delete(files).where(eq(files.id, params.id));
 
     return { success: true };
   });

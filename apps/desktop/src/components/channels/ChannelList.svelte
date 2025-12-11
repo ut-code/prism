@@ -22,7 +22,10 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as Channel[];
+    if (!response.data) {
+      throw new Error("No channel data returned");
+    }
+    return response.data;
   });
 </script>
 

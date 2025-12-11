@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Organization } from "@apps/api-client";
-  import { getApiClient, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getOrganization, useQuery } from "@/lib/api.svelte";
   import { goto } from "$app/navigation";
   import Channel from "../channels/Channel.svelte";
   import ChannelList from "../channels/ChannelList.svelte";
@@ -15,11 +15,20 @@
   const { organizationId, screenMode }: Props = $props();
   const api = getApiClient();
 
-  const organization = useQuery<Organization>(() =>
-    (api.organizations as any)[organizationId]
-      .get()
-      .then((res: any) => res.data as Organization),
-  );
+  const organization = useQuery<Organization>(async () => {
+    const response = await getOrganization(api, organizationId).get();
+    if (response.error) {
+      throw new Error(
+        typeof response.error.value === "string"
+          ? response.error.value
+          : JSON.stringify(response.error.value),
+      );
+    }
+    if (!response.data) {
+      throw new Error("Organization not found");
+    }
+    return response.data;
+  });
 </script>
 
 <div class="bg-base-100 flex h-screen">

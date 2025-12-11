@@ -7,12 +7,20 @@
 
   const api = getApiClient();
 
-  const identity = useQuery<User>(() =>
-    api.users.me.get().then((res) => res.data as User),
-  );
-  const personalization = useQuery<User>(() =>
-    api.users.me.get().then((res) => res.data as User),
-  ); // TODO: Replace with actual personalization endpoint
+  const identity = useQuery<User>(async () => {
+    const res = await api.users.me.get();
+    if (!res.data) {
+      throw new Error("No user data returned");
+    }
+    return res.data;
+  });
+  const personalization = useQuery<User>(async () => {
+    const res = await api.users.me.get();
+    if (!res.data) {
+      throw new Error("No user data returned");
+    }
+    return res.data;
+  }); // TODO: Replace with actual personalization endpoint
   let iconURL = $state<string | null>("");
   let imageURL = $derived(iconURL || identity.data?.image);
   let userName = $derived(
@@ -34,8 +42,7 @@
       })
         .then((value) => {
           return new Promise((resolve, reject) => {
-            const storageId = value as string;
-            if (storageId) {
+            if (typeof value === "string" && value) {
               // TODO: Implement getImageUrl endpoint in REST API
               // Currently using placeholder - personalization.getImageUrl not available
               resolve(null);
@@ -45,9 +52,8 @@
           });
         })
         .then((value) => {
-          if (value) {
-            const url = value as string;
-            iconURL = url;
+          if (value && typeof value === "string") {
+            iconURL = value;
           }
         });
     }
@@ -113,8 +119,10 @@
         file:py-2 file:font-semibold"
   accept=".jpg, .png"
   onchange={(event) => {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const file = event.target.files?.[0];
     if (file) {
       changedImage = URL.createObjectURL(file);
       changedImageFile = file;

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Reaction, User } from "@apps/api-client";
   import { fly } from "svelte/transition";
-  import { getApiClient, useMutation, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, getMessage, useMutation, useQuery } from "@/lib/api.svelte";
 
   interface Props {
     messageId: string;
@@ -12,7 +12,7 @@
   const api = getApiClient();
 
   const reactions = useQuery<Reaction[]>(async () => {
-    const response = await (api.messages as any)[messageId].reactions.get();
+    const response = await getMessage(api, messageId).reactions.get();
     if (response.error) {
       throw new Error(
         typeof response.error.value === "string"
@@ -20,7 +20,10 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as Reaction[];
+    if (!response.data) {
+      throw new Error("No reaction data returned");
+    }
+    return response.data;
   });
 
   const me = useQuery<User>(async () => {
@@ -32,13 +35,16 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as User;
+    if (!response.data) {
+      throw new Error("No user data returned");
+    }
+    return response.data;
   });
 
   const addReaction = useMutation(
     async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
-      const response = await (api.messages as any)[mid].reactions.post({
-        body: { emoji },
+      const response = await getMessage(api, mid).reactions.post({
+        emoji,
       });
       if (response.error) {
         throw new Error(
@@ -52,9 +58,8 @@
   );
   const removeReaction = useMutation(
     async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
-      const response = await (api.messages as any)[mid].reactions[
-        emoji
-      ].delete();
+      const messageRoute = getMessage(api, mid);
+      const response = await messageRoute.reactions[emoji].delete();
       if (response.error) {
         throw new Error(
           typeof response.error.value === "string"

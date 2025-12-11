@@ -58,7 +58,10 @@
           : JSON.stringify(response.error.value),
       );
     }
-    return response.data as User;
+    if (!response.data) {
+      throw new Error("No user data returned");
+    }
+    return response.data;
   });
 
   let messageContent = $state("");
@@ -111,7 +114,7 @@
         voteOptions: vote.voteOptions,
       });
       if (!voteResponse.error && voteResponse.data) {
-        voteId = (voteResponse.data as any).id;
+        voteId = voteResponse.data.id;
       }
     }
 
