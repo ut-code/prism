@@ -1,4 +1,3 @@
-import { cookie } from "@elysiajs/cookie";
 import { jwt } from "@elysiajs/jwt";
 import { Elysia, t } from "elysia";
 
@@ -10,9 +9,8 @@ export interface AuthUser {
 
 export const authMiddleware = new Elysia({ name: "auth" })
   .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET || "your-secret-key" }))
-  .use(cookie())
   .derive({ as: "global" }, async ({ jwt, cookie }) => {
-    const tokenValue = cookie.token?.value;
+    const tokenValue = cookie.token.value;
 
     if (!tokenValue || typeof tokenValue !== "string") {
       return { user: null as AuthUser | null };
