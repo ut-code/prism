@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!apps/convex/src/convex/_generated"],
+    "includes": ["**"],
   },
   "formatter": {
     "enabled": false,
@@ -75,7 +75,17 @@
       },
     },
     {
-      "includes": ["apps/convex/**/*"],
+      "includes": ["apps/server/**/*"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useImportExtensions": "off",
+          },
+        },
+      },
+    },
+    {
+      "includes": ["apps/api-client/**/*"],
       "linter": {
         "rules": {
           "correctness": {

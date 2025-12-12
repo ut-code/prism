@@ -1,19 +1,13 @@
 <script lang="ts">
-  import { useAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
+  import { useAuth } from "@/lib/auth.svelte.ts";
   import { goto } from "$app/navigation";
-  import SignInForm from "./SignInForm.svelte";
-  import VerificationForm from "./VerificationForm.svelte";
 
-  const { signIn } = useAuth();
-  const isAuthenticated = $derived(useAuth().isAuthenticated);
-  const isLoading = $derived(useAuth().isLoading);
+  const auth = useAuth();
+  const isAuthenticated = $derived(auth.isAuthenticated);
+  const isLoading = $derived(auth.isLoading);
 
-  type Step =
-    | "signIn"
-    | "signUp"
-    | { email: string; flow: "signUp-verification" };
-
-  let step = $state<Step>("signIn");
+  let email = $state("");
+  let submitting = $state(false);
 
   $effect(() => {
     if (isAuthenticated) {
@@ -21,54 +15,51 @@
     }
   });
 
-  function handleFormSubmit(formData: FormData) {
-    if (step === "signUp") {
-      if (formData.get("password") !== formData.get("confirmPassword")) {
-        alert("Passwords do not match!");
-        return;
-      }
-      const email = String(formData.get("email") ?? "");
-      signIn("password", formData).then(() => {
-        step = {
-          email,
-          flow: "signUp-verification",
-        };
-      });
-    } else {
-      signIn("password", formData);
-    }
-  }
-
-  function handleVerificationSubmit(code: string) {
-    if (typeof step === "object") {
-      const formData = new FormData();
-      formData.set("code", code);
-      formData.set("email", step.email);
-      formData.set("flow", "email-verification");
-      signIn("password", formData);
+  async function handleSubmit(event: Event) {
+    event.preventDefault();
+    submitting = true;
+    try {
+      await auth.signIn(email);
       goto("/", { replaceState: true });
+    } catch {
+      alert("Sign in failed");
+    } finally {
+      submitting = false;
     }
   }
 </script>
 
 <div class="hero bg-base-200 min-h-screen">
   <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-    {#if typeof step === "object"}
-      <VerificationForm
-        email={step.email}
-        {isLoading}
-        onSubmit={handleVerificationSubmit}
-      />
-    {:else}
-      <SignInForm
-        {step}
-        {isLoading}
-        onSignIn={(provider) => signIn(provider)}
-        onSubmit={handleFormSubmit}
-        onToggleMode={() => {
-          step = step === "signIn" ? "signUp" : "signIn";
-        }}
-      />
-    {/if}
+    <form class="card-body" onsubmit={handleSubmit}>
+      <h1 class="text-2xl font-bold">Sign In to Prism</h1>
+
+      <div class="form-control">
+        <label class="label" for="email">
+          <span class="label-text">Email</span>
+        </label>
+        <input
+          id="email"
+          type="email"
+          placeholder="email@example.com"
+          class="input input-bordered"
+          bind:value={email}
+          required
+        />
+      </div>
+
+      <div class="form-control mt-6">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          disabled={isLoading || submitting}
+        >
+          {#if isLoading || submitting}
+            <span class="loading loading-spinner"></span>
+          {/if}
+          Sign In
+        </button>
+      </div>
+    </form>
   </div>
 </div>

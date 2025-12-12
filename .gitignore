@@ -12,7 +12,3 @@ test-results
 target
 .svelte-kit
 dist
-
-# Convex?
-**/gen/schemas
-.env.local

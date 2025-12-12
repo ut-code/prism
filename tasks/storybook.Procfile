@@ -1,3 +1,3 @@
 web: bun run:web
-convex: bun run:convex
+server: bun run:server
 storybook: bun run:storybook
