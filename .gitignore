@@ -4,6 +4,8 @@ node_modules
 # development
 .env
 .direnv
+.devenv
+.devenv.flake.nix
 
 # Tests
 test-results
