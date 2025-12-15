@@ -9,9 +9,9 @@ import { getOrganizationPermissions } from "./permissions.ts";
  * Organization member removal route
  * Handles: remove member from organization
  */
-export const organizationMemberRemoveRoute = new Elysia().use(authMiddleware).delete(
-  "/:id/members/:userId",
-  async ({ user, params, set }) => {
+export const organizationMemberRemoveRoute = new Elysia()
+  .use(authMiddleware)
+  .delete("/:id/members/:userId", async ({ user, params, set }) => {
     if (!user) {
       set.status = 401;
       return { message: "Unauthorized" };
@@ -39,5 +39,4 @@ export const organizationMemberRemoveRoute = new Elysia().use(authMiddleware).de
       );
 
     return { success: true };
-  },
-);
+  });

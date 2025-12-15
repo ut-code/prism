@@ -9,9 +9,9 @@ import { getOrganizationPermissions } from "./permissions.ts";
  * Organization member read routes
  * Handles: list members
  */
-export const organizationMemberReadRoutes = new Elysia().use(authMiddleware).get(
-  "/:id/members",
-  async ({ user, params, set }) => {
+export const organizationMemberReadRoutes = new Elysia()
+  .use(authMiddleware)
+  .get("/:id/members", async ({ user, params, set }) => {
     if (!user) {
       set.status = 401;
       return { message: "Unauthorized" };
@@ -32,5 +32,4 @@ export const organizationMemberReadRoutes = new Elysia().use(authMiddleware).get
       ...m.membership,
       user: m.user,
     }));
-  },
-);
+  });

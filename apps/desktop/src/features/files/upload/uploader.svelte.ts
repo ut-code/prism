@@ -1,4 +1,4 @@
-import { getApiClient } from "@/lib/api.svelte";
+import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
 
 export const MAX_FILES = 10;
 // constants
@@ -75,10 +75,8 @@ export class FileUploader {
   }
 
   private async uploadFile(file: File): Promise<UploadedFile> {
-    // For now, create a simple file upload directly via the API
-    // In a real implementation, this would use a proper storage service
     const response = await this.api.files.post({
-      storageId: `temp-${Date.now()}-${Math.random()}`, // Temporary storage ID
+      storageId: `temp-${Date.now()}-${Math.random()}`,
       filename: file.name,
       originalFilename: file.name,
       mimeType: file.type,
@@ -86,24 +84,13 @@ export class FileUploader {
       organizationId: this.organizationId,
     });
 
-    if (response.error) {
-      throw new Error(
-        typeof response.error.value === "string"
-          ? response.error.value
-          : JSON.stringify(response.error.value),
-      );
-    }
-
-    if (!response.data) {
-      throw new Error("No file data returned");
-    }
-
+    const data = unwrapResponse<UploadedFile>(response);
     return {
-      id: response.data.id,
-      filename: response.data.filename,
-      originalFilename: response.data.originalFilename,
-      mimeType: response.data.mimeType,
-      size: response.data.size,
+      id: data.id,
+      filename: data.filename,
+      originalFilename: data.originalFilename,
+      mimeType: data.mimeType,
+      size: data.size,
     };
   }
 }

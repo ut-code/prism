@@ -38,7 +38,11 @@
   const removeReaction = useMutation(
     async ({ messageId: mid, emoji }: { messageId: string; emoji: string }) => {
       const messageRoute = getMessage(api, mid);
-      const response = await messageRoute.reactions[emoji].delete();
+      const emojiRoute = messageRoute.reactions[emoji];
+      if (!emojiRoute) {
+        throw new Error(`Reaction route for ${emoji} not found`);
+      }
+      const response = await emojiRoute.delete();
       return unwrapResponse(response);
     },
   );

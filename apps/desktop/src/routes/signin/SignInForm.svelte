@@ -69,7 +69,7 @@
     </div>
   {/if}
   <div class="form-control mt-6">
-    <input name="flow" type="hidden" bind:value={step} />
+    <input name="flow" type="hidden" value={step} />
     <button type="submit" class="btn btn-primary" disabled={isLoading}>
       {#if isLoading}<span class="loading loading-spinner"></span>{/if}
       {step === "signIn" ? "Sign In" : "Continue"}

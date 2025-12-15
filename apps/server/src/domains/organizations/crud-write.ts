@@ -9,7 +9,8 @@ import { getOrganizationPermissions } from "./permissions.ts";
  * Organization write routes
  * Handles: create organization, update organization
  */
-export const organizationWriteRoutes = new Elysia().use(authMiddleware)
+export const organizationWriteRoutes = new Elysia()
+  .use(authMiddleware)
   .post(
     "/",
     async ({ user, body, set }) => {

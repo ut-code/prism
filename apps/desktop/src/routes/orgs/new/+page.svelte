@@ -5,7 +5,7 @@
   const api = getApiClient();
   const createOrganization = useMutation(
     async (data: { name: string; description?: string }) =>
-      unwrapResponse(await api.organizations.post(data)),
+      unwrapResponse<{ id: string }>(await api.organizations.post(data)),
   );
 
   let form = $state({

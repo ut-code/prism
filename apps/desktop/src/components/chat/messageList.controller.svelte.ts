@@ -27,7 +27,9 @@ export class MessageListController {
   reactionPaletteVisibleFor = $state<string | null>(null);
 
   // Mutations
-  addReaction: ReturnType<typeof useMutation>;
+  addReaction: ReturnType<
+    typeof useMutation<{ messageId: string; emoji: string }, unknown>
+  >;
 
   constructor(props: () => { organizationId: string; channelId: string }) {
     const api = getApiClient();

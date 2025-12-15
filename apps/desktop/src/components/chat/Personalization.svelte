@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { User } from "@apps/api-client";
-  import { getApiClient, useQuery } from "@/lib/api.svelte";
+  import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
 
   // organizationId not used in this component currently
   // const { organizationId }: { organizationId: string } = $props();
@@ -9,17 +9,11 @@
 
   const identity = useQuery<User>(async () => {
     const res = await api.users.me.get();
-    if (!res.data) {
-      throw new Error("No user data returned");
-    }
-    return res.data;
+    return unwrapResponse<User>(res);
   });
   const personalization = useQuery<User>(async () => {
     const res = await api.users.me.get();
-    if (!res.data) {
-      throw new Error("No user data returned");
-    }
-    return res.data;
+    return unwrapResponse<User>(res);
   }); // TODO: Replace with actual personalization endpoint
   let iconURL = $state<string | null>("");
   let imageURL = $derived(iconURL || identity.data?.image);

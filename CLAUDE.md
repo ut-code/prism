@@ -38,11 +38,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Import Aliases
 
-| Alias | Path |
-|-------|------|
-| `@` | `src/` |
+| Alias         | Path              |
+| ------------- | ----------------- |
+| `@`           | `src/`            |
 | `$components` | `src/components/` |
-| `@apps/{pkg}` | `apps/{pkg}/` |
+| `@apps/{pkg}` | `apps/{pkg}/`     |
 
 </architecture>
 
@@ -80,10 +80,10 @@ import type { App } from "@apps/server";
 
 const client = treaty<App>("http://localhost:8080");
 
-await client.products.get();                              // GET
-await client.products["123"].get();                       // Dynamic param
-await client.products.get({ query: { category: "foo" }}); // Query
-await client.products.post({ name: "bar", price: 100 });  // POST
+await client.products.get(); // GET
+await client.products["123"].get(); // Dynamic param
+await client.products.get({ query: { category: "foo" } }); // Query
+await client.products.post({ name: "bar", price: 100 }); // POST
 ```
 
 </framework-elysia>
@@ -117,8 +117,8 @@ UI [.svelte] → controller [.svelte.ts] → processor [.svelte.ts] → utility 
 
 毎回の作業前、タスクの種類に応じて `docs/skills/` 内の該当ドキュメントを読む。
 
-| Skill | File | Usage |
-|-------|------|-------|
+| Skill     | File                       | Usage                |
+| --------- | -------------------------- | -------------------- |
 | UI Design | `docs/skills/ui-design.md` | UI実装、デザイン判断 |
 
 </skills>

@@ -9,7 +9,8 @@ import { getOrganizationPermissions } from "./permissions.ts";
  * Organization read routes
  * Handles: list organizations, get organization by ID
  */
-export const organizationReadRoutes = new Elysia().use(authMiddleware)
+export const organizationReadRoutes = new Elysia()
+  .use(authMiddleware)
   .get("/", async ({ user, set }) => {
     if (!user) {
       set.status = 401;
@@ -34,20 +35,17 @@ export const organizationReadRoutes = new Elysia().use(authMiddleware)
       role: m.membership.role,
     }));
   })
-  .get(
-    "/:id",
-    async ({ user, params, set }) => {
-      if (!user) {
-        set.status = 401;
-        return { message: "Unauthorized" };
-      }
+  .get("/:id", async ({ user, params, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
 
-      const perms = await getOrganizationPermissions(user.id, params.id);
+    const perms = await getOrganizationPermissions(user.id, params.id);
 
-      return {
-        ...perms.organization,
-        permission: perms.membership.permission,
-        role: perms.membership.role,
-      };
-    },
-  );
+    return {
+      ...perms.organization,
+      permission: perms.membership.permission,
+      role: perms.membership.role,
+    };
+  });

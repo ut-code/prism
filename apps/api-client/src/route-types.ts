@@ -3,62 +3,60 @@
  * These types describe the structure of dynamically accessed routes.
  */
 
+import type {
+  Channel,
+  File,
+  Organization,
+  Reaction,
+  Task,
+  Vote,
+} from "./types.ts";
+
+type ApiResponse<T> = Promise<{
+  data?: T | { message: string } | null;
+  error?: { status: unknown; value: unknown } | null;
+}>;
+
 export type DynamicRoute<T> = {
-  get: () => Promise<{ data?: T; error?: { status: number; value: unknown } }>;
-  patch: (
-    body?: Partial<T>,
-  ) => Promise<{ data?: T; error?: { status: number; value: unknown } }>;
-  delete: () => Promise<{
-    data?: { success: boolean };
-    error?: { status: number; value: unknown };
-  }>;
+  get: () => ApiResponse<T>;
+  patch: (body?: Partial<T>) => ApiResponse<T>;
+  delete: () => ApiResponse<{ success: boolean }>;
+};
+
+export type VoteRoute = DynamicRoute<Vote> & {
   cast?: {
-    post: (body: {
-      votedOptions: number[];
-    }) => Promise<{
-      data?: unknown;
-      error?: { status: number; value: unknown };
-    }>;
+    post: (body: { votedOptions: number[] }) => ApiResponse<Vote>;
   };
 };
+
+export type FileRoute = DynamicRoute<File>;
+
+export type TaskRoute = DynamicRoute<Task>;
 
 export type OrganizationMembersRoute = {
-  get: () => Promise<{
-    data?: unknown;
-    error?: { status: number; value: unknown };
-  }>;
-  post: (body: {
-    userId: string;
-    permission: string;
-  }) => Promise<{ data?: unknown; error?: { status: number; value: unknown } }>;
+  get: () => ApiResponse<unknown>;
+  post: (body: { userId: string; permission: string }) => ApiResponse<unknown>;
 } & {
   [userId: string]: {
-    delete: () => Promise<{
-      data?: unknown;
-      error?: { status: number; value: unknown };
-    }>;
+    delete: () => ApiResponse<unknown>;
   };
 };
 
-export type OrganizationRoute = DynamicRoute<unknown> & {
+export type OrganizationRoute = DynamicRoute<Organization> & {
   members: OrganizationMembersRoute;
 };
 
+export type ChannelRoute = DynamicRoute<Channel>;
+
 export type MessageReactionsRoute = {
-  get: () => Promise<{
-    data?: unknown;
-    error?: { status: number; value: unknown };
-  }>;
-  post: (body: {
-    emoji: string;
-  }) => Promise<{ data?: unknown; error?: { status: number; value: unknown } }>;
+  get: () => ApiResponse<Reaction[]>;
+  post: (body: { emoji: string }) => ApiResponse<Reaction>;
 } & {
-  [emoji: string]: {
-    delete: () => Promise<{
-      data?: unknown;
-      error?: { status: number; value: unknown };
-    }>;
-  };
+  [emoji: string]:
+    | {
+        delete: () => ApiResponse<{ success: boolean }>;
+      }
+    | undefined;
 };
 
 export type MessagesRoute = {

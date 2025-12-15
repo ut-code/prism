@@ -38,15 +38,16 @@ export class MessageInputApi {
    * Returns undefined if creation fails.
    */
   async createVote(vote: Vote): Promise<string | undefined> {
-    const voteResponse = await this.api.votes.post({
-      title: vote.title,
-      maxVotes: vote.maxVotes,
-      voteOptions: vote.voteOptions,
-    });
-
-    if (!voteResponse.error && voteResponse.data) {
-      return voteResponse.data.id;
+    try {
+      const voteResponse = await this.api.votes.post({
+        title: vote.title,
+        maxVotes: vote.maxVotes,
+        voteOptions: vote.voteOptions,
+      });
+      const data = unwrapResponse<{ id: string }>(voteResponse);
+      return data.id;
+    } catch {
+      return undefined;
     }
-    return undefined;
   }
 }

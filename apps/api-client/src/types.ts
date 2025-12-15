@@ -2,10 +2,10 @@
 
 export interface User {
   id: string;
-  email: string;
-  name?: string;
-  emailVerified?: Date;
-  image?: string;
+  email?: string | null;
+  name?: string | null;
+  emailVerified?: Date | null;
+  image?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,18 +13,18 @@ export interface User {
 export interface Organization {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
-  permission?: string;
-  role?: string;
+  permission?: "admin" | "member" | "visitor";
+  role?: string | null;
 }
 
 export interface Channel {
   id: string;
   name: string;
-  description?: string;
+  description?: string | null;
   organizationId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -36,8 +36,8 @@ export interface Message {
   content: string;
   author: string;
   userId: string;
-  parentId?: string;
-  voteId?: string;
+  parentId?: string | null;
+  voteId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   // Extended fields (may be populated by joins or separate queries)
