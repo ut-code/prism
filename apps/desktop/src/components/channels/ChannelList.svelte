@@ -6,6 +6,9 @@
   import type { Selection } from "$components/chat/types";
   import DMList from "$components/dms/DMList.svelte";
   import UserSearch from "$components/dms/UserSearch.svelte";
+  import MdiAccount from "~icons/mdi/account";
+  import MdiPlus from "~icons/mdi/plus";
+  import MdiPound from "~icons/mdi/pound";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
   const api = getApiClient();
@@ -27,97 +30,111 @@
 
   onMount(() => {
     unreadManager.fetchUnreadCounts();
-    const interval = setInterval(() => {
-      unreadManager.fetchUnreadCounts();
-    }, 30000);
+    const interval = setInterval(
+      () => unreadManager.fetchUnreadCounts(),
+      30000,
+    );
     return () => clearInterval(interval);
   });
 </script>
 
 <div class="flex h-full flex-col">
-  <div class="border-base-300 border-b p-4">
-    <h3 class="text-base font-semibold">チャンネル</h3>
-    <CreateChannelButton {organizationId} />
-  </div>
+  <!-- Channels section -->
+  <section class="flex-1 overflow-y-auto">
+    <header class="flex items-center justify-between px-3 py-2">
+      <span class="text-muted text-xs font-medium tracking-wider uppercase">
+        Channels
+      </span>
+      <CreateChannelButton {organizationId} />
+    </header>
 
-  <div class="flex-1 overflow-y-auto">
-    {#if channels.data}
-      {#each channels.data as channel (channel.id)}
-        {@const active =
-          screenMode.type === "chat" &&
-          screenMode.selectedChannelId === channel.id}
-        {@const unreadCount = unreadManager.getUnreadCount(channel.id)}
-        {@const hasUnread = unreadCount > 0}
-        <a
-          class={[
-            "border-base-300 flex w-full items-center justify-between border-b p-3 text-left",
-            active ? "bg-primary text-primary-content" : "hover:bg-base-300",
-          ]}
-          href={`/orgs/${organizationId}/chat/${channel.id}`}
-        >
-          <div class="flex flex-1 flex-col">
-            <span class={["font-medium", hasUnread && "font-bold"]}>
-              # {channel.name}
+    <nav class="px-2">
+      {#if channels.data}
+        {#each channels.data as channel (channel.id)}
+          {@const active =
+            screenMode.type === "chat" &&
+            screenMode.selectedChannelId === channel.id}
+          {@const unreadCount = unreadManager.getUnreadCount(channel.id)}
+          <a
+            href={`/orgs/${organizationId}/chat/${channel.id}`}
+            class={[
+              "group flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors",
+              active
+                ? "bg-primary/15 text-primary"
+                : "text-base-content/80 hover:bg-base-300 hover:text-base-content",
+            ]}
+          >
+            <MdiPound
+              class={[
+                "h-4 w-4 flex-shrink-0",
+                active ? "text-primary" : "text-muted",
+              ]}
+            />
+            <span class={["flex-1 truncate", unreadCount > 0 && "font-medium"]}>
+              {channel.name}
             </span>
-            {#if channel.description}
-              <span class="text-sm opacity-70">{channel.description}</span>
+            {#if unreadCount > 0}
+              <span
+                class="badge-unread flex items-center justify-center rounded-full"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
             {/if}
-          </div>
-          {#if hasUnread}
-            <span class="badge badge-primary badge-sm">{unreadCount}</span>
-          {/if}
-        </a>
-      {/each}
-    {:else}
-      <div class="text-base-content/60 p-4 text-center">
-        チャンネルを読み込み中...
-      </div>
-    {/if}
+          </a>
+        {/each}
+      {:else}
+        <div class="text-muted px-2 py-4 text-center text-sm">
+          読み込み中...
+        </div>
+      {/if}
 
-    {#if channels.data && channels.data.length === 0}
-      <div class="text-base-content/60 p-4 text-center text-sm">
-        まだチャンネルがありません
-      </div>
-    {/if}
-  </div>
-  <div class="border-base-300 border-t">
-    <div class="border-base-300 flex items-center justify-between border-b p-4">
-      <h3 class="text-base font-semibold">DM</h3>
+      {#if channels.data?.length === 0}
+        <div class="text-muted px-2 py-4 text-center text-sm">
+          チャンネルがありません
+        </div>
+      {/if}
+    </nav>
+  </section>
+
+  <!-- DM section -->
+  <section class="border-subtle border-t">
+    <header class="flex items-center justify-between px-3 py-2">
+      <span class="text-muted text-xs font-medium tracking-wider uppercase">
+        Direct Messages
+      </span>
       <button
-        class="btn btn-ghost btn-sm btn-circle"
-        aria-label="新しいDMを開始"
+        class="btn btn-ghost btn-xs btn-square"
+        title="新しいDM"
         onclick={() => (showUserSearch = !showUserSearch)}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          class="inline-block h-5 w-5 stroke-current"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          ></path>
-        </svg>
+        <MdiPlus class="text-muted h-4 w-4" />
       </button>
-    </div>
+    </header>
 
     {#if showUserSearch}
-      <UserSearch {organizationId} />
+      <div class="px-2 pb-2">
+        <UserSearch {organizationId} />
+      </div>
     {/if}
 
-    <DMList
-      {organizationId}
-      selectedChannelId={screenMode.type === "chat"
-        ? screenMode.selectedChannelId
-        : undefined}
-    />
-  </div>
+    <div class="max-h-48 overflow-y-auto px-2 pb-2">
+      <DMList
+        {organizationId}
+        selectedChannelId={screenMode.type === "chat"
+          ? screenMode.selectedChannelId
+          : undefined}
+      />
+    </div>
+  </section>
 
-  <a
-    class="btn btn-primary mt-auto mb-2 w-full"
-    href={`/orgs/${organizationId}/personalization`}>個人用設定</a
-  >
+  <!-- Settings link -->
+  <footer class="border-subtle border-t p-2">
+    <a
+      href={`/orgs/${organizationId}/personalization`}
+      class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors"
+    >
+      <MdiAccount class="h-4 w-4" />
+      <span>個人設定</span>
+    </a>
+  </footer>
 </div>

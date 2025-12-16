@@ -18,7 +18,9 @@ export class MessageListController {
   channelId: string;
 
   // Data
-  messages: ReturnType<typeof useQuery<Message[]>> & { refetch: () => Promise<void> };
+  messages: ReturnType<typeof useQuery<Message[]>> & {
+    refetch: () => Promise<void>;
+  };
   messagesById: Map<string, Message>;
 
   // UI State
@@ -53,7 +55,9 @@ export class MessageListController {
         query: { channelId: this.channelId },
       });
       return unwrapResponse(response);
-    }) as ReturnType<typeof useQuery<Message[]>> & { refetch: () => Promise<void> };
+    }) as ReturnType<typeof useQuery<Message[]>> & {
+      refetch: () => Promise<void>;
+    };
 
     this.messagesById = $derived(
       new Map(

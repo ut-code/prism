@@ -7,6 +7,8 @@
     unwrapResponse,
     useQuery,
   } from "@/lib/api.svelte";
+  import MdiMagnify from "~icons/mdi/magnify";
+  import MdiPound from "~icons/mdi/pound";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
   import type { SearchResult } from "../chat/messageSearch.svelte.ts";
@@ -31,21 +33,20 @@
   let searchQuery = $state("");
   let searchResults = $state<SearchResult[]>([]);
   let isSearching = $state(false);
+  let showSearch = $state(false);
 
   async function handleSearch() {
     if (!searchQuery.trim()) {
       searchResults = [];
       return;
     }
-
     isSearching = true;
     try {
       const response = await api.messages.search.get({
         query: { q: searchQuery, channelId: selectedChannelId },
       });
       searchResults = unwrapResponse(response) as SearchResult[];
-    } catch (error) {
-      console.error("Search failed:", error);
+    } catch {
       searchResults = [];
     } finally {
       isSearching = false;
@@ -53,24 +54,23 @@
   }
 
   function handleResultClick(messageId: string) {
-    const messageEl = document.getElementById(`message-${messageId}`);
-    if (messageEl) {
-      messageEl.scrollIntoView({ behavior: "smooth", block: "center" });
-      messageEl.classList.add("ring-2", "ring-primary");
-      setTimeout(() => {
-        messageEl.classList.remove("ring-2", "ring-primary");
-      }, 2000);
+    const el = document.getElementById(`message-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-primary");
+      setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 2000);
     }
     searchQuery = "";
     searchResults = [];
+    showSearch = false;
   }
 
   async function markChannelAsRead() {
     try {
       // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
       await api.channels[selectedChannelId].read.post({});
-    } catch (error) {
-      console.error("Failed to mark channel as read:", error);
+    } catch {
+      // Ignore errors
     }
   }
 
@@ -79,40 +79,74 @@
   });
 </script>
 
-<div class="border-base-300 bg-base-200 border-b p-4">
-  <div class="mb-3 flex items-center gap-3">
-    <h1 class="text-xl font-semibold">
-      # {selectedChannel.data?.name}
-    </h1>
-    <div class="relative max-w-md flex-1">
-      <input
-        type="text"
-        placeholder="メッセージを検索..."
-        class="input input-sm input-bordered w-full"
-        bind:value={searchQuery}
-        onkeydown={(e) => e.key === "Enter" && handleSearch()}
-      />
-      {#if isSearching}
-        <span class="loading loading-spinner loading-xs absolute top-2 right-2"
-        ></span>
+<div class="flex h-full flex-col">
+  <!-- Channel header -->
+  <header
+    class="border-subtle flex items-center justify-between border-b px-4 py-3"
+  >
+    <div class="flex items-center gap-2">
+      <MdiPound class="text-muted h-5 w-5" />
+      <h1 class="font-semibold">{selectedChannel.data?.name ?? "..."}</h1>
+      {#if selectedChannel.data?.description}
+        <span class="text-muted hidden text-sm sm:inline">
+          — {selectedChannel.data.description}
+        </span>
       {/if}
     </div>
-  </div>
-  {#if selectedChannel.data?.description}
-    <p class="text-base-content/70 text-sm">
-      {selectedChannel.data?.description}
-    </p>
-  {/if}
+
+    <div class="flex items-center gap-2">
+      {#if showSearch}
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="メッセージを検索..."
+            class="input input-sm input-bordered bg-base-200 w-48 pr-8 text-sm"
+            bind:value={searchQuery}
+            onkeydown={(e) => e.key === "Enter" && handleSearch()}
+          />
+          {#if isSearching}
+            <span
+              class="loading loading-spinner loading-xs absolute top-2 right-2"
+            ></span>
+          {/if}
+        </div>
+      {/if}
+      <button
+        class="btn btn-ghost btn-sm btn-square"
+        title="検索"
+        onclick={() => (showSearch = !showSearch)}
+      >
+        <MdiMagnify class="text-muted h-5 w-5" />
+      </button>
+    </div>
+  </header>
+
+  <!-- Search results -->
   {#if searchResults.length > 0}
-    <div class="mt-3">
+    <div class="border-subtle bg-base-200/50 border-b p-2">
       <SearchResults
         results={searchResults}
         onResultClick={handleResultClick}
       />
     </div>
   {/if}
-</div>
 
-<PinnedMessages channelId={selectedChannelId} />
-<MessageList {organizationId} channelId={selectedChannelId} bind:replyingTo />
-<MessageInput channelId={selectedChannelId} {organizationId} bind:replyingTo />
+  <!-- Pinned messages -->
+  <PinnedMessages channelId={selectedChannelId} />
+
+  <!-- Messages -->
+  <div class="flex-1 overflow-y-auto">
+    <MessageList
+      {organizationId}
+      channelId={selectedChannelId}
+      bind:replyingTo
+    />
+  </div>
+
+  <!-- Input -->
+  <MessageInput
+    channelId={selectedChannelId}
+    {organizationId}
+    bind:replyingTo
+  />
+</div>

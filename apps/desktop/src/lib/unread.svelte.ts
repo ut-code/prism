@@ -26,8 +26,8 @@ export class UnreadManager {
    */
   async fetchUnreadCounts() {
     try {
-      // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
       const response =
+        // @ts-expect-error - Eden Treaty dynamic property access for unread route
         await this.api.organizations[this.organizationId].unread.get();
       if (response.data) {
         const counts = response.data as ChannelUnreadCount[];
