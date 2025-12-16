@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { Organization } from "@apps/api-client";
+  import type { Snippet } from "svelte";
 
   interface Props {
     organization: Organization | undefined;
     organizationId: string;
+    children: Snippet;
   }
 
-  const { organization, organizationId }: Props = $props();
+  const { organization, organizationId, children }: Props = $props();
 </script>
 
 <div class="bg-base-200 border-base-300 flex h-full w-80 flex-col border-r">
@@ -59,5 +61,5 @@
     {/if}
   </div>
 
-  <slot />
+  {@render children()}
 </div>
