@@ -25,9 +25,18 @@ export interface Channel {
   id: string;
   name: string;
   description?: string | null;
+  type: "public" | "private" | "dm";
   organizationId: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ChannelMember {
+  id: string;
+  channelId: string;
+  userId: string;
+  joinedAt: Date;
+  user?: User;
 }
 
 export interface Message {
@@ -38,8 +47,11 @@ export interface Message {
   userId: string;
   parentId?: string | null;
   voteId?: string | null;
+  pinnedAt?: Date | null;
+  pinnedBy?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  editedAt?: Date | null;
   // Extended fields (may be populated by joins or separate queries)
   attachments?: string[]; // Array of file IDs
   vote?: string; // Vote ID (alias for voteId)

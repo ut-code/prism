@@ -63,6 +63,11 @@
             controller.showReactionPalette(message.id);
           }}
           onShowReactions={() => modalManager.dispatch(reactionListSnippet)}
+          onPin={() => controller.handlePin(message.id)}
+          isPinned={!!message.pinnedAt}
+          isOwnMessage={controller.isOwnMessage(message)}
+          onEdit={() => controller.startEditing(message)}
+          onDelete={() => controller.handleDelete(message.id)}
         />
       </MessageDropdown>
 
@@ -88,6 +93,11 @@
           controller.calculateMenuPosition(e);
           controller.showDropdown(message.id);
         }}
+        isEditing={controller.editingMessageId === message.id}
+        editedContent={controller.editedContent}
+        onEditChange={(content) => (controller.editedContent = content)}
+        onEditSave={() => controller.saveEdit(message.id)}
+        onEditCancel={() => controller.cancelEditing()}
       />
     {:else}
       <div class="text-center text-base-content/60 py-8">

@@ -59,9 +59,10 @@ export function useQuery<T>(
     get data() {
       return data;
     },
+    refetch: fetch,
   };
 
-  return state as QueryState<T>;
+  return state as QueryState<T> & { refetch: () => Promise<void> };
 }
 
 /**

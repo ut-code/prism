@@ -61,4 +61,6 @@ export type MessageReactionsRoute = {
 
 export type MessagesRoute = {
   reactions: MessageReactionsRoute;
+  put: (body: { content: string }) => ApiResponse<unknown>;
+  delete: () => ApiResponse<{ success: boolean }>;
 };

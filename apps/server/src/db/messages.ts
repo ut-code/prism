@@ -33,8 +33,13 @@ export const messages = pgTable(
     voteId: uuid("vote_id").references(() => votes.id, {
       onDelete: "set null",
     }),
+    pinnedAt: timestamp("pinned_at"),
+    pinnedBy: uuid("pinned_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    editedAt: timestamp("edited_at"),
   },
   (table) => [index("messages_channel_idx").on(table.channelId)],
 );

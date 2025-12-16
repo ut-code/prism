@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { channelReadStatus } from "./channelReadStatus.ts";
 import { files } from "./files.ts";
 import { messages, reactions } from "./messages.ts";
 import { organizationMembers, organizations } from "./organizations.ts";
@@ -54,4 +55,5 @@ export const usersRelations = relations(users, ({ many }) => ({
   files: many(files),
   personalizations: many(personalizations),
   ownedOrganizations: many(organizations),
+  channelReadStatuses: many(channelReadStatus),
 }));

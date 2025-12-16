@@ -4,9 +4,11 @@ import { db } from "../../db/index.ts";
 import { channels } from "../../db/schema.ts";
 import { authMiddleware } from "../../middleware/auth.ts";
 import { getOrganizationPermissions } from "../organizations/permissions.ts";
+import { channelUnreadRoutes } from "./unread.ts";
 
 export const channelRoutes = new Elysia({ prefix: "/channels" })
   .use(authMiddleware)
+  .use(channelUnreadRoutes)
   .get("/", async ({ user, query, set }) => {
     if (!user) {
       set.status = 401;

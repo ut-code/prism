@@ -6,6 +6,7 @@ import {
   useMutation,
   useQuery,
 } from "@/lib/api.svelte";
+import { useAuth } from "@/lib/auth.svelte";
 
 /**
  * Controller for managing message list state and operations.
@@ -17,7 +18,7 @@ export class MessageListController {
   channelId: string;
 
   // Data
-  messages: ReturnType<typeof useQuery<Message[]>>;
+  messages: ReturnType<typeof useQuery<Message[]>> & { refetch: () => Promise<void> };
   messagesById: Map<string, Message>;
 
   // UI State
@@ -25,11 +26,22 @@ export class MessageListController {
   clientY = $state(0);
   visibleDropdown = $state<string | null>(null);
   reactionPaletteVisibleFor = $state<string | null>(null);
+  editingMessageId = $state<string | null>(null);
+  editedContent = $state("");
+
+  // Auth
+  auth = useAuth();
 
   // Mutations
   addReaction: ReturnType<
     typeof useMutation<{ messageId: string; emoji: string }, unknown>
   >;
+  updateMessage: ReturnType<
+    typeof useMutation<{ messageId: string; content: string }, Message>
+  >;
+  deleteMessage: ReturnType<typeof useMutation<{ messageId: string }, unknown>>;
+  pinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
+  unpinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
 
   constructor(props: () => { organizationId: string; channelId: string }) {
     const api = getApiClient();
@@ -41,7 +53,7 @@ export class MessageListController {
         query: { channelId: this.channelId },
       });
       return unwrapResponse(response);
-    });
+    }) as ReturnType<typeof useQuery<Message[]>> & { refetch: () => Promise<void> };
 
     this.messagesById = $derived(
       new Map(
@@ -57,6 +69,34 @@ export class MessageListController {
         return unwrapResponse(response);
       },
     );
+
+    this.updateMessage = useMutation(
+      async (args: { messageId: string; content: string }) => {
+        const response = await getMessage(api, args.messageId).put({
+          content: args.content,
+        });
+        return unwrapResponse(response);
+      },
+    );
+
+    this.deleteMessage = useMutation(async (args: { messageId: string }) => {
+      const response = await getMessage(api, args.messageId).delete();
+      return unwrapResponse(response);
+    });
+
+    this.pinMessage = useMutation(async (args: { messageId: string }) => {
+      const response = await api.messages
+        .pins({ messageId: args.messageId })
+        .post();
+      return unwrapResponse(response);
+    });
+
+    this.unpinMessage = useMutation(async (args: { messageId: string }) => {
+      const response = await api.messages
+        .pins({ messageId: args.messageId })
+        .delete();
+      return unwrapResponse(response);
+    });
 
     // Close dropdowns on click outside
     document.addEventListener("click", () => {
@@ -96,5 +136,50 @@ export class MessageListController {
       emoji,
     });
     this.closeReactionPalette();
+  }
+
+  startEditing(message: Message) {
+    this.editingMessageId = message.id;
+    this.editedContent = message.content;
+    this.visibleDropdown = null;
+  }
+
+  cancelEditing() {
+    this.editingMessageId = null;
+    this.editedContent = "";
+  }
+
+  async saveEdit(messageId: string) {
+    if (!this.editedContent.trim()) return;
+    await this.updateMessage.run({
+      messageId,
+      content: this.editedContent,
+    });
+    this.editingMessageId = null;
+    this.editedContent = "";
+    await this.messages.refetch();
+  }
+
+  async handleDelete(messageId: string) {
+    if (!confirm("このメッセージを削除しますか？")) return;
+    await this.deleteMessage.run({ messageId });
+    await this.messages.refetch();
+  }
+
+  isOwnMessage(message: Message): boolean {
+    return this.auth.user?.id === message.userId;
+  }
+
+  async handlePin(messageId: string) {
+    const message = this.messagesById.get(messageId);
+    if (!message) return;
+
+    if (message.pinnedAt) {
+      await this.unpinMessage.run({ messageId });
+    } else {
+      await this.pinMessage.run({ messageId });
+    }
+    await this.messages.refetch();
+    this.visibleDropdown = null;
   }
 }
