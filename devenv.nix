@@ -1,8 +1,6 @@
-{ pkgs, lib, config, inputs, ... }:
-
-let
+{pkgs, ...}: let
   rustToolchain = pkgs.rust-bin.stable.latest.default.override {
-    extensions = [ "rust-src" ];
+    extensions = ["rust-src"];
   };
 in {
   packages = [
@@ -34,10 +32,24 @@ in {
     WEBKIT_DISABLE_COMPOSITING_MODE = "1";
   };
 
+  processes.web = {
+    exec = "bun --env-file=../../.env dev";
+    process-compose.working_dir = "./apps/desktop";
+  };
+  processes.db-migrate = {
+    exec = "sleep 2 && bun --env-file=../../.env db:migrate";
+    process-compose.working_dir = "./apps/server";
+    process-compose.depends_on.postgres.condition = "process_healthy";
+  };
+  processes.server = {
+    exec = "bun --env-file=../../.env dev";
+    process-compose.working_dir = "./apps/server";
+    process-compose.depends_on.db-migrate.condition = "process_completed_successfully";
+  };
   services.postgres = {
     enable = true;
     package = pkgs.postgresql_16;
-    initialDatabases = [{ name = "prism"; }];
+    initialDatabases = [{name = "prism";}];
     listen_addresses = "127.0.0.1";
   };
 }
