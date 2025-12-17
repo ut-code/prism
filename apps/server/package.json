@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "check": "tsc --noEmit",
-    "db:migrate": "drizzle-kit migrate"
+    "db": "drizzle-kit"
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.1.10",

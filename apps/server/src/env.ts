@@ -7,6 +7,13 @@ const envSchema = v.object({
   PORT: v.optional(v.pipe(v.string(), v.transform(Number)), "3000"),
   GOOGLE_CLIENT_ID: v.pipe(v.string(), v.minLength(1)),
   GOOGLE_CLIENT_SECRET: v.pipe(v.string(), v.minLength(1)),
+  DISABLE_AUTH: v.optional(
+    v.pipe(
+      v.string(),
+      v.transform((s) => s === "true"),
+    ),
+    "false",
+  ),
 });
 
 const result = v.safeParse(envSchema, process.env);

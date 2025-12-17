@@ -15,7 +15,8 @@
     "fix:format": "prettier --write . --log-level warn",
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
-    "db": "cd apps/server && bun --env-file=../../.env run drizzle-kit"
+    "db": "cd apps/server && bun --env-file=../../.env run drizzle-kit",
+    "db:seed": "bun --env-file=.env run scripts/seed.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
