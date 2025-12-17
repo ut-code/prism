@@ -11,10 +11,12 @@ import { accounts, users } from "../../db/schema.ts";
 import { env } from "../../env.ts";
 import { authMiddleware } from "../../middleware/auth.ts";
 
+const redirectUri = `http://localhost:${env.PORT}/auth/google/callback`;
+console.log("Google OAuth redirect URI:", redirectUri);
 const google = new Google(
   env.GOOGLE_CLIENT_ID,
   env.GOOGLE_CLIENT_SECRET,
-  `${env.CORS_ORIGIN}/auth/google/callback`,
+  redirectUri,
 );
 
 export const googleAuthRoutes = new Elysia({ prefix: "/auth/google" })
@@ -27,6 +29,7 @@ export const googleAuthRoutes = new Elysia({ prefix: "/auth/google" })
       "email",
       "profile",
     ]);
+    console.log("Authorization URL:", url.toString());
 
     cookie.google_oauth_state?.set({
       value: state,
