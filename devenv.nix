@@ -31,20 +31,23 @@ in {
     GDK_BACKEND = "x11";
     WEBKIT_DISABLE_COMPOSITING_MODE = "1";
   };
+  dotenv.disableHint = true;
 
-  processes.web = {
-    exec = "bun --env-file=../../.env dev";
-    process-compose.working_dir = "./apps/desktop";
-  };
-  processes.db-migrate = {
-    exec = "sleep 2 && bun --env-file=../../.env db:migrate";
-    process-compose.working_dir = "./apps/server";
-    process-compose.depends_on.postgres.condition = "process_healthy";
-  };
-  processes.server = {
-    exec = "bun --env-file=../../.env dev";
-    process-compose.working_dir = "./apps/server";
-    process-compose.depends_on.db-migrate.condition = "process_completed_successfully";
+  processes = {
+    web = {
+      exec = "bun --env-file=../../.env dev";
+      process-compose.working_dir = "./apps/desktop";
+    };
+    db-migrate = {
+      exec = "sleep 2 && bun --env-file=../../.env db:migrate";
+      process-compose.working_dir = "./apps/server";
+      process-compose.depends_on.postgres.condition = "process_healthy";
+    };
+    server = {
+      exec = "bun --env-file=../../.env dev";
+      process-compose.working_dir = "./apps/server";
+      process-compose.depends_on.db-migrate.condition = "process_completed_successfully";
+    };
   };
   services.postgres = {
     enable = true;
