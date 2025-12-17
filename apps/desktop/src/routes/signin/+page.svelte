@@ -14,8 +14,7 @@
   });
 
   function handleGoogleSignIn() {
-    const apiUrl = import.meta.env.PUBLIC_API_BASE_URL;
-    window.location.href = `${apiUrl}/auth/google/authorize`;
+    auth.signInWithGoogle();
   }
 </script>
 

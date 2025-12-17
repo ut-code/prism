@@ -1,9 +1,9 @@
 <script lang="ts">
   import OrganizationSelector from "@/components/organization/OrganizationSelector.svelte";
+  import { useAuth } from "@/lib/auth.svelte.ts";
   import { goto } from "$app/navigation";
 
-  // TODO: Implement auth when ready
-  const auth = { isLoading: false, isAuthenticated: true };
+  const auth = useAuth();
 
   function handleOrganizationSelect(organizationId: string) {
     goto(`/orgs/${organizationId}`);

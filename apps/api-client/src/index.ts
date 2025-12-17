@@ -20,6 +20,9 @@ export interface ApiConfig {
  */
 export function createApiClient(config: ApiConfig) {
   return treaty<App>(config.baseUrl, {
+    fetch: {
+      credentials: "include",
+    },
     onResponse: (response) => {
       if (response.status === 401 && config.onUnauthorized) {
         config.onUnauthorized();

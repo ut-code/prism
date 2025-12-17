@@ -24,7 +24,7 @@ export const messages = pgTable(
       .references(() => channels.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
     author: text("author").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     parentId: uuid("parent_id").references((): AnyPgColumn => messages.id, {
@@ -34,7 +34,7 @@ export const messages = pgTable(
       onDelete: "set null",
     }),
     pinnedAt: timestamp("pinned_at"),
-    pinnedBy: uuid("pinned_by").references(() => users.id, {
+    pinnedBy: text("pinned_by").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -63,7 +63,7 @@ export const reactions = pgTable(
     messageId: uuid("message_id")
       .notNull()
       .references(() => messages.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     emoji: text("emoji").notNull(),

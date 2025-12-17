@@ -19,7 +19,7 @@ export const files = pgTable(
     originalFilename: text("original_filename").notNull(),
     mimeType: text("mime_type").notNull(),
     size: integer("size").notNull(),
-    uploadedBy: uuid("uploaded_by")
+    uploadedBy: text("uploaded_by")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     organizationId: uuid("organization_id")

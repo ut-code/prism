@@ -1,7 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
-import { googleAuthRoutes } from "./domains/auth/google.ts";
-import { authRoutes } from "./domains/auth/routes.ts";
+import { betterAuthRoutes } from "./domains/auth/better-auth.ts";
 import { channelRoutes } from "./domains/channels/routes.ts";
 import { dmRoutes } from "./domains/dms/routes.ts";
 import { fileRoutes } from "./domains/files/routes.ts";
@@ -19,8 +18,7 @@ const app = new Elysia()
   .use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
   .get("/", () => ({ message: "Prism API Server" }))
   .get("/health", () => ({ status: "ok", timestamp: Date.now() }))
-  .use(authRoutes)
-  .use(googleAuthRoutes)
+  .use(betterAuthRoutes)
   .use(organizationRoutes)
   .use(channelRoutes)
   .use(dmRoutes)
