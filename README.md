@@ -6,48 +6,27 @@ Prism では、 Monorepo 構成を採用しており、 `apps/` にそれぞれ�
 
 ### セットアップ
 
-- インストール:
-  - Bun >= v1.2
-  - Hivemind <https://github.com/DarthSim/hivemind>
-  - PostgreSQL
-- 実行: `bun install --frozen-lockfile`
+devenv を使用してください。
+
+### 環境変数
+
+`.env.sample` を `.env` にコピーし、値を設定してください。
+
+```sh
+cp .env.sample .env
+```
+
+`JWT_SECRET` の生成 (32バイト = 256ビット推奨):
+
+```sh
+openssl rand -base64 32
+```
 
 ### 開発用サーバー
 
-- Server (`bun run:server`)
-  - Elysia API server at <http://localhost:3000>
-- Web Client (`bun run:web`)
-  - depends on Server
-  - <http://localhost:5173>
-- Storybook (`bun dev:storybook`)
-  - <http://localhost:6006>
-- Tauri (`bun dev:tauri`)
-  - depends on Server
-  - conflicts with web client
-
 ```sh
-bun dev
+devenv up
 ```
-
-でアプリケーションの動作に必要なものだけ (Server + Web Client) を起動します。
-
-#### Storybook
-
-```sh
-bun dev:storybook
-```
-
-で上に加え Storybook が起動します。
-
-#### Tauri
-
-Tauri はコンパイルに時間と計算資源を使うので、
-
-```sh
-bun dev:tauri
-```
-
-で明示的に起動しないと起動しません。
 
 ## 注意点
 

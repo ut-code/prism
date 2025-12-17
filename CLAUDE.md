@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Desktop**: Tauri (optional)
 - **Package Manager**: Bun
 - **Monorepo**: Workspaces (`apps/*`)
+- **Dev Environment**: devenv (logs: `.devenv/processes.log`)
 
 ## Directory Structure
 
@@ -33,7 +34,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 │   └── api-client/       # Shared API types
 ├── docs/
 │   └── skills/           # Agent skill docs
-└── tasks/                # Procfile for dev
+├── tasks/                # Procfile for dev
+├── .env.sample           # environment variable samples.
+└── .env                  # all environment variables in here. pls don't read
 ```
 
 ## Import Aliases
@@ -93,7 +96,7 @@ await client.products.post({ name: "bar", price: 100 }); // POST
 ## Code Quality
 
 - **FILE LENGTH**: 30-50 lines recommended, 100 MAX
-- **CHECK**: Always run `bun check` after writing code
+- **TIDY**: Run `bun tidy` after writing code (auto-fix + check)
 - **DOCUMENTATION**: Document behavior, not implementation
 
 ## Svelte Rules
@@ -122,3 +125,15 @@ UI [.svelte] → controller [.svelte.ts] → processor [.svelte.ts] → utility 
 | UI Design | `docs/skills/ui-design.md` | UI実装、デザイン判断 |
 
 </skills>
+
+<debugging>
+
+## Debugging
+
+サーバーエラー時は **最初に** ログを確認する：
+
+```bash
+tail -100 .devenv/processes.log
+```
+
+</debugging>

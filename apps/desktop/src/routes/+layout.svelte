@@ -4,8 +4,8 @@
 
   const { children } = $props();
 
-  // Initialize API client
-  setupApi("http://localhost:3000");
+  // Initialize API client (uses PUBLIC_API_BASE_URL env var)
+  setupApi();
 </script>
 
 {@render children()}
