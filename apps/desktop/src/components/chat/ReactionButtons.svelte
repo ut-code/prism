@@ -8,6 +8,7 @@
     useMutation,
     useQuery,
   } from "@/lib/api.svelte";
+  import { useWebSocket } from "@/lib/websocket";
 
   interface Props {
     messageId: string;
@@ -16,6 +17,7 @@
   let { messageId }: Props = $props();
 
   const api = getApiClient();
+  const ws = useWebSocket();
 
   const reactions = useQuery<Reaction[]>(async () => {
     const response = await getMessage(api, messageId).reactions.get();
@@ -25,6 +27,33 @@
   const me = useQuery<User>(async () => {
     const response = await api.users.me.get();
     return unwrapResponse(response);
+  });
+
+  // Local state for real-time updates
+  let reactionsData = $state<Reaction[]>([]);
+
+  $effect(() => {
+    if (reactions.data) {
+      reactionsData = reactions.data;
+    }
+  });
+
+  // WebSocket subscriptions (auto-cleanup via useWebSocket)
+  ws.on("reaction:added", (event) => {
+    if (event.messageId === messageId) {
+      const newReaction = event.reaction as Reaction;
+      if (!reactionsData.some((r) => r.id === newReaction.id)) {
+        reactionsData = [...reactionsData, newReaction];
+      }
+    }
+  });
+
+  ws.on("reaction:removed", (event) => {
+    if (event.messageId === messageId) {
+      reactionsData = reactionsData.filter(
+        (r) => !(r.emoji === event.emoji && r.userId === event.userId),
+      );
+    }
   });
 
   const addReaction = useMutation(
@@ -49,10 +78,7 @@
 
   const reactionsByEmoji = $derived.by(() => {
     const counts = new Map<string, { count: number; me: boolean }>();
-    if (!reactions.data) {
-      return counts;
-    }
-    for (const r of reactions.data) {
+    for (const r of reactionsData) {
       counts.set(r.emoji, {
         count: (counts.get(r.emoji)?.count ?? 0) + 1,
         me: counts.get(r.emoji)?.me || r.userId === me.data?.id,

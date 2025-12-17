@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
-import { reactions } from "../../db/schema.ts";
+import { messages, reactions } from "../../db/schema.ts";
 import { authMiddleware } from "../../middleware/auth.ts";
+import { wsManager } from "../../ws/manager.ts";
 
 /**
  * Handles reaction-related operations for messages.
@@ -57,6 +58,22 @@ export const messageReactionRoutes = new Elysia()
         })
         .returning();
 
+      // Broadcast reaction:added event
+      const [message] = await db
+        .select({ channelId: messages.channelId })
+        .from(messages)
+        .where(eq(messages.id, params.id))
+        .limit(1);
+
+      if (message) {
+        wsManager.broadcast(message.channelId, {
+          type: "reaction:added",
+          channelId: message.channelId,
+          messageId: params.id,
+          reaction,
+        });
+      }
+
       return reaction;
     },
     {
@@ -80,6 +97,23 @@ export const messageReactionRoutes = new Elysia()
           eq(reactions.emoji, params.emoji),
         ),
       );
+
+    // Broadcast reaction:removed event
+    const [message] = await db
+      .select({ channelId: messages.channelId })
+      .from(messages)
+      .where(eq(messages.id, params.id))
+      .limit(1);
+
+    if (message) {
+      wsManager.broadcast(message.channelId, {
+        type: "reaction:removed",
+        channelId: message.channelId,
+        messageId: params.id,
+        emoji: params.emoji,
+        userId: user.id,
+      });
+    }
 
     return { success: true };
   });

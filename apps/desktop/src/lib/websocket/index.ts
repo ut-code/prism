@@ -25,3 +25,4 @@ export function getWebSocket(): WebSocketClient {
 }
 
 export type { ConnectionStatus, WsEvent } from "./types.ts";
+export { useWebSocket } from "./useWebSocket.svelte.ts";

@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth.svelte";
 import { getWebSocket } from "@/lib/websocket";
 import type { WsEvent } from "@/lib/websocket/types";
 
+type WsHandler = (event: WsEvent) => void;
+
 /**
  * Controller for managing message list state and operations.
  * Handles fetching messages, managing UI state for dropdowns/palettes,
@@ -47,6 +49,10 @@ export class MessageListController {
   deleteMessage: ReturnType<typeof useMutation<{ messageId: string }, unknown>>;
   pinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
   unpinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
+
+  // WebSocket cleanup
+  private wsHandlers: { type: string; handler: WsHandler }[] = [];
+  private ws: ReturnType<typeof getWebSocket> | null = null;
 
   constructor(props: () => { organizationId: string; channelId: string }) {
     const api = getApiClient();
@@ -114,11 +120,11 @@ export class MessageListController {
 
     // WebSocket integration
     try {
-      const ws = getWebSocket();
-      ws.subscribe(this.channelId);
+      this.ws = getWebSocket();
+      this.ws.subscribe(this.channelId);
 
       // Handle new messages
-      ws.on("message:created", (event: WsEvent) => {
+      const handleCreated: WsHandler = (event) => {
         if (
           event.type === "message:created" &&
           event.channelId === this.channelId
@@ -128,10 +134,10 @@ export class MessageListController {
             this.messagesData = [...this.messagesData, newMessage];
           }
         }
-      });
+      };
 
       // Handle message updates
-      ws.on("message:updated", (event: WsEvent) => {
+      const handleUpdated: WsHandler = (event) => {
         if (
           event.type === "message:updated" &&
           event.channelId === this.channelId
@@ -141,10 +147,10 @@ export class MessageListController {
             m.id === updated.id ? updated : m,
           );
         }
-      });
+      };
 
       // Handle message deletions
-      ws.on("message:deleted", (event: WsEvent) => {
+      const handleDeleted: WsHandler = (event) => {
         if (
           event.type === "message:deleted" &&
           event.channelId === this.channelId
@@ -153,7 +159,17 @@ export class MessageListController {
             (m) => m.id !== event.messageId,
           );
         }
-      });
+      };
+
+      this.ws.on("message:created", handleCreated);
+      this.ws.on("message:updated", handleUpdated);
+      this.ws.on("message:deleted", handleDeleted);
+
+      this.wsHandlers = [
+        { type: "message:created", handler: handleCreated },
+        { type: "message:updated", handler: handleUpdated },
+        { type: "message:deleted", handler: handleDeleted },
+      ];
     } catch (error) {
       console.warn("WebSocket not initialized:", error);
     }
@@ -241,5 +257,17 @@ export class MessageListController {
     }
     await this.messages.refetch();
     this.visibleDropdown = null;
+  }
+
+  /**
+   * Cleanup WebSocket subscriptions. Call this when the component unmounts.
+   */
+  destroy() {
+    if (this.ws) {
+      for (const { type, handler } of this.wsHandlers) {
+        this.ws.off(type, handler);
+      }
+      this.ws.unsubscribe(this.channelId);
+    }
   }
 }

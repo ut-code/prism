@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { UnreadManager } from "@/lib/unread.svelte";
+  import { useWebSocket } from "@/lib/websocket";
   import type { Selection } from "$components/chat/types";
   import DMList from "$components/dms/DMList.svelte";
   import UserSearch from "$components/dms/UserSearch.svelte";
@@ -28,13 +29,14 @@
   const unreadManager = $derived(new UnreadManager(api, organizationId));
   let showUserSearch = $state(false);
 
+  // WebSocket: refresh unread counts on new messages (auto-cleanup)
+  const ws = useWebSocket();
+  ws.on("message:created", () => {
+    unreadManager.fetchUnreadCounts();
+  });
+
   onMount(() => {
     unreadManager.fetchUnreadCounts();
-    const interval = setInterval(
-      () => unreadManager.fetchUnreadCounts(),
-      30000,
-    );
-    return () => clearInterval(interval);
   });
 </script>
 

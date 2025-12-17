@@ -85,6 +85,13 @@ export class WebSocketClient {
     this.eventManager.on(eventType, callback);
   }
 
+  /**
+   * Removes an event listener.
+   */
+  off(eventType: string, callback: (event: WsEvent) => void) {
+    this.eventManager.off(eventType, callback);
+  }
+
   private send(data: unknown) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));

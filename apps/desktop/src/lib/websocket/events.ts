@@ -17,6 +17,13 @@ export class EventManager {
   }
 
   /**
+   * Removes an event listener.
+   */
+  off(eventType: string, callback: (event: WsEvent) => void) {
+    this.listeners.get(eventType)?.delete(callback);
+  }
+
+  /**
    * Notifies all listeners for a given event.
    */
   notify(event: WsEvent) {
