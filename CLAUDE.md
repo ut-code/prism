@@ -71,6 +71,101 @@ $effect(() => { ... })
 - **clsx builtin**: `<div class={["text-lg", isError && "text-error"]}>`
 - **Reactive class**: Define in `.svelte.ts` files for reusability
 
+## Controllers (`.svelte.ts`)
+
+Controllers must be instantiated **synchronously at script top-level**, so `$effect`/`$derived` work in constructors.
+
+**Reactive props pattern:**
+
+```ts
+// ✅ Pass getter function, fine-grained reactivity
+class MyController {
+  organizationId: string;
+  constructor(organizationId: () => string) {
+    this.organizationId = $derived(organizationId());
+  }
+}
+// Usage: new MyController(() => organizationId)
+
+// ❌ Don't pass raw values (not reactive)
+class MyController {
+  organizationId: string;
+  constructor(organizationId: string) {
+    this.organizationId = organizationId; // Won't update!
+  }
+}
+```
+
+```svelte
+<script lang="ts">
+  // ✅ Do - at the top of the script (just after imports)
+  const foo = FooController();
+
+  // ❌ Don't - delay the initialization after an await
+  await something();
+  const foo = FooController();
+</script>
+```
+
+**Hooks in controllers:** `useWebSocket`, `useQuery`, etc. can be called in constructors since they run at component init time.
+for example,
+
+```ts
+// foo.controller.svelte.ts
+class FooController {
+  constructor() {
+    useWebSocket("message:foo", (ev) => {
+      console.log("event received:", ev);
+    });
+  }
+}
+```
+
+## Vocaburaly
+
+[Hooks]
+we derive the words "hooks" from react.
+hooks in svelte can only be called at script initialization time.
+
+```ts
+// for "constant" variable you may use bare variables, but otherwise use getter-style passing, just like in controllers.
+function useHook(defaultVal: number, plus: () => number) {
+  // inside hooks you can call effects
+  $effect(() => {
+    console.log("effects");
+  });
+
+  // create reactive variables
+  let reactive = $state(defaultVal);
+  let derived = $derived(reactive * 2 + plus());
+
+  // and return controller-like objects
+  // ALWAYS use getters and setters for returning reactive variables, otherwise it won't be reactive.
+  return {
+    get reactive() {
+      return reactive;
+    },
+    set reactive(newVal) {
+      reactive = newVal;
+    }
+    get derived() {
+      return derived;
+    }
+  }
+}
+```
+
+```svelte
+<script lang="ts">
+  let plus = $state(1);
+
+  // do not destruct it. don't.
+  const foo = useHook(3, () => plus);
+  foo.reactive++;
+</script>
+{foo.reactive} * 2 + {plus} = {foo.derived}
+```
+
 </framework-svelte>
 
 <framework-elysia>
@@ -130,7 +225,7 @@ UI [.svelte] → controller [.svelte.ts] → processor [.svelte.ts] → utility 
 
 ## Debugging
 
-サーバーエラー時は **最初に** ログを確認する：
+サーバーエラー時はログを確認する：
 
 ```bash
 tail -100 .devenv/processes.log
