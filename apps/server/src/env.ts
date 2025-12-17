@@ -5,6 +5,8 @@ const envSchema = v.object({
   JWT_SECRET: v.pipe(v.string(), v.minLength(1)),
   CORS_ORIGIN: v.pipe(v.string(), v.url()),
   PORT: v.optional(v.pipe(v.string(), v.transform(Number)), "3000"),
+  GOOGLE_CLIENT_ID: v.pipe(v.string(), v.minLength(1)),
+  GOOGLE_CLIENT_SECRET: v.pipe(v.string(), v.minLength(1)),
 });
 
 const result = v.safeParse(envSchema, process.env);

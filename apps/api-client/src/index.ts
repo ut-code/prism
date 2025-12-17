@@ -11,7 +11,7 @@ export type * from "./types.ts";
 
 export interface ApiConfig {
   baseUrl: string;
-  fetch?: typeof fetch;
+  onUnauthorized?: () => void;
 }
 
 /**
@@ -19,7 +19,13 @@ export interface ApiConfig {
  * The client provides type-safe access to all API endpoints.
  */
 export function createApiClient(config: ApiConfig) {
-  return treaty<App>(config.baseUrl);
+  return treaty<App>(config.baseUrl, {
+    onResponse: (response) => {
+      if (response.status === 401 && config.onUnauthorized) {
+        config.onUnauthorized();
+      }
+    },
+  });
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;

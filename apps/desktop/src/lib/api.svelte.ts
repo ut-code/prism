@@ -8,6 +8,7 @@ import {
   getTask,
   getVote,
 } from "@apps/api-client";
+import { goto } from "$app/navigation";
 
 // Re-export helper functions
 export { getChannel, getFile, getMessage, getOrganization, getTask, getVote };
@@ -30,7 +31,10 @@ export function setupApi(baseUrl?: string) {
       "API base URL is required. Provide baseUrl or set PUBLIC_API_BASE_URL environment variable",
     );
   }
-  apiClient = createApiClient({ baseUrl: url });
+  apiClient = createApiClient({
+    baseUrl: url,
+    onUnauthorized: () => goto("/signin", { replaceState: true }),
+  });
   return apiClient;
 }
 
