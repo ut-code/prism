@@ -6,16 +6,18 @@
 
   const { children } = $props();
 
-  // Initialize API client (uses PUBLIC_API_BASE_URL env var)
+  // Initialize API client
   setupApi();
 
   // Initialize WebSocket client
   const wsUrl = `${env.PUBLIC_API_BASE_URL.replace(/^http/, "ws")}/ws`;
-  const ws = setupWebSocket(wsUrl);
 
   $effect(() => {
-    ws.connect();
-    return () => ws.disconnect();
+    let cleanup: (() => void) | undefined;
+    setupWebSocket(wsUrl).then((ws) => {
+      cleanup = () => ws.close();
+    });
+    return () => cleanup?.();
   });
 </script>
 

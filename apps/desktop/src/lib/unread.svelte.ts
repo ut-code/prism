@@ -1,4 +1,5 @@
 import type { ApiClient } from "@apps/api-client";
+import { useWebSocket } from "./websocket/index.ts";
 
 /**
  * Unread count for a single channel
@@ -16,9 +17,13 @@ export class UnreadManager {
   private api: ApiClient;
   private organizationId: string;
 
-  constructor(api: ApiClient, organizationId: string) {
+  constructor(api: ApiClient, organizationId: () => string) {
     this.api = api;
-    this.organizationId = organizationId;
+    this.organizationId = $derived(organizationId());
+
+    useWebSocket("message:created", () => {
+      this.fetchUnreadCounts();
+    });
   }
 
   /**

@@ -1,9 +1,17 @@
 import type { AuthUser } from "../middleware/auth.ts";
 
 /**
- * WebSocket events that can be broadcast to clients.
+ * Control messages sent to specific clients.
  */
-export type WsEvent =
+export type WsControlMessage =
+  | { type: "subscribed"; channelId: string }
+  | { type: "unsubscribed"; channelId: string }
+  | { type: "pong" };
+
+/**
+ * Broadcast events sent to channel subscribers.
+ */
+export type WsBroadcastEvent =
   | { type: "message:created"; channelId: string; message: unknown }
   | {
       type: "message:updated";
@@ -25,6 +33,14 @@ export type WsEvent =
       emoji: string;
       userId: string;
     };
+
+/**
+ * All server-to-client messages (control + broadcast).
+ */
+export type WsServerMessage = WsControlMessage | WsBroadcastEvent;
+
+/** @deprecated Use WsBroadcastEvent instead */
+export type WsEvent = WsBroadcastEvent;
 
 /**
  * Client-to-server messages.

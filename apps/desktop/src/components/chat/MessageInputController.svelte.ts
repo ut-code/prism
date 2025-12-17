@@ -20,8 +20,13 @@ interface ControllerProps {
  * Manages UI state and coordinates message sending operations.
  */
 export class MessageInputController {
-  private props: () => ControllerProps;
   private api = new MessageInputApi();
+
+  // Reactive props
+  organizationId: string;
+  channelId: string;
+  replyingTo: Message | null;
+  onReplyingToChange: (value: Message | null) => void;
 
   // UI state
   messageContent = $state("");
@@ -34,9 +39,13 @@ export class MessageInputController {
   uploader: FileUploader;
 
   constructor(props: () => ControllerProps) {
-    this.props = props;
+    this.organizationId = $derived(props().organizationId);
+    this.channelId = $derived(props().channelId);
+    this.replyingTo = $derived(props().replyingTo);
+    this.onReplyingToChange = $derived(props().onReplyingToChange);
+
     this.uploader = new FileUploader(() => ({
-      organizationId: this.props().organizationId,
+      organizationId: this.organizationId,
     }));
   }
 
@@ -76,10 +85,10 @@ export class MessageInputController {
       : undefined;
 
     await this.api.sendMessageMutation.run({
-      channelId: this.props().channelId,
+      channelId: this.channelId,
       content: this.messageContent.trim() || "",
       author: this.api.identity.data?.name || "unregistered",
-      parentId: this.props().replyingTo?.id ?? undefined,
+      parentId: this.replyingTo?.id ?? undefined,
       attachments,
       voteId,
     });
@@ -93,7 +102,7 @@ export class MessageInputController {
   private resetForm() {
     this.messageContent = "";
     this.attachedFiles = [];
-    this.props().onReplyingToChange(null);
+    this.onReplyingToChange(null);
     this.showFileSelector = false;
     this.vote = createEmptyVote();
   }

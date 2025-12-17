@@ -13,8 +13,44 @@ const wsClientMessage = t.Union([
   t.Object({ type: t.Literal("ping") }),
 ]);
 
+const wsServerMessage = t.Union([
+  t.Object({ type: t.Literal("subscribed"), channelId: t.String() }),
+  t.Object({ type: t.Literal("unsubscribed"), channelId: t.String() }),
+  t.Object({ type: t.Literal("pong") }),
+  t.Object({
+    type: t.Literal("message:created"),
+    channelId: t.String(),
+    message: t.Unknown(),
+  }),
+  t.Object({
+    type: t.Literal("message:updated"),
+    channelId: t.String(),
+    messageId: t.String(),
+    message: t.Unknown(),
+  }),
+  t.Object({
+    type: t.Literal("message:deleted"),
+    channelId: t.String(),
+    messageId: t.String(),
+  }),
+  t.Object({
+    type: t.Literal("reaction:added"),
+    channelId: t.String(),
+    messageId: t.String(),
+    reaction: t.Unknown(),
+  }),
+  t.Object({
+    type: t.Literal("reaction:removed"),
+    channelId: t.String(),
+    messageId: t.String(),
+    emoji: t.String(),
+    userId: t.String(),
+  }),
+]);
+
 export const wsRoutes = new Elysia().use(authMiddleware).ws("/ws", {
   body: wsClientMessage,
+  response: wsServerMessage,
 
   open(ws) {
     const user = ws.data.user;

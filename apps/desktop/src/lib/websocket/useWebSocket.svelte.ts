@@ -1,44 +1,41 @@
+import type { WsServerMessage } from "@apps/api-client";
 import { getWebSocket } from "./index.ts";
-import type { WsEvent } from "./types.ts";
 
-type EventType = WsEvent["type"];
-type EventHandler<T extends EventType> = (
-  event: Extract<WsEvent, { type: T }>,
-) => void;
+type EventType = WsServerMessage["type"];
+type EventOfType<T extends EventType> = Extract<WsServerMessage, { type: T }>;
 
 /**
- * Subscribe to a WebSocket event with automatic cleanup via $effect.
+ * Subscribe to a specific WebSocket event type with automatic cleanup.
  *
  * @example
  * ```ts
  * useWebSocket("message:created", (event) => {
- *   console.log("New message:", event.message);
+ *   console.log(event.channelId, event.message);
  * });
  * ```
  */
 export function useWebSocket<T extends EventType>(
   type: T,
-  handler: EventHandler<T>,
+  handler: (event: EventOfType<T>) => void,
 ): void {
   let ws: ReturnType<typeof getWebSocket> | null = null;
 
   try {
     ws = getWebSocket();
   } catch {
-    console.warn("WebSocket not initialized");
     return;
   }
 
-  const wrappedHandler = (event: WsEvent) => {
-    if (event.type === type) {
-      handler(event as Extract<WsEvent, { type: T }>);
+  const messageHandler = (event: { data: WsServerMessage }) => {
+    if (event.data.type === type) {
+      handler(event.data as EventOfType<T>);
     }
   };
 
   $effect(() => {
-    ws?.on(type, wrappedHandler);
+    ws?.on("message", messageHandler);
     return () => {
-      ws?.off(type, wrappedHandler);
+      ws?.off("message", messageHandler);
     };
   });
 }

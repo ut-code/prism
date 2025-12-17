@@ -1,10 +1,14 @@
-import type { WsConnection, WsEvent } from "./types.ts";
+import type {
+  WsBroadcastEvent,
+  WsConnection,
+  WsServerMessage,
+} from "./types.ts";
 
 /**
  * WebSocket instance with send method.
  */
 interface WsInstance {
-  send: (message: string) => void;
+  send: (message: WsServerMessage) => void;
 }
 
 /**
@@ -56,14 +60,11 @@ export class WsManager {
   /**
    * Broadcasts an event to all connections subscribed to the channel.
    */
-  broadcast(channelId: string, event: WsEvent) {
-    const message = JSON.stringify(event);
+  broadcast(channelId: string, event: WsBroadcastEvent) {
     for (const [id, conn] of this.connections) {
       if (conn.channels.has(channelId)) {
         const ws = this.sockets.get(id);
-        if (ws) {
-          ws.send(message);
-        }
+        ws?.send(event);
       }
     }
   }

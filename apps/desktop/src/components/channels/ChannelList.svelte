@@ -26,7 +26,7 @@
     return unwrapResponse(response);
   });
 
-  const unreadManager = $derived(new UnreadManager(api, organizationId));
+  const unreadManager = new UnreadManager(api, () => organizationId);
   let showUserSearch = $state(false);
 
   // WebSocket: refresh unread counts on new messages

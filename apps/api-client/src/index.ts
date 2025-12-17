@@ -8,6 +8,7 @@ import { treaty } from "@elysiajs/eden";
 
 export * from "./route-helpers.ts";
 export type * from "./types.ts";
+export * from "./ws.ts";
 
 export interface ApiConfig {
   baseUrl: string;

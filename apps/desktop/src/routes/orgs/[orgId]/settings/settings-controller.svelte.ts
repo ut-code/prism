@@ -9,7 +9,7 @@ import { searchAndAddMember } from "./member-utils.ts";
  * Handles UI state management and coordinates data operations.
  */
 export class SettingsController {
-  organizationId: () => string;
+  organizationId: string;
   api;
   organization;
   members;
@@ -23,7 +23,7 @@ export class SettingsController {
   });
 
   constructor(organizationId: () => string) {
-    this.organizationId = organizationId;
+    this.organizationId = $derived(organizationId());
 
     const { organization, members, api } = useOrganizationData(organizationId);
     this.organization = organization;
@@ -46,7 +46,7 @@ export class SettingsController {
     try {
       console.log("Updating organization...", $state.snapshot(this.editForm));
       await this.updateOrganization.run({
-        id: this.organizationId(),
+        id: this.organizationId,
         name: this.editForm.name,
         description: this.editForm.description,
       });
@@ -60,7 +60,7 @@ export class SettingsController {
     if (confirm("このメンバーを削除しますか？")) {
       try {
         await this.removeMember.run({
-          organizationId: this.organizationId(),
+          organizationId: this.organizationId,
           userId,
         });
       } catch (error) {
@@ -70,10 +70,6 @@ export class SettingsController {
   }
 
   async addMember() {
-    await searchAndAddMember(
-      this.api,
-      this.organizationId(),
-      this.members.data,
-    );
+    await searchAndAddMember(this.api, this.organizationId, this.members.data);
   }
 }

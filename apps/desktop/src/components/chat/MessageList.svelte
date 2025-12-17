@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Message } from "@apps/api-client";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
   import MessageDropdown from "./MessageDropdown.svelte";
@@ -39,10 +39,6 @@
 
   onMount(() => {
     scrollToBottom();
-  });
-
-  onDestroy(() => {
-    controller.destroy();
   });
 </script>
 

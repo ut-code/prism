@@ -3,7 +3,8 @@
   "version": "1.0.50",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./ws/types": "./src/ws/types.ts"
   },
   "scripts": {
     "dev": "bun run --watch src/index.ts",
