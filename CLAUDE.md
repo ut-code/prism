@@ -163,6 +163,7 @@ function useHook(defaultVal: number, plus: () => number) {
   const foo = useHook(3, () => plus);
   foo.reactive++;
 </script>
+
 {foo.reactive} * 2 + {plus} = {foo.derived}
 ```
 
@@ -190,7 +191,7 @@ await client.products.post({ name: "bar", price: 100 }); // POST
 
 ## Code Quality
 
-- **FILE LENGTH**: 30-50 lines recommended, 100 MAX
+- **FILE LENGTH**: 30-50 lines recommended, be warned over 100, 200 AT MAX
 - **TIDY**: Run `bun tidy` after writing code (auto-fix + check)
 - **DOCUMENTATION**: Document behavior, not implementation
 

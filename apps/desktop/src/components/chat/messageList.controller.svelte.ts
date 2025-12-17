@@ -1,17 +1,12 @@
 import type { Message } from "@apps/api-client";
-import {
-  getApiClient,
-  getMessage,
-  unwrapResponse,
-  useMutation,
-  useQuery,
-} from "@/lib/api.svelte";
+import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
 import { useAuth } from "@/lib/auth.svelte";
 import {
-  subscribeChannel,
-  unsubscribeChannel,
-  useWebSocket,
-} from "@/lib/websocket";
+  createMessageMutations,
+  type MessageMutations,
+} from "./messageList.mutations.svelte.ts";
+import { MessageListUI } from "./messageList.ui.svelte.ts";
+import { setupWebSocketHandlers } from "./messageList.websocket.svelte.ts";
 
 /**
  * Controller for managing message list state and operations.
@@ -27,27 +22,14 @@ export class MessageListController {
   messagesById: Map<string, Message>;
   messagesData = $state<Message[]>([]);
 
-  // UI State
-  clientX = $state(0);
-  clientY = $state(0);
-  visibleDropdown = $state<string | null>(null);
-  reactionPaletteVisibleFor = $state<string | null>(null);
-  editingMessageId = $state<string | null>(null);
-  editedContent = $state("");
-
   // Auth
   auth = useAuth();
 
-  // Mutations
-  addReaction: ReturnType<
-    typeof useMutation<{ messageId: string; emoji: string }, unknown>
-  >;
-  updateMessage: ReturnType<
-    typeof useMutation<{ messageId: string; content: string }, Message>
-  >;
-  deleteMessage: ReturnType<typeof useMutation<{ messageId: string }, unknown>>;
-  pinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
-  unpinMessage: ReturnType<typeof useMutation<{ messageId: string }, Message>>;
+  // UI
+  ui: MessageListUI;
+
+  // Mutations (exposed for compatibility)
+  mutations: MessageMutations;
 
   constructor(props: () => { organizationId: string; channelId: string }) {
     const api = getApiClient();
@@ -75,153 +57,59 @@ export class MessageListController {
       }
     });
 
-    this.addReaction = useMutation(
-      async (args: { messageId: string; emoji: string }) => {
-        const response = await getMessage(api, args.messageId).reactions.post({
-          emoji: args.emoji,
-        });
-        return unwrapResponse(response);
+    this.mutations = createMessageMutations();
+    this.ui = new MessageListUI(this.mutations, () => this.messages.refetch());
+
+    setupWebSocketHandlers(
+      this.channelId,
+      this.messagesData,
+      this.messagesById,
+      (messages) => {
+        this.messagesData = messages;
       },
     );
-
-    this.updateMessage = useMutation(
-      async (args: { messageId: string; content: string }) => {
-        const response = await getMessage(api, args.messageId).put({
-          content: args.content,
-        });
-        return unwrapResponse(response);
-      },
-    );
-
-    this.deleteMessage = useMutation(async (args: { messageId: string }) => {
-      const response = await getMessage(api, args.messageId).delete();
-      return unwrapResponse(response);
-    });
-
-    this.pinMessage = useMutation(async (args: { messageId: string }) => {
-      const response = await api.messages
-        .pins({ messageId: args.messageId })
-        .post();
-      return unwrapResponse(response);
-    });
-
-    this.unpinMessage = useMutation(async (args: { messageId: string }) => {
-      const response = await api.messages
-        .pins({ messageId: args.messageId })
-        .delete();
-      return unwrapResponse(response);
-    });
-
-    // WebSocket integration
-    $effect(() => {
-      subscribeChannel(this.channelId);
-      return () => unsubscribeChannel(this.channelId);
-    });
-
-    useWebSocket("message:created", (event) => {
-      if (event.channelId === this.channelId) {
-        const newMessage = event.message as Message;
-        if (!this.messagesById.get(newMessage.id)) {
-          this.messagesData = [...this.messagesData, newMessage];
-        }
-      }
-    });
-
-    useWebSocket("message:updated", (event) => {
-      if (event.channelId === this.channelId) {
-        const updated = event.message as Message;
-        this.messagesData = this.messagesData.map((m) =>
-          m.id === updated.id ? updated : m,
-        );
-      }
-    });
-
-    useWebSocket("message:deleted", (event) => {
-      if (event.channelId === this.channelId) {
-        this.messagesData = this.messagesData.filter(
-          (m) => m.id !== event.messageId,
-        );
-      }
-    });
-
-    document.addEventListener("click", () => {
-      this.visibleDropdown = null;
-    });
   }
 
-  calculateMenuPosition(e: MouseEvent) {
-    const menuWidth = 160;
-    this.clientX =
-      e.clientX + menuWidth > window.innerWidth
-        ? e.clientX - menuWidth
-        : e.clientX;
-    this.clientY = e.clientY;
+  // UI state delegation
+  get clientX() {
+    return this.ui.clientX;
+  }
+  get clientY() {
+    return this.ui.clientY;
+  }
+  get visibleDropdown() {
+    return this.ui.visibleDropdown;
+  }
+  set visibleDropdown(v: string | null) {
+    this.ui.visibleDropdown = v;
+  }
+  get reactionPaletteVisibleFor() {
+    return this.ui.reactionPaletteVisibleFor;
+  }
+  get editingMessageId() {
+    return this.ui.editingMessageId;
+  }
+  get editedContent() {
+    return this.ui.editedContent;
+  }
+  set editedContent(v: string) {
+    this.ui.editedContent = v;
   }
 
-  showDropdown(messageId: string) {
-    this.visibleDropdown = messageId;
-  }
-
-  showReactionPalette(messageId: string) {
-    this.reactionPaletteVisibleFor = messageId;
-    this.visibleDropdown = null;
-  }
-
-  closeReactionPalette() {
-    this.reactionPaletteVisibleFor = null;
-  }
-
-  async handleEmojiSelected(emoji: string) {
-    if (!this.reactionPaletteVisibleFor) return;
-    await this.addReaction.run({
-      messageId: this.reactionPaletteVisibleFor,
-      emoji,
-    });
-    this.closeReactionPalette();
-  }
-
-  startEditing(message: Message) {
-    this.editingMessageId = message.id;
-    this.editedContent = message.content;
-    this.visibleDropdown = null;
-  }
-
-  cancelEditing() {
-    this.editingMessageId = null;
-    this.editedContent = "";
-  }
-
-  async saveEdit(messageId: string) {
-    if (!this.editedContent.trim()) return;
-    await this.updateMessage.run({
-      messageId,
-      content: this.editedContent,
-    });
-    this.editingMessageId = null;
-    this.editedContent = "";
-    await this.messages.refetch();
-  }
-
-  async handleDelete(messageId: string) {
-    if (!confirm("このメッセージを削除しますか？")) return;
-    await this.deleteMessage.run({ messageId });
-    await this.messages.refetch();
-  }
+  // UI methods delegation
+  calculateMenuPosition = (e: MouseEvent) => this.ui.calculateMenuPosition(e);
+  showDropdown = (id: string) => this.ui.showDropdown(id);
+  showReactionPalette = (id: string) => this.ui.showReactionPalette(id);
+  closeReactionPalette = () => this.ui.closeReactionPalette();
+  handleEmojiSelected = (emoji: string) => this.ui.handleEmojiSelected(emoji);
+  startEditing = (msg: Message) => this.ui.startEditing(msg);
+  cancelEditing = () => this.ui.cancelEditing();
+  saveEdit = (id: string) => this.ui.saveEdit(id);
+  handleDelete = (id: string) => this.ui.handleDelete(id);
+  handlePin = (id: string) =>
+    this.ui.handlePin(id, this.messagesById, this.mutations);
 
   isOwnMessage(message: Message): boolean {
     return this.auth.user?.id === message.userId;
-  }
-
-  async handlePin(messageId: string) {
-    const message = this.messagesById.get(messageId);
-    if (!message) return;
-
-    if (message.pinnedAt) {
-      await this.unpinMessage.run({ messageId });
-    } else {
-      await this.pinMessage.run({ messageId });
-    }
-    await this.messages.refetch();
-    this.visibleDropdown = null;
   }
 }
