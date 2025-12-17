@@ -1,5 +1,8 @@
 <script lang="ts">
   import type { Channel } from "@apps/api-client";
+  import Hash from "@lucide/svelte/icons/hash";
+  import Plus from "@lucide/svelte/icons/plus";
+  import User from "@lucide/svelte/icons/user";
   import { onMount } from "svelte";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { UnreadManager } from "@/lib/unread.svelte";
@@ -7,9 +10,6 @@
   import type { Selection } from "$components/chat/types";
   import DMList from "$components/dms/DMList.svelte";
   import UserSearch from "$components/dms/UserSearch.svelte";
-  import MdiAccount from "~icons/mdi/account";
-  import MdiPlus from "~icons/mdi/plus";
-  import MdiPound from "~icons/mdi/pound";
   import CreateChannelButton from "./CreateChannelButton.svelte";
 
   const api = getApiClient();
@@ -65,9 +65,9 @@
                 : "text-base-content/80 hover:bg-base-300 hover:text-base-content",
             ]}
           >
-            <MdiPound
+            <Hash
               class={[
-                "h-4 w-4 flex-shrink-0",
+                "size-4 flex-shrink-0",
                 active ? "text-primary" : "text-muted",
               ]}
             />
@@ -108,7 +108,7 @@
         title="新しいDM"
         onclick={() => (showUserSearch = !showUserSearch)}
       >
-        <MdiPlus class="text-muted h-4 w-4" />
+        <Plus class="text-muted size-4" />
       </button>
     </header>
 
@@ -134,7 +134,7 @@
       href={`/orgs/${organizationId}/personalization`}
       class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors"
     >
-      <MdiAccount class="h-4 w-4" />
+      <User class="size-4" />
       <span>個人設定</span>
     </a>
   </footer>

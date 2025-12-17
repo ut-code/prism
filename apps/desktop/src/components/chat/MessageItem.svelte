@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Message } from "@apps/api-client";
-  import MdiDotsVertical from "~icons/mdi/dots-vertical";
-  import MdiPin from "~icons/mdi/pin";
-  import MdiReply from "~icons/mdi/reply";
+  import EllipsisVertical from "@lucide/svelte/icons/ellipsis-vertical";
+  import Pin from "@lucide/svelte/icons/pin";
+  import Reply from "@lucide/svelte/icons/reply";
   import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import ReactionButtons from "./ReactionButtons.svelte";
   import VoteViewer from "./VoteViewer.svelte";
@@ -54,7 +54,7 @@
     <div
       class="mb-2 flex items-center gap-1.5 text-xs opacity-60 transition-opacity duration-150 group-hover:opacity-80"
     >
-      <MdiReply class="h-3 w-3" />
+      <Reply class="size-3" />
       <span class="text-primary/80 font-medium">{parentMessage.author}</span>
       <span class="truncate">{parentMessage.content}</span>
     </div>
@@ -75,7 +75,7 @@
     {/if}
     {#if message.pinnedAt}
       <span class="text-warning flex items-center gap-1 text-xs opacity-70">
-        <MdiPin class="h-3 w-3" />
+        <Pin class="size-3" />
         ピン留め
       </span>
     {/if}
@@ -137,7 +137,7 @@
       onclick={onDotsClick}
       title="メニュー"
     >
-      <MdiDotsVertical class="h-4 w-4 opacity-60" />
+      <EllipsisVertical class="size-4 opacity-60" />
     </button>
   </div>
 </article>

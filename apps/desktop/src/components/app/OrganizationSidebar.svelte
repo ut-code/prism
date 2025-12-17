@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Organization } from "@apps/api-client";
+  import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
+  import Settings from "@lucide/svelte/icons/settings";
   import type { Snippet } from "svelte";
-  import MdiCog from "~icons/mdi/cog";
-  import MdiSwapHorizontal from "~icons/mdi/swap-horizontal";
 
   interface Props {
     organization: Organization | undefined;
@@ -29,14 +29,14 @@
         class="btn btn-ghost btn-sm btn-square hover-highlight"
         title="組織設定"
       >
-        <MdiCog class="text-muted h-4 w-4" />
+        <Settings class="text-muted size-4" />
       </a>
       <a
         href="/"
         class="btn btn-ghost btn-sm btn-square hover-highlight"
         title="組織を切り替え"
       >
-        <MdiSwapHorizontal class="text-muted h-4 w-4" />
+        <ArrowLeftRight class="text-muted size-4" />
       </a>
     </div>
   </header>

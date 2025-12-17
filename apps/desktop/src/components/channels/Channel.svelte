@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Channel as ChannelType, Message } from "@apps/api-client";
+  import Hash from "@lucide/svelte/icons/hash";
+  import Search from "@lucide/svelte/icons/search";
   import { onMount } from "svelte";
   import {
     getApiClient,
@@ -7,8 +9,6 @@
     unwrapResponse,
     useQuery,
   } from "@/lib/api.svelte";
-  import MdiMagnify from "~icons/mdi/magnify";
-  import MdiPound from "~icons/mdi/pound";
   import MessageInput from "../chat/MessageInput.svelte";
   import MessageList from "../chat/MessageList.svelte";
   import type { SearchResult } from "../chat/messageSearch.svelte.ts";
@@ -85,7 +85,7 @@
     class="border-subtle flex items-center justify-between border-b px-6 py-4"
   >
     <div class="flex items-center gap-3">
-      <MdiPound class="h-5 w-5 opacity-50" />
+      <Hash class="size-5 opacity-50" />
       <h1 class="text-base font-semibold">
         {selectedChannel.data?.name ?? "..."}
       </h1>
@@ -120,8 +120,8 @@
         title="検索"
         onclick={() => (showSearch = !showSearch)}
       >
-        <MdiMagnify
-          class="h-5 w-5 opacity-50 transition-opacity duration-150 hover:opacity-80"
+        <Search
+          class="size-5 opacity-50 transition-opacity duration-150 hover:opacity-80"
         />
       </button>
     </div>

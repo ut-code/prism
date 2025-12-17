@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Plus from "@lucide/svelte/icons/plus";
   import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
-  import MdiPlus from "~icons/mdi/plus";
 
   const api = getApiClient();
 
@@ -47,7 +47,7 @@
     modalManager.dispatch(createChannelModalContent);
   }}
 >
-  <MdiPlus class="text-muted h-4 w-4" />
+  <Plus class="text-muted size-4" />
 </button>
 
 {#snippet createChannelModalContent()}

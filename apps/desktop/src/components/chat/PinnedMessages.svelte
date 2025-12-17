@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Message } from "@apps/api-client";
-  import MdiPin from "@/icons/mdi-pin.svelte";
+  import Pin from "@lucide/svelte/icons/pin";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { useWebSocket } from "@/lib/websocket";
 
@@ -63,7 +63,7 @@
 {#if messages.length > 0}
   <div class="bg-base-200 border-b p-2">
     <div class="text-warning mb-2 flex items-center gap-2">
-      <MdiPin class="h-4 w-4" />
+      <Pin class="size-4" />
       <span class="text-sm font-semibold">ピン留めされたメッセージ</span>
     </div>
     <div class="space-y-1">

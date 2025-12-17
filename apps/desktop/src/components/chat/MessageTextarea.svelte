@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Attachment from "@/icons/attachment.svelte";
+  import Paperclip from "@lucide/svelte/icons/paperclip";
 
   interface Props {
     value: string;
@@ -41,7 +41,7 @@
       title="ファイルを添付"
       type="button"
     >
-      <Attachment />
+      <Paperclip class="size-4" />
       {showFileSelector ? "キャンセル" : "ファイル添付"}
     </button>
     <button

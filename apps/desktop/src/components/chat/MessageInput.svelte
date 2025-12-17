@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Message } from "@apps/api-client";
+  import X from "@lucide/svelte/icons/x";
   import FileSelector from "@/features/files/upload/Selector.svelte";
-  import MdiClose from "~icons/mdi/close";
   import EmojiButton from "./EmojiButton.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
   import FileAttachmentPreview from "./FileAttachmentPreview.svelte";
@@ -41,7 +41,7 @@
         class="btn btn-ghost btn-xs btn-square"
         onclick={() => (replyingTo = null)}
       >
-        <MdiClose class="h-4 w-4" />
+        <X class="size-4" />
       </button>
     </div>
   {/if}

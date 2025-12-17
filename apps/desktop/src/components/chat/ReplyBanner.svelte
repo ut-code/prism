@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Message } from "@apps/api-client";
-  import MdiClose from "@/icons/mdi-close.svelte";
+  import X from "@lucide/svelte/icons/x";
 
   interface Props {
     replyingTo: Message;
@@ -23,6 +23,6 @@
     <span class="truncate">: {replyingTo.content}</span>
   </div>
   <button class="btn btn-ghost btn-circle btn-sm" onclick={onclose}>
-    <MdiClose />
+    <X class="size-4" />
   </button>
 </div>
