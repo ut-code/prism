@@ -16,16 +16,11 @@ devenv を使用してください。
 cp .env.sample .env
 ```
 
-`JWT_SECRET` の生成 (32バイト = 256ビット推奨):
-
-```sh
-openssl rand -base64 32
-```
-
 ### 開発用サーバー
 
 ```sh
-devenv up
+devenv up -d # run in background, logs at .devenv/processes.log
+devenv processes down # kill the background service
 ```
 
 ## 注意点
@@ -39,15 +34,6 @@ devenv up
 ```sh
 git commit -m "It's not working??" -n
 ```
-
-### (client) Icon の使用について
-
-- unplugin-icons を使っています。 <https://github.com/unplugin/unplugin-icons>
-- Usage Example: `import MdiClose from "~icons/mdi/close"`
-- 現在インストールされているアイコンセットは以下のとおりです:
-  - mdi (Material Design Icons)
-- 新規アイコンセットを追加する場合は、`cd apps/desktop; bun add @iconify-json/[iconset]` で追加できます。
-- icon の一覧はここで見れます。: https://icones.js.org/
 
 ### 独自命名規則
 
