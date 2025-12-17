@@ -43,10 +43,14 @@ in {
       process-compose.working_dir = "./apps/server";
       process-compose.depends_on.postgres.condition = "process_healthy";
     };
+    db-seed = {
+      exec = "bun --env-file=.env db:seed";
+      process-compose.depends_on.db-migrate.condition = "process_completed_successfully";
+    };
     server = {
       exec = "bun --env-file=../../.env dev";
       process-compose.working_dir = "./apps/server";
-      process-compose.depends_on.db-migrate.condition = "process_completed_successfully";
+      process-compose.depends_on.db-seed.condition = "process_completed_successfully";
     };
   };
   services.postgres = {
