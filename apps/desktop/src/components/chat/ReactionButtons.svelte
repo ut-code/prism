@@ -17,7 +17,6 @@
   let { messageId }: Props = $props();
 
   const api = getApiClient();
-  const ws = useWebSocket();
 
   const reactions = useQuery<Reaction[]>(async () => {
     const response = await getMessage(api, messageId).reactions.get();
@@ -38,8 +37,8 @@
     }
   });
 
-  // WebSocket subscriptions (auto-cleanup via useWebSocket)
-  ws.on("reaction:added", (event) => {
+  // WebSocket subscriptions (auto-cleanup via $effect)
+  useWebSocket("reaction:added", (event) => {
     if (event.messageId === messageId) {
       const newReaction = event.reaction as Reaction;
       if (!reactionsData.some((r) => r.id === newReaction.id)) {
@@ -48,7 +47,7 @@
     }
   });
 
-  ws.on("reaction:removed", (event) => {
+  useWebSocket("reaction:removed", (event) => {
     if (event.messageId === messageId) {
       reactionsData = reactionsData.filter(
         (r) => !(r.emoji === event.emoji && r.userId === event.userId),

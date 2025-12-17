@@ -2,8 +2,7 @@
   import type { Message } from "@apps/api-client";
   import MdiPin from "@/icons/mdi-pin.svelte";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
-  import type { WsEvent } from "@/lib/websocket";
-  import { getWebSocket } from "@/lib/websocket";
+  import { useWebSocket } from "@/lib/websocket";
 
   interface Props {
     channelId: string;
@@ -12,7 +11,6 @@
   let { channelId }: Props = $props();
 
   const api = getApiClient();
-  const ws = getWebSocket();
 
   const pinnedMessages = useQuery<Message[]>(async () => {
     const response = await api.messages.pins.get({
@@ -29,35 +27,23 @@
     }
   });
 
-  $effect(() => {
-    const handleMessageUpdate = (event: WsEvent) => {
-      if (event.type !== "message:updated" || event.channelId !== channelId) {
-        return;
-      }
+  useWebSocket("message:updated", (event) => {
+    if (event.channelId !== channelId) return;
 
-      const updatedMessage = event.message as Message;
-      const existingIndex = messages.findIndex(
-        (m) => m.id === updatedMessage.id,
-      );
+    const updatedMessage = event.message as Message;
+    const existingIndex = messages.findIndex((m) => m.id === updatedMessage.id);
 
-      if (updatedMessage.pinnedAt) {
-        if (existingIndex !== -1) {
-          messages[existingIndex] = updatedMessage;
-        } else {
-          messages = [...messages, updatedMessage];
-        }
+    if (updatedMessage.pinnedAt) {
+      if (existingIndex !== -1) {
+        messages[existingIndex] = updatedMessage;
       } else {
-        if (existingIndex !== -1) {
-          messages = messages.filter((m) => m.id !== updatedMessage.id);
-        }
+        messages = [...messages, updatedMessage];
       }
-    };
-
-    ws.on("message:updated", handleMessageUpdate);
-
-    return () => {
-      ws.off("message:updated", handleMessageUpdate);
-    };
+    } else {
+      if (existingIndex !== -1) {
+        messages = messages.filter((m) => m.id !== updatedMessage.id);
+      }
+    }
   });
 
   function formatTime(timestamp: Date | number | string) {

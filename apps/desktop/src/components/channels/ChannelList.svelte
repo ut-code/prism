@@ -29,9 +29,8 @@
   const unreadManager = $derived(new UnreadManager(api, organizationId));
   let showUserSearch = $state(false);
 
-  // WebSocket: refresh unread counts on new messages (auto-cleanup)
-  const ws = useWebSocket();
-  ws.on("message:created", () => {
+  // WebSocket: refresh unread counts on new messages
+  useWebSocket("message:created", () => {
     unreadManager.fetchUnreadCounts();
   });
 

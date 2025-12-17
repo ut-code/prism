@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
+  import MdiPlus from "~icons/mdi/plus";
 
   const api = getApiClient();
 
@@ -40,12 +41,13 @@
 <Modal manager={modalManager} />
 
 <button
-  class="btn btn-primary btn-sm mt-2 w-full"
+  class="btn btn-ghost btn-xs btn-square"
+  title="新しいチャンネル"
   onclick={() => {
     modalManager.dispatch(createChannelModalContent);
   }}
 >
-  + 新しいチャンネル
+  <MdiPlus class="text-muted h-4 w-4" />
 </button>
 
 {#snippet createChannelModalContent()}
