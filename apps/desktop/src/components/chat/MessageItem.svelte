@@ -46,27 +46,35 @@
 
 <article
   id="message-{message.id}"
-  class="group hover:bg-base-200/50 relative px-4 py-1.5 transition-colors"
+  class="group hover:bg-base-200/30 relative px-6 py-3 transition-all duration-200"
   oncontextmenu={onContextMenu}
 >
   <!-- Reply reference -->
   {#if parentMessage}
-    <div class="text-muted mb-1 flex items-center gap-1.5 text-xs">
+    <div
+      class="mb-2 flex items-center gap-1.5 text-xs opacity-60 transition-opacity duration-150 group-hover:opacity-80"
+    >
       <MdiReply class="h-3 w-3" />
       <span class="text-primary/80 font-medium">{parentMessage.author}</span>
-      <span class="truncate opacity-70">{parentMessage.content}</span>
+      <span class="truncate">{parentMessage.content}</span>
     </div>
   {/if}
 
   <!-- Message header -->
-  <div class="flex items-baseline gap-2">
-    <span class="text-primary font-medium">{message.author}</span>
-    <span class="timestamp">{formatTime(message.createdAt)}</span>
+  <div class="flex items-baseline gap-2.5">
+    <span class="text-primary text-sm font-semibold">{message.author}</span>
+    <span
+      class="text-xs opacity-40 transition-opacity duration-150 group-hover:opacity-60"
+      >{formatTime(message.createdAt)}</span
+    >
     {#if isEdited}
-      <span class="text-muted text-xs">(編集済み)</span>
+      <span
+        class="text-xs opacity-30 transition-opacity duration-150 group-hover:opacity-50"
+        >(編集済み)</span
+      >
     {/if}
     {#if message.pinnedAt}
-      <span class="text-warning flex items-center gap-1 text-xs">
+      <span class="text-warning flex items-center gap-1 text-xs opacity-70">
         <MdiPin class="h-3 w-3" />
         ピン留め
       </span>
@@ -75,9 +83,9 @@
 
   <!-- Message content -->
   {#if isEditing}
-    <div class="mt-2 space-y-2">
+    <div class="mt-3 space-y-2">
       <textarea
-        class="textarea textarea-bordered bg-base-300 w-full text-sm"
+        class="textarea textarea-bordered bg-base-300 w-full text-sm transition-all duration-150"
         value={editedContent}
         oninput={(e) =>
           onEditChange?.(
@@ -96,16 +104,14 @@
       </div>
     </div>
   {:else}
-    <div
-      class="text-base-content/90 text-sm leading-relaxed whitespace-pre-wrap"
-    >
+    <div class="mt-1.5 text-sm leading-relaxed whitespace-pre-wrap opacity-90">
       {message.content}
     </div>
   {/if}
 
   <!-- Attachments -->
   {#if message.attachments && message.attachments.length > 0}
-    <div class="mt-2 space-y-1">
+    <div class="mt-3 space-y-2">
       {#each message.attachments as fileId}
         <FileAttachment {fileId} compact={false} />
       {/each}
@@ -114,7 +120,7 @@
 
   <!-- Vote -->
   {#if message.vote}
-    <div class="mt-2">
+    <div class="mt-3">
       <VoteViewer voteId={message.vote} />
     </div>
   {/if}
@@ -124,14 +130,14 @@
 
   <!-- Actions (hover) -->
   <div
-    class="border-subtle bg-base-100 absolute top-1 right-2 flex gap-0.5 rounded border opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+    class="border-subtle bg-base-100 absolute top-2 right-4 flex gap-0.5 rounded border opacity-0 shadow-sm transition-all duration-200 group-hover:opacity-100"
   >
     <button
-      class="btn btn-ghost btn-xs btn-square"
+      class="btn btn-ghost btn-xs btn-square transition-colors duration-150"
       onclick={onDotsClick}
       title="メニュー"
     >
-      <MdiDotsVertical class="h-4 w-4" />
+      <MdiDotsVertical class="h-4 w-4 opacity-60" />
     </button>
   </div>
 </article>

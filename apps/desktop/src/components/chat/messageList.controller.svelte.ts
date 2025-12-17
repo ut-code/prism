@@ -7,6 +7,8 @@ import {
   useQuery,
 } from "@/lib/api.svelte";
 import { useAuth } from "@/lib/auth.svelte";
+import { getWebSocket } from "@/lib/websocket";
+import type { WsEvent } from "@/lib/websocket/types";
 
 /**
  * Controller for managing message list state and operations.
@@ -22,6 +24,7 @@ export class MessageListController {
     refetch: () => Promise<void>;
   };
   messagesById: Map<string, Message>;
+  messagesData = $state<Message[]>([]);
 
   // UI State
   clientX = $state(0);
@@ -61,9 +64,16 @@ export class MessageListController {
 
     this.messagesById = $derived(
       new Map(
-        this.messages.data?.map((message: Message) => [message.id, message]),
+        this.messagesData.map((message: Message) => [message.id, message]),
       ),
     );
+
+    // Sync messagesData with query data
+    $effect(() => {
+      if (this.messages.data) {
+        this.messagesData = this.messages.data;
+      }
+    });
 
     this.addReaction = useMutation(
       async (args: { messageId: string; emoji: string }) => {
@@ -101,6 +111,52 @@ export class MessageListController {
         .delete();
       return unwrapResponse(response);
     });
+
+    // WebSocket integration
+    try {
+      const ws = getWebSocket();
+      ws.subscribe(this.channelId);
+
+      // Handle new messages
+      ws.on("message:created", (event: WsEvent) => {
+        if (
+          event.type === "message:created" &&
+          event.channelId === this.channelId
+        ) {
+          const newMessage = event.message as Message;
+          if (!this.messagesById.get(newMessage.id)) {
+            this.messagesData = [...this.messagesData, newMessage];
+          }
+        }
+      });
+
+      // Handle message updates
+      ws.on("message:updated", (event: WsEvent) => {
+        if (
+          event.type === "message:updated" &&
+          event.channelId === this.channelId
+        ) {
+          const updated = event.message as Message;
+          this.messagesData = this.messagesData.map((m) =>
+            m.id === updated.id ? updated : m,
+          );
+        }
+      });
+
+      // Handle message deletions
+      ws.on("message:deleted", (event: WsEvent) => {
+        if (
+          event.type === "message:deleted" &&
+          event.channelId === this.channelId
+        ) {
+          this.messagesData = this.messagesData.filter(
+            (m) => m.id !== event.messageId,
+          );
+        }
+      });
+    } catch (error) {
+      console.warn("WebSocket not initialized:", error);
+    }
 
     // Close dropdowns on click outside
     document.addEventListener("click", () => {

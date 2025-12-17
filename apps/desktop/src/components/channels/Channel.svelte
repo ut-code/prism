@@ -82,13 +82,15 @@
 <div class="flex h-full flex-col">
   <!-- Channel header -->
   <header
-    class="border-subtle flex items-center justify-between border-b px-4 py-3"
+    class="border-subtle flex items-center justify-between border-b px-6 py-4"
   >
-    <div class="flex items-center gap-2">
-      <MdiPound class="text-muted h-5 w-5" />
-      <h1 class="font-semibold">{selectedChannel.data?.name ?? "..."}</h1>
+    <div class="flex items-center gap-3">
+      <MdiPound class="h-5 w-5 opacity-50" />
+      <h1 class="text-base font-semibold">
+        {selectedChannel.data?.name ?? "..."}
+      </h1>
       {#if selectedChannel.data?.description}
-        <span class="text-muted hidden text-sm sm:inline">
+        <span class="hidden text-sm opacity-40 sm:inline">
           — {selectedChannel.data.description}
         </span>
       {/if}
@@ -96,11 +98,13 @@
 
     <div class="flex items-center gap-2">
       {#if showSearch}
-        <div class="relative">
+        <div
+          class="animate-in fade-in slide-in-from-right-2 relative duration-200"
+        >
           <input
             type="text"
             placeholder="メッセージを検索..."
-            class="input input-sm input-bordered bg-base-200 w-48 pr-8 text-sm"
+            class="input input-sm input-bordered bg-base-200 w-56 pr-8 text-sm transition-all duration-150 focus:w-64"
             bind:value={searchQuery}
             onkeydown={(e) => e.key === "Enter" && handleSearch()}
           />
@@ -112,11 +116,13 @@
         </div>
       {/if}
       <button
-        class="btn btn-ghost btn-sm btn-square"
+        class="btn btn-ghost btn-sm btn-square transition-all duration-150"
         title="検索"
         onclick={() => (showSearch = !showSearch)}
       >
-        <MdiMagnify class="text-muted h-5 w-5" />
+        <MdiMagnify
+          class="h-5 w-5 opacity-50 transition-opacity duration-150 hover:opacity-80"
+        />
       </button>
     </div>
   </header>

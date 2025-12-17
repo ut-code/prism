@@ -8,6 +8,7 @@ import {
   users,
 } from "../../db/schema.ts";
 import { authMiddleware } from "../../middleware/auth.ts";
+import { wsManager } from "../../ws/manager.ts";
 import { requireOrganizationMembership } from "../organizations/permissions.ts";
 import { messagePinRoutes } from "./pins.ts";
 import { messageReactionRoutes } from "./reactions.ts";
@@ -152,6 +153,12 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
         );
       }
 
+      wsManager.broadcast(body.channelId, {
+        type: "message:created",
+        channelId: body.channelId,
+        message,
+      });
+
       return message;
     },
     {
@@ -215,6 +222,13 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
         .where(eq(messages.id, params.id))
         .returning();
 
+      wsManager.broadcast(message.channelId, {
+        type: "message:updated",
+        channelId: message.channelId,
+        messageId: params.id,
+        message: updatedMessage,
+      });
+
       return updatedMessage;
     },
     {
@@ -264,6 +278,12 @@ export const messageRoutes = new Elysia({ prefix: "/messages" })
       await requireOrganizationMembership(user.id, channel.organizationId);
 
       await db.delete(messages).where(eq(messages.id, params.id));
+
+      wsManager.broadcast(message.channelId, {
+        type: "message:deleted",
+        channelId: message.channelId,
+        messageId: params.id,
+      });
 
       return { success: true };
     },

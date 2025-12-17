@@ -32,7 +32,7 @@
   }
 
   $effect(() => {
-    if (controller.messages.data) {
+    if (controller.messagesData.length > 0) {
       setTimeout(scrollToBottom, 0);
     }
   });
@@ -44,9 +44,9 @@
 
 <Modal manager={modalManager} />
 
-<div bind:this={messagesContainer} class="flex-1 space-y-2 overflow-y-auto p-4">
-  {#if controller.messages.data}
-    {#each controller.messages.data as message (message.id)}
+<div bind:this={messagesContainer} class="flex-1 overflow-y-auto scroll-smooth">
+  {#if controller.messagesData.length > 0}
+    {#each controller.messagesData as message (message.id)}
       {#snippet reactionListSnippet()}
         <ReactionList {organizationId} messageId={message.id} />
       {/snippet}
@@ -100,13 +100,13 @@
         onEditCancel={() => controller.cancelEditing()}
       />
     {:else}
-      <div class="text-center text-base-content/60 py-8">
-        まだメッセージがありません
+      <div class="flex h-full items-center justify-center py-16">
+        <p class="text-sm opacity-40">まだメッセージがありません</p>
       </div>
     {/each}
   {:else}
-    <div class="text-base-content/60 py-8 text-center">
-      メッセージを読み込み中...
+    <div class="flex h-full items-center justify-center py-16">
+      <p class="text-sm opacity-40">メッセージを読み込み中...</p>
     </div>
   {/if}
 </div>
