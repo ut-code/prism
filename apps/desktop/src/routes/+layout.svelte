@@ -9,8 +9,8 @@
   // Initialize API client
   setupApi();
 
-  // Initialize WebSocket client
-  const wsUrl = `${env.PUBLIC_API_BASE_URL.replace(/^http/, "ws")}/ws`;
+  // Initialize WebSocket client (Eden Treaty adds /ws automatically)
+  const wsUrl = env.PUBLIC_API_BASE_URL.replace(/^http/, "ws");
 
   $effect(() => {
     let cleanup: (() => void) | undefined;

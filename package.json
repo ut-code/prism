@@ -16,10 +16,13 @@
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
     "db": "cd apps/server && bun --env-file=../../.env run drizzle-kit",
-    "db:seed": "bun --env-file=.env run scripts/seed.ts"
+    "db:seed": "bun --env-file=.env run scripts/seed.ts",
+    "test:e2e": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:ui": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts --ui"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
+    "@playwright/test": "^1.57.0",
     "@sveltejs/mcp": "^0.1.13",
     "lefthook": "^2.0.8",
     "prettier": "^3.7.4",
