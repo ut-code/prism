@@ -44,7 +44,6 @@ export class SettingsController {
 
   async handleUpdate() {
     try {
-      console.log("Updating organization...", $state.snapshot(this.editForm));
       await this.updateOrganization.run({
         id: this.organizationId,
         name: this.editForm.name,

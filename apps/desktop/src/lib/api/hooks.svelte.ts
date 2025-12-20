@@ -5,10 +5,11 @@ import { untrack } from "svelte";
  * Similar to Convex's useQuery but for REST API.
  * Automatically refetches data at specified intervals if configured.
  */
-export type QueryState<T> =
+export type QueryState<T> = (
   | { isLoading: true; error: undefined; data: undefined }
   | { isLoading: false; error: Error; data: undefined }
-  | { isLoading: false; error: undefined; data: T };
+  | { isLoading: false; error: undefined; data: T }
+) & { refetch: () => Promise<void> };
 
 export function useQuery<T>(
   fetcher: () => Promise<T>,
@@ -62,7 +63,7 @@ export function useQuery<T>(
     refetch: fetch,
   };
 
-  return state as QueryState<T> & { refetch: () => Promise<void> };
+  return state as QueryState<T>;
 }
 
 /**

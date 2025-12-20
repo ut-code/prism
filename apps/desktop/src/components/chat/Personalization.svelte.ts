@@ -1,6 +1,9 @@
 import type { User } from "@apps/api-client";
 import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
 
+/**
+ * Hook for user personalization (profile editing).
+ */
 export function usePersonalization() {
   const api = getApiClient();
 
@@ -9,42 +12,16 @@ export function usePersonalization() {
     return unwrapResponse<User>(res);
   });
 
-  const personalization = useQuery<User>(async () => {
-    const res = await api.users.me.get();
-    return unwrapResponse<User>(res);
-  }); // TODO: Replace with actual personalization endpoint
-
-  let iconURL = $state<string | null>("");
   let changedImage = $state<string>("");
-  let changedImageFile = $state<File | undefined>();
   let changedUserName = $state<string>("");
+  let isSaving = $state(false);
 
-  const imageURL = $derived(iconURL || identity.data?.image);
+  const imageURL = $derived(identity.data?.image ?? null);
   const userName = $derived(identity.data?.name);
 
   $effect(() => {
     if (userName) {
       changedUserName = userName;
-    }
-    if (personalization.data) {
-      new Promise((resolve) => {
-        resolve(null);
-      })
-        .then((value) => {
-          return new Promise((resolve, reject) => {
-            if (typeof value === "string" && value) {
-              // TODO: Implement getImageUrl endpoint in REST API
-              resolve(null);
-            } else {
-              reject();
-            }
-          });
-        })
-        .then((value) => {
-          if (value && typeof value === "string") {
-            iconURL = value;
-          }
-        });
     }
   });
 
@@ -55,27 +32,28 @@ export function usePersonalization() {
     const file = event.target.files?.[0];
     if (file) {
       changedImage = URL.createObjectURL(file);
-      changedImageFile = file;
     }
   }
 
   async function save() {
-    const image = changedImageFile;
-    changedImage = "";
-    changedImageFile = undefined;
+    if (isSaving) return;
 
+    isSaving = true;
     try {
-      if (changedUserName?.trim() && !(userName === changedUserName)) {
-        // TODO: Implement save endpoint in REST API for personalization nickname
-        console.warn("Personalization save not implemented in REST API yet");
+      const updates: { name?: string } = {};
+
+      if (changedUserName?.trim() && changedUserName !== userName) {
+        updates.name = changedUserName.trim();
       }
 
-      if (image) {
-        // TODO: Implement generateUploadUrl endpoint in REST API
-        console.warn("Image upload not implemented in REST API yet");
+      if (Object.keys(updates).length > 0) {
+        await api.users.me.patch(updates);
+        await identity.refetch();
       }
-    } catch (error) {
-      console.error("Error saving personalization:", error);
+
+      changedImage = "";
+    } finally {
+      isSaving = false;
     }
   }
 
@@ -94,6 +72,9 @@ export function usePersonalization() {
     },
     set changedUserName(value: string) {
       changedUserName = value;
+    },
+    get isSaving() {
+      return isSaving;
     },
     handleFileChange,
     save,

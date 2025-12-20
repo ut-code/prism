@@ -11,7 +11,7 @@ import { requireOrganizationMembership } from "../organizations/permissions.ts";
 export const channelUnreadRoutes = new Elysia()
   .use(authMiddleware)
   .post(
-    "/channels/:channelId/read",
+    "/channels/:id/read",
     async ({ user, params, body, set }) => {
       if (!user) {
         set.status = 401;
@@ -21,7 +21,7 @@ export const channelUnreadRoutes = new Elysia()
       const [channel] = await db
         .select()
         .from(channels)
-        .where(eq(channels.id, params.channelId))
+        .where(eq(channels.id, params.id))
         .limit(1);
 
       if (!channel) {
@@ -37,7 +37,7 @@ export const channelUnreadRoutes = new Elysia()
         .where(
           and(
             eq(channelReadStatus.userId, user.id),
-            eq(channelReadStatus.channelId, params.channelId),
+            eq(channelReadStatus.channelId, params.id),
           ),
         )
         .limit(1);
@@ -59,7 +59,7 @@ export const channelUnreadRoutes = new Elysia()
         .insert(channelReadStatus)
         .values({
           userId: user.id,
-          channelId: params.channelId,
+          channelId: params.id,
           lastReadAt: new Date(),
           lastReadMessageId: body.lastReadMessageId,
         })
@@ -73,7 +73,7 @@ export const channelUnreadRoutes = new Elysia()
       }),
     },
   )
-  .get("/channels/:channelId/unread", async ({ user, params, set }) => {
+  .get("/channels/:id/unread", async ({ user, params, set }) => {
     if (!user) {
       set.status = 401;
       return { message: "Unauthorized" };
@@ -82,7 +82,7 @@ export const channelUnreadRoutes = new Elysia()
     const [channel] = await db
       .select()
       .from(channels)
-      .where(eq(channels.id, params.channelId))
+      .where(eq(channels.id, params.id))
       .limit(1);
 
     if (!channel) {
@@ -98,7 +98,7 @@ export const channelUnreadRoutes = new Elysia()
       .where(
         and(
           eq(channelReadStatus.userId, user.id),
-          eq(channelReadStatus.channelId, params.channelId),
+          eq(channelReadStatus.channelId, params.id),
         ),
       )
       .limit(1);
@@ -107,7 +107,7 @@ export const channelUnreadRoutes = new Elysia()
       const [result] = await db
         .select({ count: count() })
         .from(messages)
-        .where(eq(messages.channelId, params.channelId));
+        .where(eq(messages.channelId, params.id));
       return { unreadCount: result?.count ?? 0 };
     }
 
@@ -116,25 +116,25 @@ export const channelUnreadRoutes = new Elysia()
       .from(messages)
       .where(
         and(
-          eq(messages.channelId, params.channelId),
+          eq(messages.channelId, params.id),
           gt(messages.createdAt, readStatus.lastReadAt),
         ),
       );
 
     return { unreadCount: result?.count ?? 0 };
   })
-  .get("/organizations/:orgId/unread", async ({ user, params, set }) => {
+  .get("/organizations/:id/unread", async ({ user, params, set }) => {
     if (!user) {
       set.status = 401;
       return { message: "Unauthorized" };
     }
 
-    await requireOrganizationMembership(user.id, params.orgId);
+    await requireOrganizationMembership(user.id, params.id);
 
     const orgChannels = await db
       .select()
       .from(channels)
-      .where(eq(channels.organizationId, params.orgId));
+      .where(eq(channels.organizationId, params.id));
 
     const unreadCounts = await Promise.all(
       orgChannels.map(async (channel) => {

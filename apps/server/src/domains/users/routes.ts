@@ -20,6 +20,44 @@ export const userRoutes = new Elysia({ prefix: "/users" })
 
     return dbUser || null;
   })
+  .patch(
+    "/me",
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
+
+      const updateData: {
+        name?: string;
+        image?: string | null;
+        updatedAt: Date;
+      } = {
+        updatedAt: new Date(),
+      };
+
+      if (body.name !== undefined) {
+        updateData.name = body.name;
+      }
+      if (body.image !== undefined) {
+        updateData.image = body.image;
+      }
+
+      const [updated] = await db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, user.id))
+        .returning();
+
+      return updated;
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        image: t.Optional(t.Union([t.String(), t.Null()])),
+      }),
+    },
+  )
   .post(
     "/names",
     async ({ body }) => {
