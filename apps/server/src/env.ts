@@ -19,7 +19,7 @@ const envSchema = v.object({
 const result = v.safeParse(envSchema, process.env);
 
 if (!result.success) {
-  console.error("❌ Invalid environment variables:");
+  console.error("Invalid environment variables:");
   for (const issue of result.issues) {
     console.error(`  ${issue.path?.[0]?.key}: ${issue.message}`);
   }

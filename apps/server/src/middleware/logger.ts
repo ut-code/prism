@@ -1,7 +1,6 @@
-import { logger } from "@bogeychan/elysia-logger";
+import { logger } from "../lib/logger.ts";
 
-export const loggerMiddleware = logger({
-  level: process.env.NODE_ENV === "production" ? "info" : "debug",
+export const loggerMiddleware = logger.into({
   autoLogging: {
     ignore(ctx) {
       return ctx.path === "/health";

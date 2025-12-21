@@ -11,6 +11,7 @@ import { taskRoutes } from "./domains/tasks/routes.ts";
 import { userRoutes } from "./domains/users/routes.ts";
 import { voteRoutes } from "./domains/votes/routes.ts";
 import { env } from "./env.ts";
+import { logger } from "./lib/logger.ts";
 import { loggerMiddleware } from "./middleware/logger.ts";
 import { wsRoutes } from "./ws/index.ts";
 
@@ -32,8 +33,6 @@ const app = new Elysia()
   .use(wsRoutes)
   .listen(env.PORT);
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
-);
+logger.info(`Server started at ${app.server?.hostname}:${app.server?.port}`);
 
 export type App = typeof app;
