@@ -44,6 +44,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```sh
+# all commands are run at repo root.
 bun tidy          # Fix + check (run after writing code)
 bun run check     # Lint + type check + format check
 bun run fix       # Auto-fix lint + format
