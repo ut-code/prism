@@ -23,21 +23,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 │   │   │   ├── components/   # UI components
 │   │   │   ├── features/     # Feature modules
 │   │   │   ├── lib/          # Utilities
-│   │   │   ├── routes/       # SvelteKit routes
-│   │   │   └── icons/        # Icon components
-│   │   └── src-tauri/    # Tauri config
-│   ├── server/           # Elysia API server
-│   │   └── src/
-│   │       ├── db/           # Drizzle schema & queries
-│   │       ├── domains/      # Business logic
-│   │       └── middleware/   # Elysia middleware
+│   │   │   └── routes/       # SvelteKit routes
+│   │   └── src-tauri/        # Tauri config
+│   └── server/               # Elysia API server
+│       └── src/
+│           ├── db/           # Drizzle schema & queries
+│           ├── domains/      # Business logic
+│           ├── middleware/   # Elysia middleware
+│           ├── ws/           # WebSocket handlers
+│           └── lib/          # Server utilities
 ├── packages/
-│   └── api-client/       # Shared API types
+│   └── api-client/       # Shared API client & types
+├── e2e/                  # Playwright E2E tests
+├── scripts/              # Utility scripts (seed.ts)
 ├── docs/
 │   └── skills/           # Agent skill docs
-├── tasks/                # Procfile for dev
-├── .env.sample           # environment variable samples.
-└── .env                  # all environment variables in here. pls don't read
+└── .env                  # Environment variables (don't read)
+```
+
+## Commands
+
+```sh
+bun tidy          # Fix + check (run after writing code)
+bun run check     # Lint + type check + format check
+bun run fix       # Auto-fix lint + format
+bun db            # Run drizzle-kit commands
+bun db:seed       # Seed database
+bun test:e2e      # Run Playwright E2E tests
+bun test:e2e:ui   # Run E2E tests with UI
 ```
 
 ## Import Aliases
