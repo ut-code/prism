@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Backend**: Elysia (Bun) + Drizzle ORM + PostgreSQL
 - **Desktop**: Tauri (optional)
 - **Package Manager**: Bun
-- **Monorepo**: Workspaces (`apps/*`)
+- **Monorepo**: Workspaces (`apps/*`, `packages/*`)
 - **Dev Environment**: devenv (logs: `.devenv/processes.log`)
 
 ## Directory Structure
@@ -31,6 +31,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 │   │       ├── db/           # Drizzle schema & queries
 │   │       ├── domains/      # Business logic
 │   │       └── middleware/   # Elysia middleware
+├── packages/
 │   └── api-client/       # Shared API types
 ├── docs/
 │   └── skills/           # Agent skill docs
@@ -41,11 +42,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Import Aliases
 
-| Alias         | Path              |
-| ------------- | ----------------- |
-| `@`           | `src/`            |
-| `$components` | `src/components/` |
-| `@apps/{pkg}` | `apps/{pkg}/`     |
+| Alias             | Path              |
+| ----------------- | ----------------- |
+| `@`               | `src/`            |
+| `$components`     | `src/components/` |
+| `@apps/{pkg}`     | `apps/{pkg}/`     |
+| `@packages/{pkg}` | `packages/{pkg}/` |
 
 </architecture>
 
