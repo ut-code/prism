@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Reaction } from "@apps/api-client";
+  import type { Reaction } from "@packages/api-client";
   import {
     getApiClient,
     getMessage,

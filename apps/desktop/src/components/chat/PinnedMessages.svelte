@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Message } from "@apps/api-client";
   import Pin from "@lucide/svelte/icons/pin";
+  import type { Message } from "@packages/api-client";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { useWebSocket } from "@/lib/websocket";
 

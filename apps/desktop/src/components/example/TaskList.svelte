@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Task } from "@apps/api-client";
+  import { type Task } from "@packages/api-client";
   import {
     getApiClient,
     getTask,

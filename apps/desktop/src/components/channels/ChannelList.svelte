@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Channel } from "@apps/api-client";
   import Hash from "@lucide/svelte/icons/hash";
   import Plus from "@lucide/svelte/icons/plus";
   import User from "@lucide/svelte/icons/user";
+  import type { Channel } from "@packages/api-client";
   import { onMount } from "svelte";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
   import { UnreadManager } from "@/lib/unread.svelte";

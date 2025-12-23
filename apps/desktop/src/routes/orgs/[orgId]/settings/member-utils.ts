@@ -1,4 +1,4 @@
-import type { ApiClient, OrganizationMember, User } from "@apps/api-client";
+import type { ApiClient, OrganizationMember, User } from "@packages/api-client";
 import { getOrganization, unwrapResponse } from "@/lib/api.svelte";
 
 /**

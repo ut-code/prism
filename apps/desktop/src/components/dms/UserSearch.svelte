@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Channel, User } from "@apps/api-client";
+  import type { Channel, User } from "@packages/api-client";
   import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
 
   interface Props {

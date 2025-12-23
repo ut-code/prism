@@ -1,4 +1,4 @@
-import type { Message } from "@apps/api-client";
+import type { Message } from "@packages/api-client";
 
 export interface SearchResult {
   message: Message;

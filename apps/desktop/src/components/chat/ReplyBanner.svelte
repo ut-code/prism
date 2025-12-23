@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Message } from "@apps/api-client";
   import X from "@lucide/svelte/icons/x";
+  import type { Message } from "@packages/api-client";
 
   interface Props {
     replyingTo: Message;

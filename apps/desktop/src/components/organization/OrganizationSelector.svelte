@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Organization } from "@apps/api-client";
+  import type { Organization } from "@packages/api-client";
   import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
 
   interface Props {

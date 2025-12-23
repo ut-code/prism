@@ -1,5 +1,5 @@
 {
-  "name": "@apps/api-client",
+  "name": "@packages/api-client",
   "type": "module",
   "private": true,
   "version": "0.0.1",

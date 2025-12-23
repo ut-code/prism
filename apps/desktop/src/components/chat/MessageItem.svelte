@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Message } from "@apps/api-client";
   import EllipsisVertical from "@lucide/svelte/icons/ellipsis-vertical";
   import Pin from "@lucide/svelte/icons/pin";
   import Reply from "@lucide/svelte/icons/reply";
+  import type { Message } from "@packages/api-client";
   import FileAttachment from "../../features/files/view/FileAttachment.svelte";
   import ReactionButtons from "./ReactionButtons.svelte";
   import VoteViewer from "./VoteViewer.svelte";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Reaction, User } from "@apps/api-client";
+  import type { Reaction, User } from "@packages/api-client";
   import { fly } from "svelte/transition";
   import {
     getApiClient,

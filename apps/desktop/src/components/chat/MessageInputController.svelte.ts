@@ -1,4 +1,4 @@
-import type { Message } from "@apps/api-client";
+import type { Message } from "@packages/api-client";
 import { FileUploader } from "@/features/files/upload/uploader.svelte";
 import { MessageInputApi } from "./messageInputApi.svelte.ts";
 import {

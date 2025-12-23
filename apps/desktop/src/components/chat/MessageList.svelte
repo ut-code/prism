@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Message } from "@apps/api-client";
+  import type { Message } from "@packages/api-client";
   import { onMount } from "svelte";
   import Modal, { ModalManager } from "$lib/modal/modal.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";

@@ -1,4 +1,4 @@
-import type { User } from "@apps/api-client";
+import type { User } from "@packages/api-client";
 import {
   getApiClient,
   unwrapResponse,

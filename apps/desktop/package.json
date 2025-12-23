@@ -26,7 +26,7 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
-    "@apps/api-client": "workspace:*",
+    "@packages/api-client": "workspace:*",
     "@apps/server": "workspace:*",
     "@codemirror/autocomplete": "^6.20.0",
     "@codemirror/commands": "^6.10.0",

@@ -1,4 +1,4 @@
-import type { WsServerMessage } from "@apps/api-client";
+import type { WsServerMessage } from "@packages/api-client";
 import { getWebSocket } from "./index.ts";
 
 type EventType = WsServerMessage["type"];

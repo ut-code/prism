@@ -1,4 +1,4 @@
-import type { ApiClient } from "@apps/api-client";
+import type { ApiClient } from "@packages/api-client";
 import { useWebSocket } from "./websocket/index.ts";
 
 /**

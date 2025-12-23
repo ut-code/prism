@@ -1,4 +1,4 @@
-import type { File } from "@apps/api-client";
+import type { File } from "@packages/api-client";
 import { isImage } from "@/features/files/utils.ts";
 import {
   getApiClient,

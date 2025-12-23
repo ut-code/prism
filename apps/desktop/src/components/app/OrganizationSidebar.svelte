@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Organization } from "@apps/api-client";
   import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
   import Settings from "@lucide/svelte/icons/settings";
+  import type { Organization } from "@packages/api-client";
   import type { Snippet } from "svelte";
 
   interface Props {

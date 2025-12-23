@@ -1,4 +1,4 @@
-import type { Channel, Message } from "@apps/api-client";
+import type { Channel, Message } from "@packages/api-client";
 import { onMount } from "svelte";
 import {
   getApiClient,

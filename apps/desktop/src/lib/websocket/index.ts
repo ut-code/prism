@@ -1,11 +1,11 @@
-import { createWsClient, type WsClient } from "@apps/api-client";
+import { createWsClient, type WsClient } from "@packages/api-client";
 
 export type {
   WsBroadcastEvent,
   WsClientMessage,
   WsControlMessage,
   WsServerMessage,
-} from "@apps/api-client";
+} from "@packages/api-client";
 
 let wsClient: WsClient | null = null;
 const subscribedChannels = new Set<string>();

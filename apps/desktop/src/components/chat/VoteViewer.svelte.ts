@@ -1,4 +1,4 @@
-import type { User, Vote } from "@apps/api-client";
+import type { User, Vote } from "@packages/api-client";
 import {
   getApiClient,
   getVote,

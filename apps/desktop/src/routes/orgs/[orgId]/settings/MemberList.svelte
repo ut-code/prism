@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Organization, OrganizationMember } from "@apps/api-client";
+  import type { Organization, OrganizationMember } from "@packages/api-client";
 
   interface Props {
     organization: Organization | undefined;

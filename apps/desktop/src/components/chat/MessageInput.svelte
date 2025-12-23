@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Message } from "@apps/api-client";
   import X from "@lucide/svelte/icons/x";
+  import type { Message } from "@packages/api-client";
   import FileSelector from "@/features/files/upload/Selector.svelte";
   import EmojiButton from "./EmojiButton.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";

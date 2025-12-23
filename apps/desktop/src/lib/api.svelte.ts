@@ -7,7 +7,7 @@ import {
   getOrganization,
   getTask,
   getVote,
-} from "@apps/api-client";
+} from "@packages/api-client";
 import { goto } from "$app/navigation";
 
 // Re-export helper functions
