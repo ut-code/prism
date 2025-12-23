@@ -4,3 +4,170 @@
   /* biome-ignore lint/correctness/noUnknownProperty: daisyui config */
   logs: false;
 }
+
+/* Prism Theme: Developer Terminal × Minimal Chat */
+@theme {
+  /* Color System - Near-black base with cyan accents */
+  --color-base-100: oklch(12% 0.01 260);
+  --color-base-200: oklch(14% 0.01 260);
+  --color-base-300: oklch(18% 0.015 260);
+  --color-base-content: oklch(92% 0.01 260);
+
+  --color-primary: oklch(70% 0.15 195);
+  --color-primary-content: oklch(15% 0.02 195);
+
+  --color-secondary: oklch(65% 0.12 280);
+  --color-secondary-content: oklch(95% 0.01 280);
+
+  --color-accent: oklch(75% 0.18 160);
+  --color-accent-content: oklch(15% 0.02 160);
+
+  --color-neutral: oklch(22% 0.015 260);
+  --color-neutral-content: oklch(85% 0.01 260);
+
+  --color-success: oklch(72% 0.19 145);
+  --color-warning: oklch(80% 0.16 85);
+  --color-error: oklch(65% 0.2 25);
+  --color-info: oklch(70% 0.15 230);
+
+  /* Subtle muted variants for UI chrome */
+  --color-muted: oklch(45% 0.02 260);
+  --color-border: oklch(25% 0.015 260);
+
+  /* Typography */
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Spacing scale (4px base) */
+  --spacing-px: 1px;
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+
+  /* Border radius - subtle */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* Transitions */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+}
+
+/* Base styles */
+html {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  line-height: 1.5;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Focus states - subtle but visible */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Code blocks */
+pre,
+code {
+  font-family: var(--font-mono);
+}
+
+code {
+  background: var(--color-base-300);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875em;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* Selection */
+::selection {
+  background: oklch(70% 0.15 195 / 30%);
+}
+
+/* Utility classes for the design system */
+.text-muted {
+  color: var(--color-muted);
+}
+
+.border-subtle {
+  border-color: var(--color-border);
+}
+
+/* Channel indicator prefix */
+.channel-prefix {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* Message timestamp styling */
+.timestamp {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hover states for interactive elements */
+.hover-highlight {
+  transition: background-color var(--duration-fast) ease;
+}
+
+.hover-highlight:hover {
+  background-color: var(--color-base-300);
+}
+
+/* Unread indicator */
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+/* Badge override for unread counts */
+.badge-unread {
+  background: var(--color-primary);
+  color: var(--color-primary-content);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+}

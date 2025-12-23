@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { api } from "@apps/convex";
-  import { useMutation } from "@/lib/useMutation.svelte.ts";
+  import { getApiClient, unwrapResponse, useMutation } from "@/lib/api.svelte";
   import { goto } from "$app/navigation";
 
-  const createOrganization = useMutation(api.organizations.create);
+  const api = getApiClient();
+  const createOrganization = useMutation(
+    async (data: { name: string; description?: string }) =>
+      unwrapResponse<{ id: string }>(await api.organizations.post(data)),
+  );
 
   let form = $state({
     name: "",
@@ -14,12 +17,14 @@
     if (!form.name.trim()) return;
 
     try {
-      const organizationId = await createOrganization.run({
+      const result = await createOrganization.run({
         name: form.name.trim(),
         description: form.description.trim() || undefined,
       });
 
-      goto(`/orgs/${organizationId}/settings`);
+      if (result) {
+        goto(`/orgs/${result.id}/settings`);
+      }
     } catch (error) {
       console.error("Failed to create organization:", error);
       alert("組織の作成に失敗しました");

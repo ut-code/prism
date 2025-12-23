@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useConvexClient } from "convex-svelte";
+  import Plus from "@lucide/svelte/icons/plus";
+  import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
 
-  const convex = useConvexClient();
+  const api = getApiClient();
 
   interface Props {
-    organizationId: Id<"organizations">;
+    organizationId: string;
   }
   const { organizationId }: Props = $props();
 
@@ -22,10 +22,11 @@
     disabled = true;
     try {
       if (newChannelName.trim()) {
-        await convex.mutation(api.channels.create, {
+        const response = await api.channels.post({
           name: newChannelName.trim(),
           organizationId,
         });
+        unwrapResponse(response);
       }
     } catch (error) {
       console.error(error);
@@ -40,12 +41,13 @@
 <Modal manager={modalManager} />
 
 <button
-  class="btn btn-primary btn-sm mt-2 w-full"
+  class="btn btn-ghost btn-xs btn-square"
+  title="新しいチャンネル"
   onclick={() => {
     modalManager.dispatch(createChannelModalContent);
   }}
 >
-  + 新しいチャンネル
+  <Plus class="text-muted size-4" />
 </button>
 
 {#snippet createChannelModalContent()}

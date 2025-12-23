@@ -1,17 +1,23 @@
 <script lang="ts">
   import "@/app.css";
+  import { setupApi } from "@/lib/api.svelte.ts";
+  import { env } from "@/lib/env.ts";
+  import { setupWebSocket } from "@/lib/websocket/index.ts";
 
-  import { setupConvexAuth } from "@mmailaender/convex-auth-svelte/sveltekit";
-  import { setupConvex } from "convex-svelte";
-  import { PUBLIC_CONVEX_URL } from "$lib/env.ts";
+  const { children } = $props();
 
-  const { children, data } = $props();
+  // Initialize API client
+  setupApi();
 
-  setupConvex(PUBLIC_CONVEX_URL);
+  // Initialize WebSocket client (Eden Treaty adds /ws automatically)
+  const wsUrl = env.PUBLIC_API_BASE_URL.replace(/^http/, "ws");
 
-  setupConvexAuth({
-    getServerState: () => data.authState,
-    convexUrl: PUBLIC_CONVEX_URL,
+  $effect(() => {
+    let cleanup: (() => void) | undefined;
+    setupWebSocket(wsUrl).then((ws) => {
+      cleanup = () => ws.close();
+    });
+    return () => cleanup?.();
   });
 </script>
 

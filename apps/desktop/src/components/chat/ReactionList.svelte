@@ -1,21 +1,31 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Reaction } from "@apps/api-client";
+  import {
+    getApiClient,
+    getMessage,
+    unwrapResponse,
+    useQuery,
+  } from "@/lib/api.svelte";
   import { uniqueBy } from "@/lib/utils";
 
   interface Props {
-    organizationId: Id<"organizations">;
-    messageId: Id<"messages">;
+    organizationId: string;
+    messageId: string;
   }
 
   let { organizationId, messageId }: Props = $props();
 
-  const reactions = useQuery(api.messages.getReactions, () => ({ messageId }));
+  const api = getApiClient();
+
+  const reactions = useQuery<Reaction[]>(async () => {
+    const response = await getMessage(api, messageId).reactions.get();
+    return unwrapResponse(response);
+  });
 
   let selectedEmoji = $state<string | null>(null);
 
   const reactionDetailsByEmoji = $derived.by(() => {
-    const details = new Map<string, { count: number; users: Id<"users">[] }>();
+    const details = new Map<string, { count: number; users: string[] }>();
     if (!reactions.data) {
       return details;
     }
@@ -34,14 +44,13 @@
       : [],
   );
 
-  // const userNamesById = useQuery(api.users.getUserNames, () => ({
-  //   userIds: allUserIdsInReactions,
-  // }));
-
-  const userNamesById = useQuery(api.users.getUserNicknames, () => ({
-    userIds: allUserIdsInReactions,
-    organizationId: organizationId,
-  }));
+  const userNamesById = useQuery<Record<string, string>>(async () => {
+    const response = await api.users.nicknames.post({
+      userIds: allUserIdsInReactions,
+      organizationId,
+    });
+    return unwrapResponse(response);
+  });
 
   function toggleUserList(emoji: string) {
     selectedEmoji = emoji;

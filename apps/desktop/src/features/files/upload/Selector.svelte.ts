@@ -1,7 +1,5 @@
-import type { Id } from "@apps/convex";
-
 export interface SelectorProps {
-  organizationId: Id<"organizations">;
+  organizationId: string;
   onselect: (files: File[]) => void;
   multiple?: boolean;
 }
@@ -34,12 +32,14 @@ export class SelectorController {
   };
 
   handleFileSelect = (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files || []);
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const files = Array.from(event.target.files || []);
     if (files.length > 0) {
       this.onselect(files);
     }
-    input.value = "";
+    event.target.value = "";
   };
 
   handleClick = () => {

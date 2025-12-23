@@ -1,243 +1,123 @@
 <script lang="ts">
-  import { api, type Doc, type Id } from "@apps/convex";
-  import { useConvexClient, useQuery } from "convex-svelte";
-  import FilePreview from "@/features/files/upload/FilePreview.svelte";
+  import type { Message } from "@apps/api-client";
+  import X from "@lucide/svelte/icons/x";
   import FileSelector from "@/features/files/upload/Selector.svelte";
-  import { FileUploader } from "@/features/files/upload/uploader.svelte";
-  import Attachment from "@/icons/attachment.svelte";
-  import MdiClose from "@/icons/mdi-close.svelte";
-  import { useMutation } from "@/lib/useMutation.svelte.ts";
-
+  import EmojiButton from "./EmojiButton.svelte";
   import EmojiPalette from "./EmojiPalette.svelte";
+  import FileAttachmentPreview from "./FileAttachmentPreview.svelte";
+  import { MessageInputController } from "./MessageInputController.svelte.ts";
+  import MessageTextarea from "./MessageTextarea.svelte";
+  import SendButton from "./SendButton.svelte";
   import VoteMaker from "./VoteMaker.svelte";
 
   interface Props {
-    organizationId: Id<"organizations">;
-    channelId: Id<"channels">;
-    replyingTo: Doc<"messages"> | null;
+    organizationId: string;
+    channelId: string;
+    replyingTo: Message | null;
   }
 
   let { channelId, organizationId, replyingTo = $bindable() }: Props = $props();
 
-  type Vote = {
-    title: string;
-    maxVotes: number;
-    voteOptions: Array<string>;
-    voters: Array<{
-      userId: Id<"users">;
-      votedOptions: Array<number>;
-    }>;
-  };
-
-  const sendMessageMutation = useMutation(api.messages.send);
-  const identity = useQuery(api.users.me, {});
-  const convex = useConvexClient();
-
-  let messageContent = $state("");
-  let showEmojiPalette = $state(false);
-  let showFileSelector = $state(false);
-  let attachedFiles = $state<File[]>([]);
-
-  const clickable = $derived.by<boolean>(() => {
-    // post ongoing
-    if (sendMessageMutation.processing) return false;
-    // identity not loaded yet
-    if (!identity.data) return false;
-    // empty content
-    if (!messageContent.trim() && attachedFiles.length === 0 && !voteIsValid())
-      return false;
-    return true;
-  });
-
-  let showVoteMaker = $state(false);
-  let vote = $state<Vote>({
-    title: "",
-    maxVotes: 1,
-    voteOptions: [],
-    voters: [],
-  });
-  function voteIsValid() {
-    if (!vote.title.trim()) return false;
-    if (vote.voteOptions.length === 0) return false;
-    if (vote.maxVotes === 0) return false;
-    return true;
-  }
-
-  const uploader = new FileUploader(() => ({
+  const controller = new MessageInputController(() => ({
     organizationId,
+    channelId,
+    replyingTo,
+    onReplyingToChange: (value) => {
+      replyingTo = value;
+    },
   }));
-
-  async function sendMessage() {
-    if (!clickable) return;
-    if (!identity.data) return;
-
-    const attachments = (await uploader.uploadAll(attachedFiles)).map(
-      (it) => it.id,
-    );
-
-    let voteId: Id<"votes"> | undefined;
-    if (voteIsValid()) {
-      voteId = await convex.mutation(api.vote.addVote, {
-        title: vote.title,
-        maxVotes: vote.maxVotes,
-        voteOptions: vote.voteOptions,
-      });
-    }
-
-    await sendMessageMutation.run({
-      channelId,
-      content: messageContent.trim() || "",
-      author: identity.data.name || "unregistered",
-      parentId: replyingTo?._id ?? undefined,
-      attachments,
-      vote: voteId,
-    });
-
-    messageContent = "";
-    attachedFiles = [];
-    replyingTo = null;
-    showFileSelector = false;
-    vote = {
-      title: "",
-      maxVotes: 1,
-      voteOptions: [],
-      voters: [],
-    };
-  }
-
-  function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === "Enter" && event.ctrlKey) {
-      event.preventDefault();
-      sendMessage();
-    }
-  }
-
-  function toggleFileUploader() {
-    showFileSelector = !showFileSelector;
-  }
-
-  function toggleVoteMaker() {
-    showVoteMaker = !showVoteMaker;
-  }
 </script>
 
-<div class="border-base-300 bg-base-100 space-y-4 border-t p-4">
+<footer class="border-subtle bg-base-100 border-t">
+  <!-- Reply banner -->
   {#if replyingTo}
     <div
-      class="bg-base-200 mb-2 flex items-center justify-between rounded-md p-2 text-sm"
+      class="border-subtle bg-base-200/50 flex items-center gap-2 border-b px-4 py-2 text-sm"
     >
-      <div class="text-base-content/70 truncate">
-        <span class="font-semibold">返信先:</span>
-        <span class="text-primary font-semibold">{replyingTo.author}</span>
-        <span class="truncate">: {replyingTo.content}</span>
-      </div>
+      <span class="text-muted">返信先:</span>
+      <span class="text-primary font-medium">{replyingTo.author}</span>
+      <span class="text-muted flex-1 truncate">{replyingTo.content}</span>
       <button
-        class="btn btn-ghost btn-circle btn-sm"
+        class="btn btn-ghost btn-xs btn-square"
         onclick={() => (replyingTo = null)}
       >
-        <MdiClose />
+        <X class="size-4" />
       </button>
     </div>
   {/if}
 
-  <!-- Attached files preview -->
-  {#if attachedFiles.length > 0}
-    <div class="space-y-2">
-      <h4 class="text-base-content/70 text-sm font-medium">添付ファイル:</h4>
-      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {#each attachedFiles as file, index (file.name)}
-          <FilePreview
-            {file}
-            compact={true}
-            removable={true}
-            onRemove={() => attachedFiles.splice(index, 1)}
-          />
-        {/each}
-      </div>
+  <!-- File attachments preview -->
+  {#if controller.attachedFiles.length > 0}
+    <div class="border-subtle border-b px-4 py-2">
+      <FileAttachmentPreview
+        files={controller.attachedFiles}
+        onremove={(index) => controller.removeFile(index)}
+      />
     </div>
   {/if}
 
-  <!-- File uploader -->
-  {#if showFileSelector}
-    <FileSelector
-      {organizationId}
-      bind:files={attachedFiles}
-      onselect={() => {
-        showFileSelector = false;
-      }}
-    />
+  <!-- File selector -->
+  {#if controller.showFileSelector}
+    <div class="border-subtle border-b p-4">
+      <FileSelector
+        {organizationId}
+        bind:files={controller.attachedFiles}
+        onselect={() => (controller.showFileSelector = false)}
+      />
+    </div>
   {/if}
 
-  {#if showVoteMaker}
-    <VoteMaker bind:vote />
+  <!-- Vote maker -->
+  {#if controller.showVoteMaker}
+    <div class="border-subtle border-b p-4">
+      <VoteMaker bind:vote={controller.vote} />
+    </div>
   {/if}
-  <div class="flex gap-2"></div>
 
-  <div class="flex gap-2">
-    <div class="flex-1 space-y-2">
-      <textarea
-        placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)"
-        class="textarea textarea-bordered w-full resize-none"
-        rows="2"
-        bind:value={messageContent}
-        onkeydown={handleKeyPress}
-      ></textarea>
-
-      <!-- Action buttons -->
-      <div class="flex gap-2">
-        <button
-          class="btn btn-ghost btn-sm"
-          onclick={toggleFileUploader}
-          title="ファイルを添付"
-          type="button"
-        >
-          <Attachment />
-          {showFileSelector ? "キャンセル" : "ファイル添付"}
-        </button>
-        <button
-          class="btn btn-ghost btn-sm"
-          onclick={toggleVoteMaker}
-          title="投票を作成"
-          type="button"
-        >
-          {showVoteMaker ? "キャンセル" : "投票を作成"}
-        </button>
-      </div>
+  <!-- Input area -->
+  <div class="flex items-end gap-2 p-3">
+    <div class="flex-1">
+      <MessageTextarea
+        bind:value={controller.messageContent}
+        showFileSelector={controller.showFileSelector}
+        showVoteMaker={controller.showVoteMaker}
+        onkeydown={(e) => controller.handleKeyPress(e)}
+        ontoggleFileUploader={() => controller.toggleFileUploader()}
+        ontoggleVoteMaker={() => controller.toggleVoteMaker()}
+      />
     </div>
 
-    <button
-      class="btn btn-primary self-end"
-      onclick={sendMessage}
-      disabled={!clickable}
-    >
-      {#if sendMessageMutation.processing}
-        <span class="loading loading-spinner loading-sm"></span>
-      {:else}
-        送信
-      {/if}
-    </button>
-    <button
-      class="btn btn-secondary self-end"
-      onclick={(e) => {
-        e.stopPropagation();
-        showEmojiPalette = !showEmojiPalette;
-      }}
-    >
-      😀
-    </button>
+    <div class="flex items-center gap-1">
+      <EmojiButton
+        onclick={(e) => {
+          e.stopPropagation();
+          controller.toggleEmojiPalette();
+        }}
+      />
+      <SendButton
+        disabled={!controller.clickable}
+        processing={controller.sendMessageMutation.processing}
+        onclick={() => controller.sendMessage()}
+      />
+    </div>
   </div>
-  {#if showEmojiPalette}
-    <EmojiPalette
-      onClose={() => (showEmojiPalette = false)}
-      onEmojiSelected={(emoji) => {
-        messageContent += emoji;
-      }}
-    />
-  {/if}
 
-  {#if sendMessageMutation.error}
-    <div class="alert alert-error text-sm">
-      {sendMessageMutation.error}
+  <!-- Emoji palette -->
+  {#if controller.showEmojiPalette}
+    <div class="border-subtle border-t">
+      <EmojiPalette
+        onClose={() => (controller.showEmojiPalette = false)}
+        onEmojiSelected={(emoji) => controller.addEmoji(emoji)}
+      />
     </div>
   {/if}
-</div>
+
+  <!-- Error message -->
+  {#if controller.sendMessageMutation.error}
+    <div
+      class="border-error/30 bg-error/10 text-error border-t px-4 py-2 text-sm"
+    >
+      {controller.sendMessageMutation.error}
+    </div>
+  {/if}
+</footer>

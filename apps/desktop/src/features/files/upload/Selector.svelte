@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { Id } from "@apps/convex";
   import { SelectorController } from "./Selector.svelte.ts";
   import SelectorDropzone from "./SelectorDropzone.svelte";
 
   interface Props {
-    organizationId: Id<"organizations">;
+    organizationId: string;
     files: File[];
     onselect?: (files: File[]) => void;
     multiple?: boolean;

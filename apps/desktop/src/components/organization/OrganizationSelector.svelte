@@ -1,14 +1,18 @@
 <script lang="ts">
-  import { api, type Id } from "@apps/convex";
-  import { useQuery } from "convex-svelte";
+  import type { Organization } from "@apps/api-client";
+  import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
 
   interface Props {
-    onselect: (organizationId: Id<"organizations">) => void;
+    onselect: (organizationId: string) => void;
   }
 
   const { onselect }: Props = $props();
 
-  const organizations = useQuery(api.organizations.list, () => ({}));
+  const api = getApiClient();
+  const organizations = useQuery<Organization[]>(async () => {
+    const response = await api.organizations.get();
+    return unwrapResponse<Organization[]>(response);
+  });
 </script>
 
 <div class="bg-base-100 flex min-h-screen items-center justify-center p-4">
@@ -25,7 +29,7 @@
         {#each organizations.data as org}
           <button
             class="card bg-base-200 hover:bg-base-300 w-full cursor-pointer text-left transition-colors"
-            onclick={() => org._id && onselect(org._id)}
+            onclick={() => org.id && onselect(org.id)}
           >
             <div class="card-body p-4">
               <div class="flex items-center justify-between">

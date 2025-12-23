@@ -1,5 +1,4 @@
-import { api, type Id } from "@apps/convex";
-import { useMutation } from "@/lib/useMutation.svelte";
+import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
 
 export const MAX_FILES = 10;
 // constants
@@ -22,7 +21,7 @@ export const ALLOWED_TYPES = [
 ];
 
 export interface UploadedFile {
-  id: Id<"files">;
+  id: string;
   filename: string;
   originalFilename: string;
   mimeType: string;
@@ -38,15 +37,14 @@ export interface UploadProgress {
 }
 
 export class FileUploader {
-  private saveFileInfo = useMutation(api.files.saveFileInfo);
-  private generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  private organizationId: Id<"organizations">;
+  private api = getApiClient();
+  private organizationId: string;
   uploading = $state(false);
   progress: UploadProgress[] = $state([]);
 
   constructor(
     props: () => {
-      organizationId: Id<"organizations">;
+      organizationId: string;
     },
   ) {
     this.organizationId = $derived(props().organizationId);
@@ -77,27 +75,8 @@ export class FileUploader {
   }
 
   private async uploadFile(file: File): Promise<UploadedFile> {
-    const uploadUrl = await this.generateUploadUrl.run({
-      organizationId: this.organizationId,
-    });
-    if (!uploadUrl) {
-      throw new Error("アップロードURLの取得に失敗しました");
-    }
-
-    const response = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error("アップロードに失敗しました");
-    }
-
-    const { storageId } = await response.json();
-
-    const fileId = await this.saveFileInfo.run({
-      storageId,
+    const response = await this.api.files.post({
+      storageId: `temp-${Date.now()}-${Math.random()}`,
       filename: file.name,
       originalFilename: file.name,
       mimeType: file.type,
@@ -105,16 +84,13 @@ export class FileUploader {
       organizationId: this.organizationId,
     });
 
-    if (!fileId) {
-      throw new Error("ファイル情報の保存に失敗しました");
-    }
-
+    const data = unwrapResponse<UploadedFile>(response);
     return {
-      id: fileId,
-      filename: file.name,
-      originalFilename: file.name,
-      mimeType: file.type,
-      size: file.size,
+      id: data.id,
+      filename: data.filename,
+      originalFilename: data.originalFilename,
+      mimeType: data.mimeType,
+      size: data.size,
     };
   }
 }

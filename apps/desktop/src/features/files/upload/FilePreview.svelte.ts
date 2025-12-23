@@ -56,7 +56,6 @@ export class FilePreviewController {
     this.onRemove = $derived(props().onRemove);
 
     $effect(() => {
-      console.log("file", this.file);
       if (this.file instanceof File) {
         const url = URL.createObjectURL(this.file);
         this.fileUrl = url;

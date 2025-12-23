@@ -6,31 +6,29 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "hivemind ./tasks/web.Procfile",
-    "dev:storybook": "hivemind ./tasks/storybook.Procfile",
-    "dev:tauri": "hivemind ./tasks/tauri.Procfile",
-    "run:web": "cd apps/desktop && bun dev",
-    "run:convex": "cd apps/convex && bun run dev",
-    "run:tauri": "cd apps/desktop && bun run dev:tauri",
-    "run:storybook": "cd apps/desktop && bun run storybook",
     "prepare": "bun run sync && bun lefthook install",
     "sync": "bun run --filter=* sync",
-    "test": "bun run --filter=* test",
     "check": "bun run check:lint && bun run --filter=* check && bun run check:format",
     "fix": "bun run fix:lint && bun run fix:format",
+    "tidy": "bun run fix && bun run check",
     "check:format": "prettier --check .",
     "fix:format": "prettier --write . --log-level warn",
     "check:lint": "bun biome check",
     "fix:lint": "bun biome check --fix --unsafe",
-    "convex": "cd apps/convex && bun run convex",
-    "paraglide": "cd apps/desktop && bun run paraglide"
+    "db": "cd apps/server && bun --env-file=../../.env run drizzle-kit",
+    "db:seed": "bun --env-file=.env run scripts/seed.ts",
+    "test:e2e": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts",
+    "test:e2e:ui": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts --ui"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.3",
-    "lefthook": "^2.0.2",
-    "prettier": "^3.6.2",
+    "@biomejs/biome": "^2.3.8",
+    "@playwright/test": "^1.57.0",
+    "@sveltejs/mcp": "^0.1.13",
+    "lefthook": "^2.0.8",
+    "prettier": "^3.7.4",
     "prettier-plugin-svelte": "^3.4.0",
-    "prettier-plugin-tailwindcss": "^0.7.1"
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "svelte": "^5.45.6"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,12 +7,18 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!apps/convex/src/convex/_generated"],
+    "includes": ["**"],
   },
   "formatter": {
     "enabled": false,
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+      },
+    },
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -64,16 +70,6 @@
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedImports": "off",
-          },
-        },
-      },
-    },
-    {
-      "includes": ["apps/convex/**/*"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "useImportExtensions": "off",
           },
         },
       },

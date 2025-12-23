@@ -2,155 +2,234 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Architecture
+<architecture>
 
-This is a TypeScript monorepo using a Convex backend and SvelteKit frontend with Tauri for desktop apps.
+## Stack
 
-### Stack
-
-- **Frontend**: SvelteKit with Svelte 5, TypeScript, TailwindCSS, DaisyUI
-  - **CRITICAL**: This project uses Svelte 5 RUNES MODE - NEVER use legacy reactive statements (`$:`)
-  - **ALWAYS use**: `$state`, `$derived`, `$effect` instead of legacy syntax
-- **Backend**: Convex (real-time database and functions)
-- **Desktop**: Tauri (optional, conflicts with web dev server)
-- **Styling**: TailwindCSS v4 with DaisyUI components
+- **Frontend**: SvelteKit + Svelte 5 + TailwindCSS v4 + DaisyUI
+- **Backend**: Elysia (Bun) + Drizzle ORM + PostgreSQL
+- **Desktop**: Tauri (optional)
 - **Package Manager**: Bun
-- **Monorepo Structure**: Workspaces with `packages/`
+- **Monorepo**: Workspaces (`apps/*`)
+- **Dev Environment**: devenv (logs: `.devenv/processes.log`)
 
-### Apps Structure
+## Directory Structure
 
-- `packages/client/` - SvelteKit frontend with Tauri integration
-- `packages/convex/` - Convex backend with database schema and functions
-
-### Frontend (SvelteKit)
-
-- **Routes**: Standard SvelteKit routing in `packages/client/src/routes/`
-- **Components**: Organized in `packages/client/src/components/` with atoms and examples
-- **Aliases**:
-  - `@` → `src`
-  - `@@` → `../..` (workspace root)
-  - `$components` → `src/components`
-  - `@` → `src/`
-  - `@apps/{package}` → monorepo
-- **Convex Integration**: Uses `convex-svelte` for reactive queries
-- **State Pattern**: Logic components (e.g., TaskList.svelte) separate from presentation (TaskListSkin.svelte)
-
-### Backend (Convex)
-
-- **Schema**: Defined in `packages/convex/src/convex/schema.ts`
-- **Functions**: Database operations in `packages/convex/src/convex/[feature].ts`
-- **Type Safety**: Auto-generated types from schema shared with frontend via workspace dependency
-
-### Data Flow
-
-1. Convex schema defines database structure
-2. Convex functions provide type-safe CRUD operations
-3. Frontend uses `convex-svelte` hooks for reactive data
-4. Automatic type generation ensures type safety across stack
-
-## Framework - Convex
-
-### Convex の Import について
-
-```ts
-import { api, type Id } from "@apps/convex";
-
-// use api and type Id ...
+```
+.
+├── apps/
+│   ├── desktop/          # SvelteKit frontend
+│   │   ├── src/
+│   │   │   ├── components/   # UI components
+│   │   │   ├── features/     # Feature modules
+│   │   │   ├── lib/          # Utilities
+│   │   │   ├── routes/       # SvelteKit routes
+│   │   │   └── icons/        # Icon components
+│   │   └── src-tauri/    # Tauri config
+│   ├── server/           # Elysia API server
+│   │   └── src/
+│   │       ├── db/           # Drizzle schema & queries
+│   │       ├── domains/      # Business logic
+│   │       └── middleware/   # Elysia middleware
+│   └── api-client/       # Shared API types
+├── docs/
+│   └── skills/           # Agent skill docs
+├── tasks/                # Procfile for dev
+├── .env.sample           # environment variable samples.
+└── .env                  # all environment variables in here. pls don't read
 ```
 
-### 注意点: convex-svelte の `useQuery` について
+## Import Aliases
 
-`useQuery` に渡す引数は、関数の形式で渡してください。そうでないと、期待しない動作を引き起こす可能性があります。
+| Alias         | Path              |
+| ------------- | ----------------- |
+| `@`           | `src/`            |
+| `$components` | `src/components/` |
+| `@apps/{pkg}` | `apps/{pkg}/`     |
+
+</architecture>
+
+<framework-svelte>
+
+## Svelte 5 Runes (CRITICAL)
+
+**NEVER use legacy syntax.** This project uses Svelte 5 runes mode.
 
 ```svelte
-<script lang="ts">
-  // good
-  const selectedChannel = useQuery(api.channels.get, () => ({
-    id: selectedChannelId,
-  }));
+<!-- ❌ FORBIDDEN -->
+$: reactiveVar = ...
+let count = 0
 
-  // bad - この形だと `selectedChannelId` の変更を検知できない
-  const selectedChannelBad = useQuery(api.channels.get, {
-    id: selectedChannelId,
-  });
-  // works, but smelly code
-  const selectedChannelSmelly = useQuery(api.channels.list, {});
-  // better - only use getter functions
-  const selectedChannelBetter = useQuery(api.channels.list, () => ({}));
-</script>
+<!-- ✅ REQUIRED -->
+let count = $state(0)
+const doubled = $derived(count * 2)
+$effect(() => { ... })
 ```
 
-### Mutations with useMutation
+## Svelte Tips
 
-Since `convex-svelte` doesn't export `useMutation`, we have a custom utility at `src/lib/useMutation.svelte.ts`:
+- **clsx builtin**: `<div class={["text-lg", isError && "text-error"]}>`
+- **Reactive class**: Define in `.svelte.ts` files for reusability
 
-```typescript
-import { useMutation } from "@/lib/useMutation.svelte.ts";
+## Controllers (`.svelte.ts`)
 
-const createOrganization = useMutation(api.organizations.create);
+Controllers must be instantiated **synchronously at script top-level**, so `$effect`/`$derived` work in constructors.
 
-// Use like this
-await createOrganization.run({ name: "New Org", description: "..." });
-// which exposes these properties
-createOrganization.processing; // boolean, use for button disabled state / loading spinners
-createOrganization.error; // string | null, use for error messages
-```
-
-## Framework - Svelte
-
-### Syntax
-
-Never use logacy svelte syntax. This project uses Svelte 5 runes mode.
-
-- ❌ FORBIDDEN: `$: reactiveVar = ...` (reactive statements)
-- ❌ FORBIDDEN: `let count = 0` for reactive state
-- ✅ REQUIRED: `let count = $state(0)` for reactive state
-- ✅ REQUIRED: `$effect(() => { ... })` for side effects
-- ✅ REQUIRED: `const sum = $derived(a + b);` for derived variables
-- ✅ REQUIRED: `const sum = $derived.by(() => { if (a + b < 0) return 0; return a + b; );` for derived variables which needs a block.
-
-### Svelte Capabilities
-
-- clsx: Svelte has clsx builtin to its class. `<div class={["text-lg", isError && "text-error"]}>{text}</div>`
-
-- reactive class: Svelte allows defining reactive controller classes inside ".svelte.ts" files for reusability and separation of concerns.
+**Reactive props pattern:**
 
 ```ts
-// my-controller.svelte.ts
+// ✅ Pass getter function, fine-grained reactivity
 class MyController {
-  foo = $state(3);
-  bar: number;
-  baz = $derived.by(() => bar + baz); // use derived.by if it needs to be lazy-initialized
-  doubleQux: number;
-  // unless it doesn't change at runtime (e.g. static configuration - initBar in this example),
-  // using getter function is better for reactivity.
-  constructor(initBar: number, props: () => { qux: number }) {
-    this.bar = $state(initBar);
-    this.doubleQux = $derived(props().qux * 2);
+  organizationId: string;
+  constructor(organizationId: () => string) {
+    this.organizationId = $derived(organizationId());
+  }
+}
+// Usage: new MyController(() => organizationId)
+
+// ❌ Don't pass raw values (not reactive)
+class MyController {
+  organizationId: string;
+  constructor(organizationId: string) {
+    this.organizationId = organizationId; // Won't update!
   }
 }
 ```
 
-## Code Quality / Coding Rules
+```svelte
+<script lang="ts">
+  // ✅ Do - at the top of the script (just after imports)
+  const foo = FooController();
 
-### Common Rules
+  // ❌ Don't - delay the initialization after an await
+  await something();
+  const foo = FooController();
+</script>
+```
 
-- FILE LENGTH: Prefer short files, 30 @ 50 lines recommended, 100 lines MAX.
-- CHECK: Always run `bun check` after writing code.
-- DOCUMENTATION: document the behavior (and optionally the expected usage) of the code, not the implementation
+**Hooks in controllers:** `useWebSocket`, `useQuery`, etc. can be called in constructors since they run at component init time.
+for example,
 
-### Svelte
+```ts
+// foo.controller.svelte.ts
+class FooController {
+  constructor() {
+    useWebSocket("message:foo", (ev) => {
+      console.log("event received:", ev);
+    });
+  }
+}
+```
 
-- NAMING: Name snippets with camelCase instead of PascalCase to avoid confusion with components.
-- ALIAS: Use TypeScript import alias for client code. `import component from "@/features/foo/component.svelte";`
-- STYLING: Don't use style blocks in Svelte components, instead use TailwindCSS and DaisyUI.
-- STYLING: Always prefer using DaisyUI classes, and use minimal Tailwind classes.
-- SEPARATE COMPONENTS: Separate components into smallest pieces for readability.
-- SEPARATE LOGIC: Separate Logic from .svelte files into .svelte.ts files.
-  - .svelte.ts files should handle Calculation / Reactivity, while .svelte files should handle UI changes (e.g. navigation, modal open).
-  - if it has any reusable utility function, it should be separated again into plain .ts files / .svelte.ts
-    - An Ideal import tree would look like this: `UI component [.svelte] -> controller [.svelte.ts] -> processor [.svelte.ts] -> pure logic utility [.ts]`
+## Vocaburaly
 
-### Convex Rules
+[Hooks]
+we derive the words "hooks" from react.
+hooks in svelte can only be called at script initialization time.
 
-- AUTHORIZATION: write authorization determinator in `packages/convex/src/convex/perms.ts`
+```ts
+// for "constant" variable you may use bare variables, but otherwise use getter-style passing, just like in controllers.
+function useHook(defaultVal: number, plus: () => number) {
+  // inside hooks you can call effects
+  $effect(() => {
+    console.log("effects");
+  });
+
+  // create reactive variables
+  let reactive = $state(defaultVal);
+  let derived = $derived(reactive * 2 + plus());
+
+  // and return controller-like objects
+  // ALWAYS use getters and setters for returning reactive variables, otherwise it won't be reactive.
+  return {
+    get reactive() {
+      return reactive;
+    },
+    set reactive(newVal) {
+      reactive = newVal;
+    }
+    get derived() {
+      return derived;
+    }
+  }
+}
+```
+
+```svelte
+<script lang="ts">
+  let plus = $state(1);
+
+  // do not destruct it. don't.
+  const foo = useHook(3, () => plus);
+  foo.reactive++;
+</script>
+
+{foo.reactive} * 2 + {plus} = {foo.derived}
+```
+
+</framework-svelte>
+
+<framework-elysia>
+
+## Eden Treaty (Data Fetching)
+
+```ts
+import { treaty } from "@elysiajs/eden";
+import type { App } from "@apps/server";
+
+const client = treaty<App>("http://localhost:8080");
+
+await client.products.get(); // GET
+await client.products["123"].get(); // Dynamic param
+await client.products.get({ query: { category: "foo" } }); // Query
+await client.products.post({ name: "bar", price: 100 }); // POST
+```
+
+</framework-elysia>
+
+<rules>
+
+## Code Quality
+
+- **FILE LENGTH**: 30-50 lines recommended, be warned over 100, 200 AT MAX
+- **TIDY**: Run `bun tidy` after writing code (auto-fix + check)
+- **DOCUMENTATION**: Document behavior, not implementation
+
+## Svelte Rules
+
+- **NAMING**: Snippets use camelCase (not PascalCase)
+- **ALIAS**: Use `@/` for imports
+- **STYLING**: TailwindCSS + DaisyUI only. No `<style>` blocks
+- **SEPARATE**: Components → smallest pieces. Logic → `.svelte.ts` files
+
+## Import Tree (Ideal)
+
+```
+UI [.svelte] → controller [.svelte.ts] → processor [.svelte.ts] → utility [.ts]
+```
+
+</rules>
+
+<skills>
+
+## Skills
+
+毎回の作業前、タスクの種類に応じて `docs/skills/` 内の該当ドキュメントを読む。
+
+| Skill     | File                       | Usage                |
+| --------- | -------------------------- | -------------------- |
+| UI Design | `docs/skills/ui-design.md` | UI実装、デザイン判断 |
+
+</skills>
+
+<debugging>
+
+## Debugging
+
+サーバーエラー時はログを確認する：
+
+```bash
+tail -100 .devenv/processes.log
+```
+
+</debugging>
