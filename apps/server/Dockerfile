@@ -14,5 +14,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+# Copy files needed for drizzle-kit push
+COPY --from=builder /app/apps/server/drizzle.config.ts ./drizzle.config.ts
+COPY --from=builder /app/apps/server/src ./src
 EXPOSE 3000
-CMD ["bun", "run", "dist/index.js"]
+CMD ["sh", "-c", "bunx drizzle-kit push && bun run dist/index.js"]
