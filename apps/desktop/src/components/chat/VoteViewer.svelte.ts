@@ -17,6 +17,7 @@ export class VoteViewerController {
 
   vote: ReturnType<typeof useQuery<Vote>>;
   me: ReturnType<typeof useQuery<User>>;
+  isCasting = $state(false);
 
   constructor(props: () => { voteId: string }) {
     this.voteId = $derived(props().voteId);
@@ -108,9 +109,10 @@ export class VoteViewerController {
   }
 
   async castVote() {
-    if (this.me.data) {
+    if (this.me.data && !this.isCasting) {
       const voteRoute = getVote(this.api, this.voteId);
       if (voteRoute.cast) {
+        this.isCasting = true;
         try {
           const response = await voteRoute.cast.post({
             votedOptions: this.selectedOptions,
@@ -118,6 +120,8 @@ export class VoteViewerController {
           unwrapResponse(response);
         } catch (error) {
           console.error("Failed to cast vote:", error);
+        } finally {
+          this.isCasting = false;
         }
       }
     }

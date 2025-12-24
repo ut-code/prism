@@ -18,6 +18,10 @@
     () => selectedChannelId,
     () => organizationId,
   );
+
+  function autofocus(node: HTMLElement) {
+    node.focus();
+  }
 </script>
 
 <div class="flex h-full flex-col">
@@ -25,13 +29,13 @@
   <header
     class="border-subtle flex items-center justify-between border-b px-6 py-4"
   >
-    <div class="flex items-center gap-3">
-      <Hash class="size-5 opacity-50" />
+    <div class="flex items-center gap-4">
+      <Hash class="size-5 opacity-60" />
       <h1 class="text-base font-semibold">
         {controller.selectedChannel.data?.name ?? "..."}
       </h1>
       {#if controller.selectedChannel.data?.description}
-        <span class="hidden text-sm opacity-40 sm:inline">
+        <span class="hidden text-sm opacity-60 sm:inline">
           — {controller.selectedChannel.data.description}
         </span>
       {/if}
@@ -44,10 +48,11 @@
         >
           <input
             type="text"
-            placeholder="メッセージを検索..."
-            class="input input-sm input-bordered bg-base-200 w-56 pr-8 text-sm transition-all duration-150 focus:w-64"
+            placeholder="Search messages..."
+            class="input input-sm input-bordered bg-base-200 w-56 pr-8 text-sm transition-all duration-200 focus:w-64"
             bind:value={controller.searchQuery}
             onkeydown={(e) => e.key === "Enter" && controller.handleSearch()}
+            use:autofocus
           />
           {#if controller.isSearching}
             <span
@@ -57,12 +62,12 @@
         </div>
       {/if}
       <button
-        class="btn btn-ghost btn-sm btn-square transition-all duration-150"
-        title="検索"
+        class="btn btn-ghost btn-sm btn-square transition-all duration-200"
+        title="Search"
         onclick={() => (controller.showSearch = !controller.showSearch)}
       >
         <Search
-          class="size-5 opacity-50 transition-opacity duration-150 hover:opacity-80"
+          class="size-5 opacity-60 transition-opacity duration-200 hover:opacity-80"
         />
       </button>
     </div>
@@ -70,7 +75,7 @@
 
   <!-- Search results -->
   {#if controller.searchResults.length > 0}
-    <div class="border-subtle bg-base-200/50 border-b p-2">
+    <div class="border-subtle bg-base-200/50 border-b p-4">
       <SearchResults
         results={controller.searchResults}
         onResultClick={controller.handleResultClick}

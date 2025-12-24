@@ -15,7 +15,7 @@
 >
   {#if results.length === 0}
     <div class="text-base-content/60 p-4 text-center text-sm">
-      検索結果がありません
+      No search results
     </div>
   {:else}
     {#each results as result}

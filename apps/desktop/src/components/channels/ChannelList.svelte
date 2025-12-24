@@ -42,7 +42,7 @@
 <div class="flex h-full flex-col">
   <!-- Channels section -->
   <section class="flex-1 overflow-y-auto">
-    <header class="flex items-center justify-between px-3 py-2">
+    <header class="flex items-center justify-between px-4 py-2">
       <span class="text-muted text-xs font-medium tracking-wider uppercase">
         Channels
       </span>
@@ -59,7 +59,7 @@
           <a
             href={`/orgs/${organizationId}/chat/${channel.id}`}
             class={[
-              "group flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors",
+              "group flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors duration-200",
               active
                 ? "bg-primary/15 text-primary"
                 : "text-base-content/80 hover:bg-base-300 hover:text-base-content",
@@ -84,14 +84,14 @@
           </a>
         {/each}
       {:else}
-        <div class="text-muted px-2 py-4 text-center text-sm">
-          読み込み中...
+        <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
+          Loading...
         </div>
       {/if}
 
       {#if channels.data?.length === 0}
-        <div class="text-muted px-2 py-4 text-center text-sm">
-          チャンネルがありません
+        <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
+          No channels
         </div>
       {/if}
     </nav>
@@ -99,13 +99,13 @@
 
   <!-- DM section -->
   <section class="border-subtle border-t">
-    <header class="flex items-center justify-between px-3 py-2">
+    <header class="flex items-center justify-between px-4 py-2">
       <span class="text-muted text-xs font-medium tracking-wider uppercase">
         Direct Messages
       </span>
       <button
         class="btn btn-ghost btn-xs btn-square"
-        title="新しいDM"
+        title="New DM"
         onclick={() => (showUserSearch = !showUserSearch)}
       >
         <Plus class="text-muted size-4" />
@@ -132,10 +132,10 @@
   <footer class="border-subtle border-t p-2">
     <a
       href={`/orgs/${organizationId}/personalization`}
-      class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors"
+      class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors duration-200"
     >
       <User class="size-4" />
-      <span>個人設定</span>
+      <span>Settings</span>
     </a>
   </footer>
 </div>

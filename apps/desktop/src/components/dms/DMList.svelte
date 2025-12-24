@@ -17,18 +17,16 @@
 </script>
 
 <div class="flex flex-col">
-  <div class="border-base-300 border-b p-4">
-    <h3 class="text-base font-semibold">ダイレクトメッセージ</h3>
-  </div>
-
   <div class="flex-1 overflow-y-auto">
     {#if dms.data}
       {#each dms.data as dm (dm.id)}
         {@const active = selectedChannelId === dm.id}
         <a
           class={[
-            "border-base-300 block w-full border-b p-3 text-left",
-            active ? "bg-primary text-primary-content" : "hover:bg-base-300",
+            "block w-full rounded px-2 py-2 text-left text-sm transition-colors duration-200",
+            active
+              ? "bg-primary/15 text-primary"
+              : "text-base-content/80 hover:bg-base-300",
           ]}
           href={`/orgs/${organizationId}/chat/${dm.id}`}
         >
@@ -36,11 +34,13 @@
         </a>
       {/each}
     {:else}
-      <div class="text-base-content/60 p-4 text-center">読み込み中...</div>
+      <div class="text-base-content p-4 text-center opacity-60">
+        読み込み中...
+      </div>
     {/if}
 
     {#if dms.data && dms.data.length === 0}
-      <div class="text-base-content/60 p-4 text-center text-sm">
+      <div class="text-base-content p-4 text-center text-sm opacity-60">
         DMはまだありません
       </div>
     {/if}

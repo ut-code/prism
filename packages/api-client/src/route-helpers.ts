@@ -4,7 +4,6 @@ import type {
   FileRoute,
   MessagesRoute,
   OrganizationRoute,
-  TaskRoute,
   VoteRoute,
 } from "./route-types.ts";
 
@@ -13,35 +12,33 @@ import type {
  * Eden Treaty uses Proxy to enable dynamic route access at runtime.
  */
 
+type DynamicIndex<T> = Record<string, T>;
+
 export function getOrganization(
   client: ApiClient,
   id: string,
 ): OrganizationRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.organizations[id];
+  return (client.organizations as unknown as DynamicIndex<OrganizationRoute>)[
+    id
+  ] as OrganizationRoute;
 }
 
 export function getChannel(client: ApiClient, id: string): ChannelRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.channels[id];
+  return (client.channels as unknown as DynamicIndex<ChannelRoute>)[
+    id
+  ] as ChannelRoute;
 }
 
 export function getMessage(client: ApiClient, id: string): MessagesRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.messages[id];
+  return (client.messages as unknown as DynamicIndex<MessagesRoute>)[
+    id
+  ] as MessagesRoute;
 }
 
 export function getVote(client: ApiClient, id: string): VoteRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.votes[id];
-}
-
-export function getTask(client: ApiClient, id: string): TaskRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.tasks[id];
+  return (client.votes as unknown as DynamicIndex<VoteRoute>)[id] as VoteRoute;
 }
 
 export function getFile(client: ApiClient, id: string): FileRoute {
-  // @ts-expect-error - Eden Treaty Proxy allows dynamic property access
-  return client.files[id];
+  return (client.files as unknown as DynamicIndex<FileRoute>)[id] as FileRoute;
 }

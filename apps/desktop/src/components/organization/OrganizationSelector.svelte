@@ -18,10 +18,10 @@
 <div class="bg-base-100 flex min-h-screen items-center justify-center p-4">
   <div class="w-full max-w-md">
     <div class="mb-8 text-center">
-      <h1 class="text-base-content mb-2 text-4xl font-bold">組織を選択</h1>
-      <p class="text-base-content/70">
-        参加している組織からチャットする組織を選んでください
-      </p>
+      <h1 class="text-base-content mb-2 text-4xl font-bold">
+        Select Organization
+      </h1>
+      <p class="text-base-content/70">Choose an organization to chat with</p>
     </div>
 
     <div class="space-y-3">
@@ -57,8 +57,10 @@
 
     {#if organizations.data && organizations.data.length === 0}
       <div class="py-8 text-center">
-        <p class="text-base-content/60 mb-4">参加している組織がありません</p>
-        <a href="/orgs/new" class="btn btn-primary"> 新しい組織を作成 </a>
+        <p class="text-base-content/60 mb-4">No organizations available</p>
+        <a href="/orgs/new" class="btn btn-primary">
+          Create New Organization
+        </a>
       </div>
     {/if}
   </div>

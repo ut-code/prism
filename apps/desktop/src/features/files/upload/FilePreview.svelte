@@ -87,9 +87,9 @@
         controller.compact && "-top-1 -right-1",
       ]}
       onclick={controller.handleRemove}
-      title="削除"
+      title="Remove"
       type="button"
-      aria-label="ファイルを削除"
+      aria-label="Remove file"
     >
       <svg
         class="h-3 w-3"

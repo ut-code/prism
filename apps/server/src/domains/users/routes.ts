@@ -60,15 +60,20 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   )
   .post(
     "/names",
-    async ({ body }) => {
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
+
       const userList = await db
         .select()
         .from(users)
         .where(inArray(users.id, body.userIds));
 
       const userNames: Record<string, string> = {};
-      for (const user of userList) {
-        userNames[user.id] = user.name || "";
+      for (const dbUser of userList) {
+        userNames[dbUser.id] = dbUser.name || "";
       }
 
       return userNames;
@@ -81,7 +86,12 @@ export const userRoutes = new Elysia({ prefix: "/users" })
   )
   .post(
     "/nicknames",
-    async ({ body }) => {
+    async ({ user, body, set }) => {
+      if (!user) {
+        set.status = 401;
+        return { message: "Unauthorized" };
+      }
+
       const userList = await db
         .select()
         .from(users)
@@ -98,9 +108,9 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         );
 
       const userNicknames: Record<string, string> = {};
-      for (const user of userList) {
-        const p = personalizationList.find((p) => p.userId === user.id);
-        userNicknames[user.id] = p?.nickname || user.name || "";
+      for (const dbUser of userList) {
+        const p = personalizationList.find((p) => p.userId === dbUser.id);
+        userNicknames[dbUser.id] = p?.nickname || dbUser.name || "";
       }
 
       return userNicknames;
@@ -112,7 +122,12 @@ export const userRoutes = new Elysia({ prefix: "/users" })
       }),
     },
   )
-  .get("/search", async ({ query }) => {
+  .get("/search", async ({ user, query, set }) => {
+    if (!user) {
+      set.status = 401;
+      return { message: "Unauthorized" };
+    }
+
     if (!query.email) return [];
 
     const userList = await db

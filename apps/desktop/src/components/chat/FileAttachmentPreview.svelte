@@ -15,7 +15,7 @@
 -->
 {#if files.length > 0}
   <div class="space-y-2">
-    <h4 class="text-base-content/70 text-sm font-medium">添付ファイル:</h4>
+    <h4 class="text-base-content/70 text-sm font-medium">Attached Files:</h4>
     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
       {#each files as file, index (file.name)}
         <FilePreview

@@ -101,12 +101,12 @@
       />
     {:else}
       <div class="flex h-full items-center justify-center py-16">
-        <p class="text-sm opacity-40">まだメッセージがありません</p>
+        <p class="text-sm opacity-60">No messages yet</p>
       </div>
     {/each}
   {:else}
     <div class="flex h-full items-center justify-center py-16">
-      <p class="text-sm opacity-40">メッセージを読み込み中...</p>
+      <p class="text-sm opacity-60">Loading messages...</p>
     </div>
   {/if}
 </div>

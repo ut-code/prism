@@ -27,7 +27,7 @@
       }
     } catch (error) {
       console.error("Failed to create organization:", error);
-      alert("組織の作成に失敗しました");
+      alert("Failed to create organization");
     }
   }
 
@@ -39,12 +39,14 @@
 <div class="container mx-auto max-w-md p-6">
   <div class="mb-6">
     <button class="btn btn-ghost btn-sm mb-4" onclick={goBack}>
-      ← ホームに戻る
+      ← Back to Home
     </button>
 
-    <h1 class="text-base-content mb-2 text-3xl font-bold">新しい組織を作成</h1>
+    <h1 class="text-base-content mb-2 text-3xl font-bold">
+      Create New Organization
+    </h1>
     <p class="text-base-content/70">
-      新しい組織を作成して、メンバーとコラボレーションを始めましょう
+      Create a new organization and start collaborating with members
     </p>
   </div>
 
@@ -53,15 +55,15 @@
       <form onsubmit={handleSubmit}>
         <div class="form-control mb-4">
           <label class="label" for="name">
-            <span class="label-text font-medium">組織名</span>
-            <span class="label-text-alt text-error">必須</span>
+            <span class="label-text font-medium">Organization Name</span>
+            <span class="label-text-alt text-error">Required</span>
           </label>
           <input
             id="name"
             bind:value={form.name}
             type="text"
             class="input input-bordered w-full"
-            placeholder="例: 株式会社サンプル"
+            placeholder="e.g., Acme Inc."
             required
             disabled={createOrganization.processing}
           />
@@ -69,14 +71,14 @@
 
         <div class="form-control mb-6">
           <label class="label" for="description">
-            <span class="label-text font-medium">組織の説明</span>
-            <span class="label-text-alt">任意</span>
+            <span class="label-text font-medium">Description</span>
+            <span class="label-text-alt">Optional</span>
           </label>
           <textarea
             id="description"
             bind:value={form.description}
             class="textarea textarea-bordered h-24 w-full"
-            placeholder="この組織について簡単に説明してください"
+            placeholder="Brief description of your organization"
             disabled={createOrganization.processing}
           ></textarea>
         </div>
@@ -88,7 +90,7 @@
             onclick={goBack}
             disabled={createOrganization.processing}
           >
-            キャンセル
+            Cancel
           </button>
           <button
             type="submit"
@@ -97,9 +99,9 @@
           >
             {#if createOrganization.processing}
               <span class="loading loading-spinner loading-sm"></span>
-              作成中...
+              Creating...
             {:else}
-              組織を作成
+              Create Organization
             {/if}
           </button>
         </div>

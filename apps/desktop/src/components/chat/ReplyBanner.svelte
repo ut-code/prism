@@ -18,7 +18,7 @@
   class="bg-base-200 mb-2 flex items-center justify-between rounded-md p-2 text-sm"
 >
   <div class="text-base-content/70 truncate">
-    <span class="font-semibold">返信先:</span>
+    <span class="font-semibold">Replying to:</span>
     <span class="text-primary font-semibold">{replyingTo.author}</span>
     <span class="truncate">: {replyingTo.content}</span>
   </div>

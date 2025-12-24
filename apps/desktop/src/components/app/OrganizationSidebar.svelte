@@ -16,25 +16,25 @@
 <aside class="border-subtle bg-base-200 flex h-full w-72 flex-col border-r">
   <!-- Organization header -->
   <header
-    class="border-subtle flex items-center justify-between border-b px-4 py-3"
+    class="border-subtle flex items-center justify-between border-b px-4 py-4"
   >
     <div class="min-w-0 flex-1">
       <h1 class="truncate font-semibold tracking-tight">
         {organization?.name ?? "Loading..."}
       </h1>
     </div>
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-2">
       <a
         href="/orgs/{organizationId}/settings"
         class="btn btn-ghost btn-sm btn-square hover-highlight"
-        title="組織設定"
+        title="Organization Settings"
       >
         <Settings class="text-muted size-4" />
       </a>
       <a
         href="/"
         class="btn btn-ghost btn-sm btn-square hover-highlight"
-        title="組織を切り替え"
+        title="Switch Organization"
       >
         <ArrowLeftRight class="text-muted size-4" />
       </a>

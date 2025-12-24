@@ -32,11 +32,13 @@
   <!-- Reply banner -->
   {#if replyingTo}
     <div
-      class="border-subtle bg-base-200/50 flex items-center gap-2 border-b px-4 py-2 text-sm"
+      class="border-subtle bg-base-200/50 flex items-center gap-2 border-b px-4 py-3 text-sm"
     >
-      <span class="text-muted">返信先:</span>
+      <span class="text-muted opacity-60">Replying to:</span>
       <span class="text-primary font-medium">{replyingTo.author}</span>
-      <span class="text-muted flex-1 truncate">{replyingTo.content}</span>
+      <span class="text-muted flex-1 truncate opacity-60"
+        >{replyingTo.content}</span
+      >
       <button
         class="btn btn-ghost btn-xs btn-square"
         onclick={() => (replyingTo = null)}
@@ -75,7 +77,7 @@
   {/if}
 
   <!-- Input area -->
-  <div class="flex items-end gap-2 p-3">
+  <div class="flex items-end gap-2 p-4">
     <div class="flex-1">
       <MessageTextarea
         bind:value={controller.messageContent}
@@ -87,7 +89,7 @@
       />
     </div>
 
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-2">
       <EmojiButton
         onclick={(e) => {
           e.stopPropagation();

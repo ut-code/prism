@@ -52,7 +52,7 @@
   <!-- Reply reference -->
   {#if parentMessage}
     <div
-      class="mb-2 flex items-center gap-1.5 text-xs opacity-60 transition-opacity duration-150 group-hover:opacity-80"
+      class="mb-2 flex items-center gap-2 text-xs opacity-60 transition-opacity duration-200 group-hover:opacity-80"
     >
       <Reply class="size-3" />
       <span class="text-primary/80 font-medium">{parentMessage.author}</span>
@@ -61,22 +61,22 @@
   {/if}
 
   <!-- Message header -->
-  <div class="flex items-baseline gap-2.5">
+  <div class="flex items-baseline gap-2">
     <span class="text-primary text-sm font-semibold">{message.author}</span>
     <span
-      class="text-xs opacity-40 transition-opacity duration-150 group-hover:opacity-60"
+      class="text-xs opacity-60 transition-opacity duration-200 group-hover:opacity-80"
       >{formatTime(message.createdAt)}</span
     >
     {#if isEdited}
       <span
-        class="text-xs opacity-30 transition-opacity duration-150 group-hover:opacity-50"
-        >(編集済み)</span
+        class="text-xs opacity-60 transition-opacity duration-200 group-hover:opacity-80"
+        >(edited)</span
       >
     {/if}
     {#if message.pinnedAt}
-      <span class="text-warning flex items-center gap-1 text-xs opacity-70">
+      <span class="text-warning flex items-center gap-1 text-xs opacity-80">
         <Pin class="size-3" />
-        ピン留め
+        Pinned
       </span>
     {/if}
   </div>
@@ -85,7 +85,7 @@
   {#if isEditing}
     <div class="mt-3 space-y-2">
       <textarea
-        class="textarea textarea-bordered bg-base-300 w-full text-sm transition-all duration-150"
+        class="textarea textarea-bordered bg-base-300 w-full text-sm transition-all duration-200"
         value={editedContent}
         oninput={(e) =>
           onEditChange?.(
@@ -96,22 +96,22 @@
         rows="3"
       ></textarea>
       <div class="flex gap-2">
-        <button class="btn btn-primary btn-xs" onclick={onEditSave}>保存</button
+        <button class="btn btn-primary btn-xs" onclick={onEditSave}>Save</button
         >
         <button class="btn btn-ghost btn-xs" onclick={onEditCancel}>
-          キャンセル
+          Cancel
         </button>
       </div>
     </div>
   {:else}
-    <div class="mt-1.5 text-sm leading-relaxed whitespace-pre-wrap opacity-90">
+    <div class="mt-2 text-sm leading-relaxed whitespace-pre-wrap opacity-80">
       {message.content}
     </div>
   {/if}
 
   <!-- Attachments -->
   {#if message.attachments && message.attachments.length > 0}
-    <div class="mt-3 space-y-2">
+    <div class="mt-4 space-y-2">
       {#each message.attachments as fileId}
         <FileAttachment {fileId} compact={false} />
       {/each}
@@ -120,7 +120,7 @@
 
   <!-- Vote -->
   {#if message.vote}
-    <div class="mt-3">
+    <div class="mt-4">
       <VoteViewer voteId={message.vote} />
     </div>
   {/if}
@@ -128,12 +128,12 @@
   <!-- Reactions -->
   <ReactionButtons messageId={message.id} />
 
-  <!-- Actions (hover) -->
+  <!-- Actions (always visible for touch devices) -->
   <div
-    class="border-subtle bg-base-100 absolute top-2 right-4 flex gap-0.5 rounded border opacity-0 shadow-sm transition-all duration-200 group-hover:opacity-100"
+    class="border-subtle bg-base-100 absolute top-2 right-4 flex gap-1 rounded border opacity-0 shadow-sm transition-all duration-200 group-hover:opacity-100"
   >
     <button
-      class="btn btn-ghost btn-xs btn-square transition-colors duration-150"
+      class="btn btn-ghost btn-xs btn-square transition-colors duration-200"
       onclick={onDotsClick}
       title="メニュー"
     >

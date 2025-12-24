@@ -34,7 +34,7 @@
 {:else}
   <div class="hero bg-base-200 min-h-screen">
     <div class="text-center">
-      <p>You are not signed in.</p>
+      <p>Not signed in</p>
       <a href="/signin" class="link mt-2">Go to Sign In</a>
     </div>
   </div>

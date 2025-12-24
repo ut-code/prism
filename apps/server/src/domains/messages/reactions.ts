@@ -58,6 +58,11 @@ export const messageReactionRoutes = new Elysia()
         })
         .returning();
 
+      if (!reaction) {
+        set.status = 500;
+        return { message: "Failed to create reaction" };
+      }
+
       // Broadcast reaction:added event
       const [message] = await db
         .select({ channelId: messages.channelId })

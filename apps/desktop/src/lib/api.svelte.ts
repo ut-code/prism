@@ -5,13 +5,12 @@ import {
   getFile,
   getMessage,
   getOrganization,
-  getTask,
   getVote,
 } from "@packages/api-client";
 import { goto } from "$app/navigation";
 
 // Re-export helper functions
-export { getChannel, getFile, getMessage, getOrganization, getTask, getVote };
+export { getChannel, getFile, getMessage, getOrganization, getVote };
 
 // Re-export hooks and utilities
 export { type QueryState, useMutation, useQuery } from "./api/hooks.svelte.ts";

@@ -15,14 +15,14 @@ export async function searchAndAddMember(
   organizationId: string,
   currentMembers: OrganizationMember[] | undefined,
 ): Promise<void> {
-  const email = prompt("追加するメンバーのメールアドレスを入力してください");
+  const email = prompt("Enter the email address of the member to add");
   if (!email?.trim()) return;
 
   // Check if member already exists
   if (currentMembers) {
     for (const m of currentMembers) {
       if (m.user?.email === email) {
-        alert("そのメンバーはもう存在します");
+        alert("This member already exists");
         return;
       }
     }
@@ -38,25 +38,25 @@ export async function searchAndAddMember(
   );
 
   if (!users || !users.length) {
-    alert("ユーザーが見つかりませんでした");
+    alert("User not found");
     return;
   }
 
   if (users.length > 1) {
     alert(
-      "同じメールアドレスで登録されている人物が複数確認されました。開発者に報告してください。",
+      "Multiple users found with the same email address. Please report this to the developer.",
     );
     return;
   }
 
   const foundUser = users[0];
   if (!foundUser) {
-    alert("ユーザーが見つかりませんでした");
+    alert("User not found");
     return;
   }
 
   // Confirm and add user
-  const message = `以下のユーザーが見つかりました\n${foundUser.name}\n組織に追加しますか？`;
+  const message = `Found user:\n${foundUser.name}\nAdd to organization?`;
   const answer = confirm(message);
   if (answer) {
     const response = await getOrganization(api, organizationId).members.post({

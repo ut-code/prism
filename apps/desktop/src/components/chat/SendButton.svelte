@@ -12,10 +12,15 @@
   Send button with loading state.
   Displays a spinner when processing the message send operation.
 -->
-<button class="btn btn-primary self-end" {onclick} {disabled}>
+<button
+  class="btn btn-primary btn-sm self-end"
+  {onclick}
+  {disabled}
+  aria-label="Send message"
+>
   {#if processing}
     <span class="loading loading-spinner loading-sm"></span>
   {:else}
-    送信
+    Send
   {/if}
 </button>

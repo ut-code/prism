@@ -24,7 +24,7 @@
 
 <div class="mb-6">
   <a href={`/orgs/${organizationId}`} class="btn btn-ghost btn-sm mb-4">
-    ← 戻る
+    ← Back
   </a>
 
   {#if organization}
@@ -34,12 +34,12 @@
           <input
             bind:value={editForm.name}
             class="input input-bordered input-lg w-full max-w-md"
-            placeholder="組織名"
+            placeholder="Organization name"
           />
           <textarea
             bind:value={editForm.description}
             class="textarea textarea-bordered mt-2 w-full max-w-md"
-            placeholder="組織の説明"
+            placeholder="Organization description"
           ></textarea>
         {:else}
           <h1 class="text-base-content text-3xl font-bold">
@@ -56,10 +56,10 @@
       {#if organization.permission === "admin"}
         <div class="flex gap-2">
           {#if isEditing}
-            <button class="btn btn-primary" onclick={onUpdate}>保存</button>
-            <button class="btn btn-ghost" onclick={onCancel}>キャンセル</button>
+            <button class="btn btn-primary" onclick={onUpdate}>Save</button>
+            <button class="btn btn-ghost" onclick={onCancel}>Cancel</button>
           {:else}
-            <button class="btn btn-outline" onclick={onEdit}>編集</button>
+            <button class="btn btn-outline" onclick={onEdit}>Edit</button>
           {/if}
         </div>
       {/if}

@@ -21,7 +21,7 @@
   }}
 >
   <h1 class="text-2xl font-bold">
-    {step === "signIn" ? "Sign In to Prism" : "Create an Account"}
+    {step === "signIn" ? "Sign In to Prism" : "Create Account"}
   </h1>
 
   <GoogleButton onclick={() => onSignIn("google")} />
@@ -72,7 +72,7 @@
     <input name="flow" type="hidden" value={step} />
     <button type="submit" class="btn btn-primary" disabled={isLoading}>
       {#if isLoading}<span class="loading loading-spinner"></span>{/if}
-      {step === "signIn" ? "Sign In" : "Continue"}
+      {step === "signIn" ? "Sign In" : "Next"}
     </button>
   </div>
 
@@ -81,13 +81,8 @@
   <div class="text-center">
     <button type="button" class="link-hover link" onclick={onToggleMode}>
       {step === "signIn"
-        ? "Don't have an account? Sign Up"
-        : "Already have an account? Sign In"}
+        ? "Don't have an account? Sign up"
+        : "Already have an account? Sign in"}
     </button>
   </div>
-  {#if step === "signIn"}
-    <div class="mt-4 text-center">
-      <a href="/reset" class="link-hover link text-sm">Forgot password?</a>
-    </div>
-  {/if}
 </form>

@@ -15,10 +15,10 @@
 <div class="card bg-base-200 shadow-xl">
   <div class="card-body">
     <div class="mb-4 flex items-center justify-between">
-      <h2 class="card-title">メンバー</h2>
+      <h2 class="card-title">Members</h2>
       {#if organization?.permission === "admin"}
         <button class="btn btn-primary btn-sm" onclick={onAddMember}>
-          メンバーを追加
+          Add Member
         </button>
       {/if}
     </div>
@@ -53,7 +53,7 @@
                   class="btn btn-ghost btn-sm text-error"
                   onclick={() => onRemoveMember(member.userId)}
                 >
-                  削除
+                  Remove
                 </button>
               {/if}
             </div>

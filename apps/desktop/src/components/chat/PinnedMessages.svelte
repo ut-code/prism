@@ -61,26 +61,26 @@
 </script>
 
 {#if messages.length > 0}
-  <div class="bg-base-200 border-b p-2">
+  <div class="bg-base-200 border-b p-4">
     <div class="text-warning mb-2 flex items-center gap-2">
       <Pin class="size-4" />
-      <span class="text-sm font-semibold">ピン留めされたメッセージ</span>
+      <span class="text-sm font-semibold">Pinned Messages</span>
     </div>
-    <div class="space-y-1">
+    <div class="space-y-2">
       {#each messages as message}
         <button
-          class="hover:bg-base-300 w-full rounded p-2 text-left transition-colors"
+          class="hover:bg-base-300 w-full rounded p-2 text-left transition-colors duration-200"
           onclick={() => scrollToMessage(message.id)}
         >
           <div class="flex items-baseline gap-2">
             <span class="text-primary text-sm font-semibold">
               {message.author}
             </span>
-            <span class="text-base-content/60 text-xs">
+            <span class="text-base-content text-xs opacity-60">
               {formatTime(message.createdAt)}
             </span>
           </div>
-          <div class="text-base-content/80 truncate text-sm">
+          <div class="text-base-content truncate text-sm opacity-80">
             {message.content}
           </div>
         </button>

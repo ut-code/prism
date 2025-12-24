@@ -56,7 +56,7 @@ export class SettingsController {
   }
 
   async handleRemoveMember(userId: string) {
-    if (confirm("このメンバーを削除しますか？")) {
+    if (confirm("Are you sure you want to remove this member?")) {
       try {
         await this.removeMember.run({
           organizationId: this.organizationId,

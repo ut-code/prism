@@ -32,14 +32,23 @@
     }
   }
 
+  function isChannel(obj: unknown): obj is Channel {
+    return (
+      obj !== null &&
+      typeof obj === "object" &&
+      "id" in obj &&
+      "organizationId" in obj
+    );
+  }
+
   async function createDM(userId: string) {
     try {
       const response = await api.dms.post({
         otherUserId: userId,
         organizationId,
       });
-      const channel = unwrapResponse(response) as Channel | undefined;
-      if (channel?.id) {
+      const channel = unwrapResponse(response);
+      if (isChannel(channel) && channel.id) {
         window.location.href = `/orgs/${organizationId}/chat/${channel.id}`;
       }
     } catch (error) {
@@ -51,14 +60,16 @@
 <div class="p-4">
   <input
     type="text"
-    placeholder="メールアドレスで検索..."
+    placeholder="Search by email..."
     class="input input-bordered w-full"
     bind:value={searchQuery}
     oninput={searchUsers}
   />
 
   {#if isSearching}
-    <div class="text-base-content/60 mt-2 text-center text-sm">検索中...</div>
+    <div class="text-base-content/60 mt-2 text-center text-sm">
+      Searching...
+    </div>
   {/if}
 
   {#if users.length > 0}
