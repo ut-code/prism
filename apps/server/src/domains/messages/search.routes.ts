@@ -6,6 +6,17 @@ import { authMiddleware } from "../../middleware/auth.ts";
 import { requireOrganizationMembership } from "../organizations/permissions.ts";
 
 /**
+ * Escapes special characters in LIKE pattern (%, _, \).
+ * Prevents SQL injection by treating user input as literal text.
+ */
+export function escapeLikePattern(pattern: string): string {
+  return pattern
+    .replace(/\\/g, "\\\\")
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
+}
+
+/**
  * Handles message search operations.
  * Provides endpoint to search messages within a channel.
  */
@@ -49,7 +60,7 @@ export const messageSearchRoutes = new Elysia().use(authMiddleware).get(
       .where(
         and(
           eq(messages.channelId, query.channelId),
-          ilike(messages.content, `%${query.q}%`),
+          ilike(messages.content, `%${escapeLikePattern(query.q)}%`),
         ),
       )
       .orderBy(asc(messages.createdAt))
