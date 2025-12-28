@@ -18,6 +18,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Sign In - Prism</title>
+</svelte:head>
+
 <div class="hero bg-base-200 min-h-screen">
   <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
     <div class="card-body">

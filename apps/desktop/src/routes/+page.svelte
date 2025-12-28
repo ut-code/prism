@@ -10,6 +10,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Prism</title>
+</svelte:head>
+
 {#if auth.isLoading}
   <div class="flex h-screen w-full items-center justify-center">
     <span class="loading loading-dots loading-lg"></span>

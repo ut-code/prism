@@ -8,22 +8,19 @@ import { getOrganization, unwrapResponse } from "@/lib/api.svelte";
 
 /**
  * Search for a user by email and add them to the organization.
- * Shows appropriate alerts for various error conditions.
+ * Throws errors for various error conditions.
  */
-export async function searchAndAddMember(
+export async function addMemberByEmail(
   api: ApiClient,
   organizationId: string,
+  email: string,
   currentMembers: OrganizationMember[] | undefined,
 ): Promise<void> {
-  const email = prompt("Enter the email address of the member to add");
-  if (!email?.trim()) return;
-
   // Check if member already exists
   if (currentMembers) {
     for (const m of currentMembers) {
       if (m.user?.email === email) {
-        alert("This member already exists");
-        return;
+        throw new Error("This member already exists");
       }
     }
   }
@@ -38,31 +35,24 @@ export async function searchAndAddMember(
   );
 
   if (!users || !users.length) {
-    alert("User not found");
-    return;
+    throw new Error("User not found");
   }
 
   if (users.length > 1) {
-    alert(
+    throw new Error(
       "Multiple users found with the same email address. Please report this to the developer.",
     );
-    return;
   }
 
   const foundUser = users[0];
   if (!foundUser) {
-    alert("User not found");
-    return;
+    throw new Error("User not found");
   }
 
-  // Confirm and add user
-  const message = `Found user:\n${foundUser.name}\nAdd to organization?`;
-  const answer = confirm(message);
-  if (answer) {
-    const response = await getOrganization(api, organizationId).members.post({
-      userId: foundUser.id,
-      permission: "member",
-    });
-    await unwrapResponse(response);
-  }
+  // Add user to organization
+  const response = await getOrganization(api, organizationId).members.post({
+    userId: foundUser.id,
+    permission: "member",
+  });
+  await unwrapResponse(response);
 }

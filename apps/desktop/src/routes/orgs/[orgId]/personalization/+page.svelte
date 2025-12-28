@@ -5,6 +5,10 @@
   const { orgId } = $derived(page.params);
 </script>
 
+<svelte:head>
+  <title>Settings - Prism</title>
+</svelte:head>
+
 <ChatApp
   organizationId={orgId ?? ""}
   screenMode={{ type: "personalization" }}

@@ -45,7 +45,11 @@
 <Modal manager={modalManager} />
 
 <div bind:this={messagesContainer} class="flex-1 overflow-y-auto scroll-smooth">
-  {#if controller.messagesData.length > 0}
+  {#if controller.messages.isLoading}
+    <div class="flex h-full items-center justify-center py-16">
+      <p class="text-sm opacity-60">Loading messages...</p>
+    </div>
+  {:else if controller.messagesData.length > 0}
     {#each controller.messagesData as message (message.id)}
       {#snippet reactionListSnippet()}
         <ReactionList {organizationId} messageId={message.id} />
@@ -99,14 +103,10 @@
         onEditSave={() => controller.saveEdit(message.id)}
         onEditCancel={() => controller.cancelEditing()}
       />
-    {:else}
-      <div class="flex h-full items-center justify-center py-16">
-        <p class="text-sm opacity-60">No messages yet</p>
-      </div>
     {/each}
   {:else}
     <div class="flex h-full items-center justify-center py-16">
-      <p class="text-sm opacity-60">Loading messages...</p>
+      <p class="text-sm opacity-60">No messages yet</p>
     </div>
   {/if}
 </div>

@@ -70,6 +70,10 @@
     <div class="text-base-content/60 mt-2 text-center text-sm">
       Searching...
     </div>
+  {:else if searchQuery.trim() && users.length === 0}
+    <div class="text-base-content/60 mt-2 text-center text-sm">
+      No users found
+    </div>
   {/if}
 
   {#if users.length > 0}

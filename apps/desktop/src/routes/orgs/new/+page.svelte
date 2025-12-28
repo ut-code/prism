@@ -36,6 +36,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Create Organization - Prism</title>
+</svelte:head>
+
 <div class="container mx-auto max-w-md p-6">
   <div class="mb-6">
     <button class="btn btn-ghost btn-sm mb-4" onclick={goBack}>

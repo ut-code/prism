@@ -12,6 +12,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Sign Out - Prism</title>
+</svelte:head>
+
 {#if isLoading}
   <div class="flex min-h-screen items-center justify-center">
     <span class="loading loading-spinner loading-lg"></span>
