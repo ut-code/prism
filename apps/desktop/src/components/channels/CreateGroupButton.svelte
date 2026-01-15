@@ -1,55 +1,36 @@
 <script lang="ts">
-  import Plus from "@lucide/svelte/icons/plus";
-  import { getApiClient, unwrapResponse } from "@/lib/api.svelte";
+  import FolderPlus from "@lucide/svelte/icons/folder-plus";
   import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
   import type { ChannelGroup } from "./channelGroups.svelte.ts";
 
-  const api = getApiClient();
-
   interface Props {
-    organizationId: string;
     groups?: ChannelGroup[];
-    defaultGroupId?: string | null;
-    onCreated?: () => void;
+    onCreate?: (name: string, parentGroupId: string | null) => Promise<void>;
   }
-  const {
-    organizationId,
-    groups = [],
-    defaultGroupId,
-    onCreated,
-  }: Props = $props();
+
+  const { groups = [], onCreate }: Props = $props();
 
   let name = $state("");
-  let groupId = $state<string | null>(null);
+  let parentGroupId = $state("");
   let form: HTMLFormElement | null = $state(null);
   let disabled = $state(false);
 
   const modalManager = new ModalManager();
 
-  function openModal() {
-    groupId = defaultGroupId ?? null;
-    modalManager.dispatch(createChannelModalContent);
-  }
-  async function createChannel(event: Event) {
+  async function handleSubmit(event: Event) {
     event.preventDefault();
-
     if (disabled || !name.trim()) return;
+
     disabled = true;
     try {
-      const response = await api.channels.post({
-        name: name.trim(),
-        organizationId,
-        groupId: groupId ?? undefined,
-      });
-      unwrapResponse(response);
-      onCreated?.();
+      await onCreate?.(name.trim(), parentGroupId || null);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to create group:", error);
     } finally {
       disabled = false;
       form?.reset();
       name = "";
-      groupId = defaultGroupId ?? null;
+      parentGroupId = "";
       modalManager.close();
     }
   }
@@ -59,22 +40,22 @@
 
 <button
   class="btn btn-ghost btn-xs btn-square"
-  title="New channel"
-  onclick={openModal}
+  title="New group"
+  onclick={() => modalManager.dispatch(createGroupModalContent)}
 >
-  <Plus class="text-muted size-4" />
+  <FolderPlus class="text-muted size-4" />
 </button>
 
-{#snippet createChannelModalContent()}
-  <form bind:this={form} onsubmit={createChannel} class="flex flex-col gap-4">
-    <h3 class="text-lg font-medium">Create Channel</h3>
+{#snippet createGroupModalContent()}
+  <form bind:this={form} onsubmit={handleSubmit} class="flex flex-col gap-4">
+    <h3 class="text-lg font-medium">Create Channel Group</h3>
 
     <div class="flex flex-col gap-2">
-      <label for="channel-name" class="text-sm font-medium">Name</label>
+      <label for="group-name" class="text-sm font-medium">Name</label>
       <input
-        id="channel-name"
+        id="group-name"
         type="text"
-        placeholder="Channel name"
+        placeholder="Group name"
         class="input input-bordered"
         bind:value={name}
       />
@@ -82,15 +63,15 @@
 
     {#if groups.length > 0}
       <div class="flex flex-col gap-2">
-        <label for="channel-group" class="text-muted text-sm">
-          Group (optional)
+        <label for="parent-group" class="text-muted text-sm">
+          Parent group (optional)
         </label>
         <select
-          id="channel-group"
+          id="parent-group"
           class="select select-bordered"
-          bind:value={groupId}
+          bind:value={parentGroupId}
         >
-          <option value={null}>None</option>
+          <option value="">None</option>
           {#each groups as group (group.id)}
             <option value={group.id}>{group.name}</option>
           {/each}

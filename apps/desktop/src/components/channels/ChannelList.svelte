@@ -10,7 +10,14 @@
   import type { Selection } from "$components/chat/types";
   import DMList from "$components/dms/DMList.svelte";
   import UserSearch from "$components/dms/UserSearch.svelte";
+  import ChannelGroup from "./ChannelGroup.svelte";
   import CreateChannelButton from "./CreateChannelButton.svelte";
+  import CreateGroupButton from "./CreateGroupButton.svelte";
+  import {
+    type ChannelGroup as ChannelGroupType,
+    organizeChannelsIntoGroups,
+    useChannelGroupState,
+  } from "./channelGroups.svelte.ts";
 
   const api = getApiClient();
 
@@ -26,8 +33,26 @@
     return unwrapResponse(response);
   });
 
+  const channelGroups = useQuery<ChannelGroupType[]>(async () => {
+    const response = await api["channel-groups"].get({
+      query: { organizationId },
+    });
+    return unwrapResponse(response);
+  });
+
   const unreadManager = new UnreadManager(api, () => organizationId);
+  const groupState = useChannelGroupState(() => organizationId);
   let showUserSearch = $state(false);
+
+  const organized = $derived(
+    organizeChannelsIntoGroups(channels.data ?? [], channelGroups.data ?? []),
+  );
+
+  const rootGroups = $derived(
+    organized.groups.filter((g) => g.parentGroupId === null),
+  );
+
+  const ungroupedChannels = $derived(organized.channelsByGroup.get(null) ?? []);
 
   // WebSocket: refresh unread counts on new messages
   useWebSocket("message:created", () => {
@@ -37,6 +62,15 @@
   onMount(() => {
     unreadManager.fetchUnreadCounts();
   });
+
+  async function handleCreateGroup(name: string, parentGroupId: string | null) {
+    await api["channel-groups"].post({
+      name,
+      organizationId,
+      parentGroupId: parentGroupId ?? undefined,
+    });
+    channelGroups.refetch();
+  }
 </script>
 
 <div class="flex h-full flex-col">
@@ -46,12 +80,41 @@
       <span class="text-muted text-xs font-medium tracking-wider uppercase">
         Channels
       </span>
-      <CreateChannelButton {organizationId} />
+      <div class="flex items-center gap-1">
+        <CreateGroupButton
+          groups={channelGroups.data ?? []}
+          onCreate={handleCreateGroup}
+        />
+        <CreateChannelButton
+          {organizationId}
+          groups={channelGroups.data ?? []}
+          onCreated={() => channels.refetch()}
+        />
+      </div>
     </header>
 
     <nav class="px-2">
       {#if channels.data}
-        {#each channels.data as channel (channel.id)}
+        <!-- Grouped channels -->
+        {#each rootGroups as group (group.id)}
+          <ChannelGroup
+            {group}
+            channels={organized.channelsByGroup.get(group.id) ?? []}
+            childGroups={organized.groups.filter(
+              (g) => g.parentGroupId === group.id,
+            )}
+            allGroups={organized.groups}
+            allChannelsByGroup={organized.channelsByGroup}
+            {organizationId}
+            {screenMode}
+            {unreadManager}
+            isCollapsed={groupState.isCollapsed}
+            onToggle={groupState.toggle}
+          />
+        {/each}
+
+        <!-- Ungrouped channels -->
+        {#each ungroupedChannels as channel (channel.id)}
           {@const active =
             screenMode.type === "chat" &&
             screenMode.selectedChannelId === channel.id}
@@ -59,7 +122,7 @@
           <a
             href={`/orgs/${organizationId}/chat/${channel.id}`}
             class={[
-              "group flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors duration-200",
+              "group flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors",
               active
                 ? "bg-primary/15 text-primary"
                 : "text-base-content/80 hover:bg-base-300 hover:text-base-content",
@@ -132,7 +195,7 @@
   <footer class="border-subtle border-t p-2">
     <a
       href={`/orgs/${organizationId}/personalization`}
-      class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors duration-200"
+      class="text-muted hover:bg-base-300 hover:text-base-content flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors"
     >
       <User class="size-4" />
       <span>Settings</span>

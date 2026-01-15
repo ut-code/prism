@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth.ts";
+import { channelGroups } from "./channelGroups.ts";
 import { channelReadStatus } from "./channelReadStatus.ts";
 import { messages } from "./messages.ts";
 import { organizations } from "./organizations.ts";
@@ -18,10 +19,16 @@ export const channels = pgTable(
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
+    groupId: uuid("group_id").references(() => channelGroups.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [index("channels_org_idx").on(table.organizationId)],
+  (table) => [
+    index("channels_org_idx").on(table.organizationId),
+    index("channels_group_idx").on(table.groupId),
+  ],
 );
 
 // Channel Members (for private channels and DMs)
@@ -48,6 +55,10 @@ export const channelsRelations = relations(channels, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [channels.organizationId],
     references: [organizations.id],
+  }),
+  group: one(channelGroups, {
+    fields: [channels.groupId],
+    references: [channelGroups.id],
   }),
   messages: many(messages),
   readStatuses: many(channelReadStatus),

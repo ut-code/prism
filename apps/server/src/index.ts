@@ -1,6 +1,7 @@
 import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
 import { betterAuthRoutes } from "./domains/auth/better-auth.ts";
+import { channelGroupRoutes } from "./domains/channelGroups/routes.ts";
 import { channelRoutes } from "./domains/channels/routes.ts";
 import { channelUnreadRoutes } from "./domains/channels/unread.ts";
 import { dmRoutes } from "./domains/dms/routes.ts";
@@ -22,6 +23,7 @@ const app = new Elysia()
   .get("/health", () => ({ status: "ok", timestamp: Date.now() }))
   .use(betterAuthRoutes)
   .use(organizationRoutes)
+  .use(channelGroupRoutes)
   .use(channelRoutes)
   .use(channelUnreadRoutes)
   .use(dmRoutes)
