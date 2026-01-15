@@ -19,22 +19,24 @@ import {
 
 export const channelGroupRoutes = new Elysia({ prefix: "/channel-groups" })
   .use(authMiddleware)
-  .get("/", async ({ user, query, set }) => {
-    try {
-      if (!user) throw new UnauthorizedError();
-      if (!query.organizationId) {
-        throw new BadRequestError(
-          "organizationId is required",
-          "MISSING_ORGANIZATION_ID",
-        );
-      }
+  .get(
+    "/",
+    async ({ user, query, set }) => {
+      try {
+        if (!user) throw new UnauthorizedError();
 
-      await getOrganizationPermissions(user.id, query.organizationId);
-      return getChannelGroups(db, query.organizationId);
-    } catch (error) {
-      return handleError(error, set);
-    }
-  })
+        await getOrganizationPermissions(user.id, query.organizationId);
+        return getChannelGroups(db, query.organizationId);
+      } catch (error) {
+        return handleError(error, set);
+      }
+    },
+    {
+      query: t.Object({
+        organizationId: t.String(),
+      }),
+    },
+  )
   .get("/:id", async ({ user, params, set }) => {
     try {
       if (!user) throw new UnauthorizedError();

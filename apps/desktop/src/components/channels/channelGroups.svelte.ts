@@ -49,6 +49,7 @@ export function useChannelGroupState(organizationId: () => string) {
     } else {
       collapsedGroups.add(groupId);
     }
+    // Svelte 5: Set mutation is not detected, reassign to trigger reactivity
     collapsedGroups = new Set(collapsedGroups);
     saveState();
   }

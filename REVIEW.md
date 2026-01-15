@@ -136,3 +136,111 @@ JS で計算してから渡す方がシンプル。あるいは Tailwind のク�
 | セキュリティ | ⚠️ 要修正          |
 | コード品質   | ○ 概ね良好         |
 | 保守性       | △ ファイル長に注意 |
+
+---
+
+## 対応状況
+
+### Critical
+
+#### 1. 子グループのフィルタリングロジック
+
+✅ **修正済み**
+
+`ChannelGroup.svelte` に `allGroups` プロパティを追加し、再帰呼び出し時に全グループリストからフィルタリングするように修正。
+
+```svelte
+// Props に追加 allGroups: ChannelGroupType[]; // 再帰呼び出し時 childGroups={allGroups.filter(
+  (g) => g.parentGroupId === child.id,
+)}
+{allGroups}
+```
+
+---
+
+### High
+
+#### 2. `parentGroupId` のクロス組織バリデーション
+
+✅ **修正済み**
+
+`routes.ts` の POST および PATCH エンドポイントに、親グループの組織チェックを追加。
+
+```ts
+// POST (routes.ts:68-76)
+if (body.parentGroupId) {
+  const parent = await getChannelGroupById(db, body.parentGroupId);
+  if (!parent || parent.organizationId !== body.organizationId) {
+    throw new BadRequestError("Invalid parent group", "INVALID_PARENT_GROUP");
+  }
+}
+
+// PATCH (routes.ts:111-119) - 同様のチェック
+```
+
+#### 3. グループ削除時の子グループ・チャンネルの扱い
+
+✅ **修正済み**
+
+`channelGroups.ts` スキーマの `parentGroupId` に `onDelete: "set null"` を追加。
+
+- 親グループ削除時、子グループは `parentGroupId` が `null` になりルートレベルに移動
+- チャンネルも同様に `groupId` が `null` になり ungrouped に移動
+
+これにより孤児グループは発生せず、階層構造が崩れてもデータは保持される設計。
+
+---
+
+### Medium
+
+#### 4. 型キャストによる型安全性の低下
+
+✅ **修正済み**
+
+`packages/api-client/src/types.ts` に以下を追加:
+
+- `Channel` 型に `groupId?: string | null` を追加
+- `ChannelGroup` 型を新規追加・エクスポート
+
+`channelGroups.svelte.ts` の型キャストを削除し、正規の型を使用するように変更。
+
+#### 5. リアクティビティのための Set 再作成にコメントがない
+
+✅ **修正済み**
+
+`channelGroups.svelte.ts:52` にコメントを追加。
+
+```ts
+// Svelte 5: Set mutation is not detected, reassign to trigger reactivity
+collapsedGroups = new Set(collapsedGroups);
+```
+
+#### 6. `ChannelList.svelte` のファイル長
+
+⏳ **対応予定**
+
+現在 196 行。グループ関連のスニペットやロジックを別ファイルに分離することを検討。
+
+---
+
+### Low
+
+#### 7. `query` パラメータの型定義
+
+✅ **修正済み**
+
+GET エンドポイントに query スキーマを追加。
+
+```ts
+{
+  query: t.Object({
+    organizationId: t.String(),
+  }),
+}
+```
+
+#### 8. インデント計算の CSS
+
+📝 **対応見送り**
+
+現状の `calc()` は可読性が高く、depth と base indent の関係が明示的。Tailwind クラスでは動的な depth に対応できないため、現行実装を維持。
