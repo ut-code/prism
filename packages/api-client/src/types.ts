@@ -1,5 +1,14 @@
 // Type definitions for API responses
 
+/**
+ * 標準的なAPIエラーレスポンス
+ */
+export interface ApiErrorResponse {
+  message: string;
+  code?: string;
+  details?: unknown;
+}
+
 export interface User {
   id: string;
   email?: string | null;

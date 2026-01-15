@@ -16,54 +16,54 @@
   let newOption = $state("");
 </script>
 
-<div class="m-1 flex items-center">
-  <p class="text">投票のタイトル：</p>
+<div class="flex items-center gap-2">
+  <p class="text-sm opacity-80">Poll title:</p>
   <input
     type="text"
-    class="input input-sm input-bordered ml-2 w-128"
+    class="input input-sm input-bordered w-128"
     bind:value={vote.title}
   />
 </div>
 
-<div class="m-1 flex items-center">
-  <p class="text">一人が投票できる最大数：</p>
+<div class="flex items-center gap-2">
+  <p class="text-sm opacity-80">Max votes per person:</p>
   <input
     type="number"
-    class="input input-sm input-bordered ml-2 w-32"
+    class="input input-sm input-bordered w-32"
     bind:value={vote.maxVotes}
     onblur={() => {
       vote.maxVotes = vote.maxVotes ?? 0;
     }}
   />
 </div>
-<div class="max-h-32 overflow-auto">
+<div class="max-h-32 space-y-2 overflow-auto">
   {#each vote.voteOptions as option, i}
-    <div class="m-1 flex items-center">
-      <p class="text">{i}：{option}</p>
+    <div class="flex items-center gap-2">
+      <p class="text-sm">{i}: {option}</p>
       <button
-        class="btn btn-secondary ml-2"
+        class="btn btn-ghost btn-xs"
         onclick={() => {
           vote.voteOptions.splice(i, 1);
-        }}>削除</button
+        }}>Remove</button
       >
     </div>
   {/each}
 </div>
 
-<div class="m-1 flex items-center">
-  <p class="text">選択肢を追加：</p>
+<div class="flex items-center gap-2">
+  <p class="text-sm opacity-80">Add option:</p>
   <input
     type="text"
-    class="input input-sm input-bordered ml-2 w-128"
+    class="input input-sm input-bordered w-128"
     bind:value={newOption}
   />
   <button
-    class="btn btn-primary ml-2"
+    class="btn btn-primary btn-sm"
     onclick={() => {
       if (newOption.trim()) {
         vote.voteOptions.push(newOption);
         newOption = "";
       }
-    }}>追加</button
+    }}>Add</button
   >
 </div>

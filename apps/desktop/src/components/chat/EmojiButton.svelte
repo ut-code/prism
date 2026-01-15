@@ -10,4 +10,10 @@
   Button to toggle the emoji palette.
   Displays a smiling face emoji icon.
 -->
-<button class="btn btn-secondary self-end" {onclick}>😀</button>
+<button
+  class="btn btn-ghost btn-sm self-end"
+  {onclick}
+  aria-label="Open emoji picker"
+>
+  😀
+</button>

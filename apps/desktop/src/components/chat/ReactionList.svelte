@@ -87,7 +87,7 @@
                   reactionDetailsByEmoji.get(selectedEmoji)?.users ?? []}
                 {#if userIdsForSelectedEmoji.length === 0}
                   <tr>
-                    <td>No one has reacted with this emoji.</td>
+                    <td>No reactions with this emoji yet</td>
                   </tr>
                 {/if}
                 {#each userIdsForSelectedEmoji as userId}
@@ -111,7 +111,7 @@
     </div>
   {:else}
     <div class="flex h-96 items-center justify-center">
-      <p>There are no reactions yet.</p>
+      <p>No reactions yet</p>
     </div>
   {/if}
 </div>

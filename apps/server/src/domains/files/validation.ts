@@ -39,9 +39,25 @@ export function validateFile(size: number, mimeType: string): string | null {
 
 /**
  * Sanitizes filename to prevent security issues.
+ * Blocks path traversal attempts and hidden files.
  * Removes special characters and limits length.
  */
 export function sanitizeFilename(filename: string): string {
+  // Block path traversal attempts
+  if (filename.includes("..")) {
+    throw new Error("Filename cannot contain '..'");
+  }
+
+  // Block hidden files
+  if (filename.startsWith(".")) {
+    throw new Error("Filename cannot start with '.'");
+  }
+
+  // Block empty or whitespace-only filenames
+  if (!filename.trim()) {
+    throw new Error("Filename cannot be empty");
+  }
+
   return filename
     .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF._-]/g, "_")
     .substring(0, 255);

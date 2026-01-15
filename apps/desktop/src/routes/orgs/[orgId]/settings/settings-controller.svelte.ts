@@ -2,7 +2,7 @@ import {
   useOrganizationData,
   useOrganizationMutations,
 } from "./data-hooks.svelte.ts";
-import { searchAndAddMember } from "./member-utils.ts";
+import { addMemberByEmail } from "./member-utils.ts";
 
 /**
  * Controller for organization settings page.
@@ -56,7 +56,7 @@ export class SettingsController {
   }
 
   async handleRemoveMember(userId: string) {
-    if (confirm("このメンバーを削除しますか？")) {
+    if (confirm("Are you sure you want to remove this member?")) {
       try {
         await this.removeMember.run({
           organizationId: this.organizationId,
@@ -68,7 +68,12 @@ export class SettingsController {
     }
   }
 
-  async addMember() {
-    await searchAndAddMember(this.api, this.organizationId, this.members.data);
+  async addMember(email: string) {
+    await addMemberByEmail(
+      this.api,
+      this.organizationId,
+      email,
+      this.members.data,
+    );
   }
 }

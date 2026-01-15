@@ -47,9 +47,12 @@ export const voteRoutes = new Elysia({ prefix: "/votes" })
     },
     {
       body: t.Object({
-        title: t.String(),
-        maxVotes: t.Number(),
-        voteOptions: t.Array(t.String()),
+        title: t.String({ minLength: 1, maxLength: 200 }),
+        maxVotes: t.Number({ minimum: 1 }),
+        voteOptions: t.Array(t.String({ minLength: 1 }), {
+          minItems: 2,
+          maxItems: 20,
+        }),
       }),
     },
   )
@@ -70,6 +73,15 @@ export const voteRoutes = new Elysia({ prefix: "/votes" })
       if (!vote) {
         set.status = 404;
         return { message: "Vote not found" };
+      }
+
+      // Validate votedOptions indices are within bounds
+      const invalidIndices = body.votedOptions.filter(
+        (index) => index < 0 || index >= vote.voteOptions.length,
+      );
+      if (invalidIndices.length > 0) {
+        set.status = 400;
+        return { message: "Invalid vote option indices" };
       }
 
       // Check if user already voted

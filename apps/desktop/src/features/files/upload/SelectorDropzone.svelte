@@ -55,12 +55,12 @@
         </svg>
       </div>
       <p class="text-base-content/70 text-sm">
-        ファイルをドラッグ&ドロップ または <span
-          class="text-primary font-medium">クリックして選択</span
+        Drag and drop files or <span class="text-primary font-medium"
+          >click to select</span
         >
       </p>
       <p class="text-base-content/60 text-xs">
-        最大{MAX_FILES}ファイル、{formatFileSize(MAX_FILE_SIZE)}まで
+        Max {MAX_FILES} files, up to {formatFileSize(MAX_FILE_SIZE)}
       </p>
     </div>
   </div>

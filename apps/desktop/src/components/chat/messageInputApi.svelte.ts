@@ -18,7 +18,6 @@ export class MessageInputApi {
     async (args: {
       channelId: string;
       content: string;
-      author: string;
       parentId?: string;
       attachments?: string[];
       voteId?: string;

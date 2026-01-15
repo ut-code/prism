@@ -26,11 +26,12 @@
 -->
 <div class="flex-1 space-y-2">
   <textarea
-    placeholder="メッセージを入力... (Ctrl+Enterで送信、Enterで改行)"
+    placeholder="Type a message... (Ctrl+Enter to send, Enter for new line)"
     class="textarea textarea-bordered w-full resize-none"
     rows="2"
     bind:value
     {onkeydown}
+    aria-label="Message input"
   ></textarea>
 
   <!-- Action buttons -->
@@ -38,19 +39,19 @@
     <button
       class="btn btn-ghost btn-sm"
       onclick={ontoggleFileUploader}
-      title="ファイルを添付"
+      title="Attach file"
       type="button"
     >
       <Paperclip class="size-4" />
-      {showFileSelector ? "キャンセル" : "ファイル添付"}
+      {showFileSelector ? "Cancel" : "Attach File"}
     </button>
     <button
       class="btn btn-ghost btn-sm"
       onclick={ontoggleVoteMaker}
-      title="投票を作成"
+      title="Create poll"
       type="button"
     >
-      {showVoteMaker ? "キャンセル" : "投票を作成"}
+      {showVoteMaker ? "Cancel" : "Create Poll"}
     </button>
   </div>
 </div>

@@ -9,6 +9,10 @@
   const organizationId = $derived($page.params.orgId ?? "");
 </script>
 
+<svelte:head>
+  <title>Organization Settings - Prism</title>
+</svelte:head>
+
 <div class="container mx-auto p-6">
   <OrganizationHeader
     organization={controller.organization.data}
@@ -25,7 +29,7 @@
     <MemberList
       organization={controller.organization.data}
       members={controller.members.data}
-      onAddMember={() => controller.addMember()}
+      onAddMember={(email) => controller.addMember(email)}
       onRemoveMember={(userId) => controller.handleRemoveMember(userId)}
     />
   </div>

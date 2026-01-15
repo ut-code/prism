@@ -12,7 +12,10 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
       return { message: "Unauthorized" };
     }
 
-    const taskList = await db.select().from(tasks);
+    const taskList = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.assigner, user.email));
 
     return taskList;
   })
@@ -48,6 +51,22 @@ export const taskRoutes = new Elysia({ prefix: "/tasks" })
       if (!user) {
         set.status = 401;
         return { message: "Unauthorized" };
+      }
+
+      // Check if task exists and belongs to current user
+      const [existingTask] = await db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.id, params.id));
+
+      if (!existingTask) {
+        set.status = 404;
+        return { message: "Task not found" };
+      }
+
+      if (existingTask.assigner !== user.email) {
+        set.status = 403;
+        return { message: "Forbidden: You can only update your own tasks" };
       }
 
       const updateData: {

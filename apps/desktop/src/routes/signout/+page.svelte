@@ -12,6 +12,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Sign Out - Prism</title>
+</svelte:head>
+
 {#if isLoading}
   <div class="flex min-h-screen items-center justify-center">
     <span class="loading loading-spinner loading-lg"></span>
@@ -34,7 +38,7 @@
 {:else}
   <div class="hero bg-base-200 min-h-screen">
     <div class="text-center">
-      <p>You are not signed in.</p>
+      <p>Not signed in</p>
       <a href="/signin" class="link mt-2">Go to Sign In</a>
     </div>
   </div>

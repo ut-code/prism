@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Picker } from "emoji-picker-element";
+  import type { EmojiClickEvent } from "emoji-picker-element/shared";
 
   interface Props {
     onClose: () => void;
@@ -49,16 +50,18 @@
 
     const emojiPicker = document.querySelector("emoji-picker");
 
-    emojiPicker?.addEventListener("emoji-click", (event) => {
+    const handleEmojiClick = (event: EmojiClickEvent) => {
       const emoji = event.detail.unicode;
       if (!emoji) return;
       onEmojiSelected(emoji);
-    });
+    };
+
+    emojiPicker?.addEventListener("emoji-click", handleEmojiClick);
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
       if (emojiPicker) {
-        emojiPicker.removeEventListener("emoji-click", () => {});
+        emojiPicker.removeEventListener("emoji-click", handleEmojiClick);
       }
     };
   });

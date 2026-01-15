@@ -10,6 +10,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Prism</title>
+</svelte:head>
+
 {#if auth.isLoading}
   <div class="flex h-screen w-full items-center justify-center">
     <span class="loading loading-dots loading-lg"></span>
@@ -21,7 +25,7 @@
     <div class="hero-content text-center">
       <div class="max-w-md">
         <h1 class="text-7xl font-bold">Prism</h1>
-        <p class="py-6">The ultimate chat tool for engineers.</p>
+        <p class="py-6">The Ultimate Chat Tool for Engineers</p>
         <a href="/signin" class="btn btn-primary">Get Started</a>
       </div>
     </div>

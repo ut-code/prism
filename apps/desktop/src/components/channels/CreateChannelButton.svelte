@@ -42,7 +42,7 @@
 
 <button
   class="btn btn-ghost btn-xs btn-square"
-  title="新しいチャンネル"
+  title="New channel"
   onclick={() => {
     modalManager.dispatch(createChannelModalContent);
   }}
@@ -58,17 +58,17 @@
   >
     <input
       type="text"
-      placeholder="チャンネル名"
+      placeholder="Channel name"
       class="input input-bordered"
       bind:value={newChannelName}
     />
     {#if disabled}
       <button type="submit" class="btn btn-primary btn-sm" disabled>
-        作成中...
+        Creating...
         <span class="loading loading-spinner"></span>
       </button>
     {:else}
-      <button type="submit" class="btn btn-primary btn-sm">作成</button>
+      <button type="submit" class="btn btn-primary btn-sm">Create</button>
     {/if}
   </form>
 {/snippet}

@@ -20,34 +20,40 @@
     isPinned,
     isOwnMessage = false,
   }: Props = $props();
+
+  function handleDelete() {
+    if (window.confirm("Are you sure you want to delete this message?")) {
+      onDelete?.();
+    }
+  }
 </script>
 
 <ul
   class="menu dropdown-content bg-base-100 absolute z-[1] w-40 rounded-md border p-2 shadow"
 >
   <li>
-    <button onclick={onReply}>返信</button>
+    <button onclick={onReply}>Reply</button>
   </li>
   <li>
-    <button onclick={onAddReaction}>リアクションを付ける</button>
+    <button onclick={onAddReaction}>Add Reaction</button>
   </li>
   <li>
-    <button onclick={onShowReactions}>リアクションを表示</button>
+    <button onclick={onShowReactions}>Show Reactions</button>
   </li>
   <li>
     <button onclick={onPin}>
-      {isPinned ? "ピン解除" : "ピン留め"}
+      {isPinned ? "Unpin" : "Pin"}
     </button>
   </li>
   {#if isOwnMessage}
     {#if onEdit}
       <li>
-        <button onclick={onEdit}>編集</button>
+        <button onclick={onEdit}>Edit</button>
       </li>
     {/if}
     {#if onDelete}
       <li>
-        <button class="text-error" onclick={onDelete}>削除</button>
+        <button class="text-error" onclick={handleDelete}>Delete</button>
       </li>
     {/if}
   {/if}

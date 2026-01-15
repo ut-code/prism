@@ -39,7 +39,7 @@
         <button
           class="group relative block w-full cursor-pointer"
           onclick={controller.handleImageClick}
-          title="クリックして拡大表示"
+          title="Click to enlarge"
           type="button"
         >
           <img
@@ -107,9 +107,9 @@
           <button
             class="btn btn-ghost btn-sm"
             onclick={controller.handleDownload}
-            title="ダウンロード"
+            title="Download"
             type="button"
-            aria-label="ファイルをダウンロード"
+            aria-label="Download file"
           >
             <svg
               class="h-5 w-5"
@@ -133,7 +133,7 @@
   <div class="alert alert-error {controller.compact ? 'p-2' : 'p-3'}">
     <span>⚠️</span>
     <span class={controller.compact ? "text-xs" : "text-sm"}
-      >ファイルを読み込めませんでした</span
+      >Failed to load file</span
     >
   </div>
 {/if}

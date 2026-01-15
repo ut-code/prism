@@ -41,19 +41,32 @@ export const messages = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     editedAt: timestamp("edited_at"),
   },
-  (table) => [index("messages_channel_idx").on(table.channelId)],
+  (table) => [
+    index("messages_channel_idx").on(table.channelId),
+    index("messages_user_idx").on(table.userId),
+    index("messages_parent_idx").on(table.parentId),
+    index("messages_created_at_idx").on(table.createdAt),
+    index("messages_pinned_at_idx").on(table.pinnedAt),
+  ],
 );
 
 // Message attachments (junction table)
-export const messageAttachments = pgTable("message_attachments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  messageId: uuid("message_id")
-    .notNull()
-    .references(() => messages.id, { onDelete: "cascade" }),
-  fileId: uuid("file_id")
-    .notNull()
-    .references(() => files.id, { onDelete: "cascade" }),
-});
+export const messageAttachments = pgTable(
+  "message_attachments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => messages.id, { onDelete: "cascade" }),
+    fileId: uuid("file_id")
+      .notNull()
+      .references(() => files.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("message_attachments_message_idx").on(table.messageId),
+    index("message_attachments_file_idx").on(table.fileId),
+  ],
+);
 
 // Reactions
 export const reactions = pgTable(

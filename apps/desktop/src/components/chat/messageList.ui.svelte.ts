@@ -16,8 +16,14 @@ export class MessageListUI {
     private mutations: MessageMutations,
     private refetch: () => Promise<void>,
   ) {
-    document.addEventListener("click", () => {
-      this.visibleDropdown = null;
+    $effect(() => {
+      const handleClick = () => {
+        this.visibleDropdown = null;
+      };
+      document.addEventListener("click", handleClick);
+      return () => {
+        document.removeEventListener("click", handleClick);
+      };
     });
   }
 
@@ -75,7 +81,7 @@ export class MessageListUI {
   }
 
   async handleDelete(messageId: string) {
-    if (!confirm("このメッセージを削除しますか？")) return;
+    if (!confirm("Are you sure you want to delete this message?")) return;
     await this.mutations.deleteMessage.run({ messageId });
     await this.refetch();
   }

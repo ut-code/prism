@@ -17,9 +17,9 @@
     onSubmit(code);
   }}
 >
-  <h1 class="text-2xl font-bold">Enter Code</h1>
+  <h1 class="text-2xl font-bold">Enter Verification Code</h1>
   <p class="text-base-content/70 text-sm">
-    A code has been sent to <strong>{email}</strong>.
+    We sent a verification code to <strong>{email}</strong>
   </p>
   <div class="form-control">
     <label class="label" for="code">
@@ -38,7 +38,7 @@
   <div class="form-control mt-6">
     <button type="submit" class="btn btn-primary" disabled={isLoading}>
       {#if isLoading}<span class="loading loading-spinner"></span>{/if}
-      Confirm & Sign Up
+      Verify and Sign Up
     </button>
   </div>
 </form>

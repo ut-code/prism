@@ -56,6 +56,11 @@ export const messageUpdateRoutes = new Elysia().use(authMiddleware).put(
       .where(eq(messages.id, params.id))
       .returning();
 
+    if (!updatedMessage) {
+      set.status = 500;
+      return { message: "Failed to update message" };
+    }
+
     wsManager.broadcast(message.channelId, {
       type: "message:updated",
       channelId: message.channelId,

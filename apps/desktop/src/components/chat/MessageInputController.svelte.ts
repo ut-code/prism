@@ -87,7 +87,6 @@ export class MessageInputController {
     await this.api.sendMessageMutation.run({
       channelId: this.channelId,
       content: this.messageContent.trim() || "",
-      author: this.api.identity.data?.name || "unregistered",
       parentId: this.replyingTo?.id ?? undefined,
       attachments,
       voteId,

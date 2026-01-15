@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/index.ts";
 import { organizationMembers, organizations } from "../../db/schema.ts";
+import { ForbiddenError, NotFoundError } from "../../lib/errors.ts";
 
 export async function getOrganizationPermissions(
   userId: string,
@@ -13,7 +14,7 @@ export async function getOrganizationPermissions(
     .limit(1);
 
   if (!org) {
-    throw new Error("Organization not found");
+    throw new NotFoundError("Organization", "ORGANIZATION_NOT_FOUND");
   }
 
   const [membership] = await db
@@ -28,7 +29,10 @@ export async function getOrganizationPermissions(
     .limit(1);
 
   if (!membership) {
-    throw new Error("User is not a member of the organization");
+    throw new ForbiddenError(
+      "User is not a member of the organization",
+      "NOT_ORGANIZATION_MEMBER",
+    );
   }
 
   const isAdmin = membership.permission === "admin";
@@ -62,7 +66,10 @@ export async function requireOrganizationMembership(
     .limit(1);
 
   if (!membership) {
-    throw new Error("User is not a member of the organization");
+    throw new ForbiddenError(
+      "User is not a member of the organization",
+      "NOT_ORGANIZATION_MEMBER",
+    );
   }
 
   return membership;

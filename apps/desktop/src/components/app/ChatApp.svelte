@@ -53,9 +53,9 @@
       {:else}
         <div class="flex flex-1 items-center justify-center">
           <div class="text-center">
-            <p class="text-muted text-lg">チャンネルを選択</p>
+            <p class="text-muted text-lg">Select a Channel</p>
             <p class="text-muted mt-1 text-sm opacity-60">
-              左のサイドバーからチャンネルを選んでください
+              Choose a channel from the sidebar
             </p>
           </div>
         </div>

@@ -100,22 +100,18 @@ export function validate(...files: File[]) {
   const errors: Error[] = [];
 
   if (files.length > MAX_FILES) {
-    errors.push(new Error(`最大${MAX_FILES}ファイルまでアップロード可能です`));
+    errors.push(new Error(`Maximum ${MAX_FILES} files can be uploaded`));
     return { valid: [], errors };
   }
 
   for (const file of files) {
     if (file.size > MAX_FILE_SIZE) {
-      errors.push(
-        new Error(`${file.name}: ファイルサイズが大きすぎます（最大10MB）`),
-      );
+      errors.push(new Error(`${file.name}: File size too large (max 10MB)`));
       continue;
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      errors.push(
-        new Error(`${file.name}: サポートされていないファイル形式です`),
-      );
+      errors.push(new Error(`${file.name}: Unsupported file format`));
       continue;
     }
 
