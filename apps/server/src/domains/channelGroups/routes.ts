@@ -118,6 +118,19 @@ export const channelGroupRoutes = new Elysia({ prefix: "/channel-groups" })
               "INVALID_PARENT_GROUP",
             );
           }
+
+          // Check for circular reference
+          let ancestorId: string | null = body.parentGroupId;
+          while (ancestorId) {
+            if (ancestorId === params.id) {
+              throw new BadRequestError(
+                "Circular reference detected",
+                "CIRCULAR_REFERENCE",
+              );
+            }
+            const ancestor = await getChannelGroupById(db, ancestorId);
+            ancestorId = ancestor?.parentGroupId ?? null;
+          }
         }
 
         const updated = await updateChannelGroup(db, params.id, body);

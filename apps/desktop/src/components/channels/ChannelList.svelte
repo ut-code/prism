@@ -1,6 +1,4 @@
 <script lang="ts">
-  import Hash from "@lucide/svelte/icons/hash";
-  import Plus from "@lucide/svelte/icons/plus";
   import User from "@lucide/svelte/icons/user";
   import type { Channel } from "@packages/api-client";
   import { onMount } from "svelte";
@@ -8,11 +6,11 @@
   import { UnreadManager } from "@/lib/unread.svelte";
   import { useWebSocket } from "@/lib/websocket";
   import type { Selection } from "$components/chat/types";
-  import DMList from "$components/dms/DMList.svelte";
-  import UserSearch from "$components/dms/UserSearch.svelte";
   import ChannelGroup from "./ChannelGroup.svelte";
+  import ChannelItem from "./ChannelItem.svelte";
   import CreateChannelButton from "./CreateChannelButton.svelte";
   import CreateGroupButton from "./CreateGroupButton.svelte";
+  import DMSection from "./DMSection.svelte";
   import {
     type ChannelGroup as ChannelGroupType,
     organizeChannelsIntoGroups,
@@ -42,7 +40,6 @@
 
   const unreadManager = new UnreadManager(api, () => organizationId);
   const groupState = useChannelGroupState(() => organizationId);
-  let showUserSearch = $state(false);
 
   const organized = $derived(
     organizeChannelsIntoGroups(channels.data ?? [], channelGroups.data ?? []),
@@ -115,36 +112,13 @@
 
         <!-- Ungrouped channels -->
         {#each ungroupedChannels as channel (channel.id)}
-          {@const active =
-            screenMode.type === "chat" &&
-            screenMode.selectedChannelId === channel.id}
-          {@const unreadCount = unreadManager.getUnreadCount(channel.id)}
-          <a
-            href={`/orgs/${organizationId}/chat/${channel.id}`}
-            class={[
-              "group flex items-center gap-2 rounded px-2 py-2 text-sm transition-colors",
-              active
-                ? "bg-primary/15 text-primary"
-                : "text-base-content/80 hover:bg-base-300 hover:text-base-content",
-            ]}
-          >
-            <Hash
-              class={[
-                "size-4 flex-shrink-0",
-                active ? "text-primary" : "text-muted",
-              ]}
-            />
-            <span class={["flex-1 truncate", unreadCount > 0 && "font-medium"]}>
-              {channel.name}
-            </span>
-            {#if unreadCount > 0}
-              <span
-                class="badge-unread flex items-center justify-center rounded-full"
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            {/if}
-          </a>
+          <ChannelItem
+            {channel}
+            {organizationId}
+            active={screenMode.type === "chat" &&
+              screenMode.selectedChannelId === channel.id}
+            unreadCount={unreadManager.getUnreadCount(channel.id)}
+          />
         {/each}
       {:else}
         <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
@@ -161,35 +135,12 @@
   </section>
 
   <!-- DM section -->
-  <section class="border-subtle border-t">
-    <header class="flex items-center justify-between px-4 py-2">
-      <span class="text-muted text-xs font-medium tracking-wider uppercase">
-        Direct Messages
-      </span>
-      <button
-        class="btn btn-ghost btn-xs btn-square"
-        title="New DM"
-        onclick={() => (showUserSearch = !showUserSearch)}
-      >
-        <Plus class="text-muted size-4" />
-      </button>
-    </header>
-
-    {#if showUserSearch}
-      <div class="px-2 pb-2">
-        <UserSearch {organizationId} />
-      </div>
-    {/if}
-
-    <div class="max-h-48 overflow-y-auto px-2 pb-2">
-      <DMList
-        {organizationId}
-        selectedChannelId={screenMode.type === "chat"
-          ? screenMode.selectedChannelId
-          : undefined}
-      />
-    </div>
-  </section>
+  <DMSection
+    {organizationId}
+    selectedChannelId={screenMode.type === "chat"
+      ? screenMode.selectedChannelId
+      : undefined}
+  />
 
   <!-- Settings link -->
   <footer class="border-subtle border-t p-2">
