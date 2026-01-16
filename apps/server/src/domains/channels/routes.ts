@@ -102,6 +102,55 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
     },
   )
   .patch(
+    "/:id",
+    async ({ user, params, body, set }) => {
+      try {
+        if (!user) throw new UnauthorizedError();
+
+        const [channel] = await db
+          .select()
+          .from(channels)
+          .where(eq(channels.id, params.id))
+          .limit(1);
+
+        if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+        const perms = await getOrganizationPermissions(
+          user.id,
+          channel.organizationId,
+        );
+        if (!perms.canCreateChannels) {
+          throw new ForbiddenError(
+            "Insufficient permissions",
+            "CANNOT_UPDATE_CHANNEL",
+          );
+        }
+
+        const [updated] = await db
+          .update(channels)
+          .set({
+            ...(body.name !== undefined && { name: body.name }),
+            ...(body.description !== undefined && {
+              description: body.description,
+            }),
+            updatedAt: new Date(),
+          })
+          .where(eq(channels.id, params.id))
+          .returning();
+
+        return updated;
+      } catch (error) {
+        return handleError(error, set);
+      }
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        description: t.Optional(t.Nullable(t.String())),
+      }),
+    },
+  )
+  .patch(
     "/:id/group",
     async ({ user, params, body, set }) => {
       try {

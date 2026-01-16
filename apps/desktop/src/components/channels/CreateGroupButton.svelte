@@ -5,10 +5,19 @@
 
   interface Props {
     groups?: ChannelGroup[];
+    defaultParentGroupId?: string | null;
     onCreate?: (name: string, parentGroupId: string | null) => Promise<void>;
+    showButton?: boolean;
+    registerOpen?: (fn: () => void) => void;
   }
 
-  const { groups = [], onCreate }: Props = $props();
+  const {
+    groups = [],
+    defaultParentGroupId,
+    onCreate,
+    showButton = true,
+    registerOpen,
+  }: Props = $props();
 
   let name = $state("");
   let parentGroupId = $state("");
@@ -16,6 +25,15 @@
   let disabled = $state(false);
 
   const modalManager = new ModalManager();
+
+  function openModal() {
+    parentGroupId = defaultParentGroupId ?? "";
+    modalManager.dispatch(createGroupModalContent);
+  }
+
+  $effect(() => {
+    registerOpen?.(openModal);
+  });
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
@@ -30,7 +48,7 @@
       disabled = false;
       form?.reset();
       name = "";
-      parentGroupId = "";
+      parentGroupId = defaultParentGroupId ?? "";
       modalManager.close();
     }
   }
@@ -38,13 +56,15 @@
 
 <Modal manager={modalManager} />
 
-<button
-  class="btn btn-ghost btn-xs btn-square"
-  title="New group"
-  onclick={() => modalManager.dispatch(createGroupModalContent)}
->
-  <FolderPlus class="text-muted size-4" />
-</button>
+{#if showButton}
+  <button
+    class="btn btn-ghost btn-xs btn-square"
+    title="New group"
+    onclick={openModal}
+  >
+    <FolderPlus class="text-muted size-4" />
+  </button>
+{/if}
 
 {#snippet createGroupModalContent()}
   <form bind:this={form} onsubmit={handleSubmit} class="flex flex-col gap-4">

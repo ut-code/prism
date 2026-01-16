@@ -5,6 +5,7 @@
   import type { UnreadManager } from "@/lib/unread.svelte";
   import type { Selection } from "$components/chat/types";
   import Self from "./ChannelGroup.svelte";
+  import ChannelGroupContextMenu from "./ChannelGroupContextMenu.svelte";
   import ChannelItem from "./ChannelItem.svelte";
   import type { ChannelGroup as ChannelGroupType } from "./channelGroups.svelte.ts";
 
@@ -20,6 +21,12 @@
     depth?: number;
     isCollapsed: (groupId: string) => boolean;
     onToggle: (groupId: string) => void;
+    onCreateChannel?: (groupId: string) => void;
+    onCreateGroup?: (parentGroupId: string) => void;
+    onRename?: (groupId: string, currentName: string) => void;
+    onDelete?: (groupId: string) => void;
+    onEditChannel?: (channel: Channel) => void;
+    onMoveChannelToGroup?: (channelId: string, groupId: string | null) => void;
   }
 
   let {
@@ -34,11 +41,36 @@
     depth = 0,
     isCollapsed,
     onToggle,
+    onCreateChannel,
+    onCreateGroup,
+    onRename,
+    onDelete,
+    onEditChannel,
+    onMoveChannelToGroup,
   }: Props = $props();
 
   const collapsed = $derived(isCollapsed(group.id));
   const indent = $derived(`${depth * 0.75}rem`);
+
+  let contextMenu = $state<{ x: number; y: number } | null>(null);
+
+  function handleContextMenu(e: MouseEvent) {
+    e.preventDefault();
+    contextMenu = { x: e.clientX, y: e.clientY };
+  }
 </script>
+
+{#if contextMenu}
+  <ChannelGroupContextMenu
+    x={contextMenu.x}
+    y={contextMenu.y}
+    onCreateChannel={() => onCreateChannel?.(group.id)}
+    onCreateGroup={() => onCreateGroup?.(group.id)}
+    onRename={() => onRename?.(group.id, group.name)}
+    onDelete={() => onDelete?.(group.id)}
+    onClose={() => (contextMenu = null)}
+  />
+{/if}
 
 <div class="flex flex-col">
   <button
@@ -46,6 +78,7 @@
     class="hover:bg-base-300 flex items-center gap-1 rounded px-2 py-1.5 text-left text-xs font-medium tracking-wide transition-colors"
     style:padding-left={indent}
     onclick={() => onToggle(group.id)}
+    oncontextmenu={handleContextMenu}
   >
     {#if collapsed}
       <ChevronRight class="text-muted size-3.5 flex-shrink-0" />
@@ -65,6 +98,9 @@
             screenMode.selectedChannelId === channel.id}
           unreadCount={unreadManager.getUnreadCount(channel.id)}
           indent={`calc(${indent} + 0.5rem)`}
+          groups={allGroups}
+          onEdit={onEditChannel}
+          onMoveToGroup={onMoveChannelToGroup}
         />
       {/each}
 
@@ -81,6 +117,12 @@
           depth={depth + 1}
           {isCollapsed}
           {onToggle}
+          {onCreateChannel}
+          {onCreateGroup}
+          {onRename}
+          {onDelete}
+          {onEditChannel}
+          {onMoveChannelToGroup}
         />
       {/each}
     </nav>

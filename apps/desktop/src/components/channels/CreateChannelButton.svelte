@@ -11,12 +11,16 @@
     groups?: ChannelGroup[];
     defaultGroupId?: string | null;
     onCreated?: () => void;
+    showButton?: boolean;
+    registerOpen?: (fn: () => void) => void;
   }
   const {
     organizationId,
     groups = [],
     defaultGroupId,
     onCreated,
+    showButton = true,
+    registerOpen,
   }: Props = $props();
 
   let name = $state("");
@@ -30,6 +34,11 @@
     groupId = defaultGroupId ?? null;
     modalManager.dispatch(createChannelModalContent);
   }
+
+  $effect(() => {
+    registerOpen?.(openModal);
+  });
+
   async function createChannel(event: Event) {
     event.preventDefault();
 
@@ -57,13 +66,15 @@
 
 <Modal manager={modalManager} />
 
-<button
-  class="btn btn-ghost btn-xs btn-square"
-  title="New channel"
-  onclick={openModal}
->
-  <Plus class="text-muted size-4" />
-</button>
+{#if showButton}
+  <button
+    class="btn btn-ghost btn-xs btn-square"
+    title="New channel"
+    onclick={openModal}
+  >
+    <Plus class="text-muted size-4" />
+  </button>
+{/if}
 
 {#snippet createChannelModalContent()}
   <form bind:this={form} onsubmit={createChannel} class="flex flex-col gap-4">
