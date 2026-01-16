@@ -19,7 +19,10 @@
     "db": "cd apps/server && bun --env-file=../../.env run drizzle-kit",
     "db:seed": "bun --env-file=.env run scripts/seed.ts",
     "test:e2e": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts",
-    "test:e2e:ui": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts --ui"
+    "test:e2e:ui": "PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) playwright test --config=e2e/playwright.config.ts --ui",
+    "up": "devenv processes up -d",
+    "down": "devenv processes down",
+    "tail": "tail -f ./.devenv/processes.log"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",

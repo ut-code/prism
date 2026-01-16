@@ -19,8 +19,9 @@ cp .env.sample .env
 ### 開発用サーバー
 
 ```sh
-devenv up -d # run in background, logs at .devenv/processes.log
-devenv processes down # kill the background service
+bun up    # バックグラウンドで起動
+bun down  # 停止
+bun tail  # ログを表示
 ```
 
 ## 注意点
