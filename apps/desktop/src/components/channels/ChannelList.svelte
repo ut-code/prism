@@ -1,8 +1,10 @@
 <script lang="ts">
   import FolderPlus from "@lucide/svelte/icons/folder-plus";
+  import Hash from "@lucide/svelte/icons/hash";
   import Plus from "@lucide/svelte/icons/plus";
   import User from "@lucide/svelte/icons/user";
   import type { Selection } from "$components/chat/types";
+  import ChannelBrowser from "./ChannelBrowser.svelte";
   import ChannelGroup from "./ChannelGroup.svelte";
   import ChannelItem from "./ChannelItem.svelte";
   import { ChannelListController } from "./ChannelList.controller.svelte.ts";
@@ -31,6 +33,13 @@
         Channels
       </span>
       <div class="flex items-center gap-1">
+        <button
+          class="btn btn-ghost btn-xs btn-square"
+          title="Browse channels"
+          onclick={() => modals.openBrowseChannels()}
+        >
+          <Hash class="text-muted size-4" />
+        </button>
         <button
           class="btn btn-ghost btn-xs btn-square"
           title="New group"
@@ -70,6 +79,7 @@
             onDelete={(id) => controller.deleteGroup(id)}
             onEditChannel={(ch) => modals.openEditChannel(ch)}
             onDeleteChannel={(id) => controller.deleteChannel(id)}
+            onLeaveChannel={(id) => controller.leaveChannel(id)}
             onMoveChannelToGroup={(chId, gId) =>
               controller.moveChannelToGroup(chId, gId)}
           />
@@ -89,6 +99,7 @@
             groups={controller.organized.groups}
             onEdit={(ch) => modals.openEditChannel(ch)}
             onDelete={(id) => controller.deleteChannel(id)}
+            onLeave={(id) => controller.leaveChannel(id)}
             onMoveToGroup={(chId, gId) =>
               controller.moveChannelToGroup(chId, gId)}
           />
@@ -137,6 +148,13 @@
     channel={modals.editChannel.channel}
     onClose={() => modals.closeEditChannel()}
     onSave={(id, name, desc) => controller.editChannel(id, name, desc)}
+  />
+
+  <ChannelBrowser
+    channels={controller.allChannels}
+    isOpen={modals.browseChannels.isOpen}
+    onClose={() => modals.closeBrowseChannels()}
+    onJoin={(id) => controller.joinChannel(id)}
   />
 
   <DMSection

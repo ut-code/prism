@@ -12,6 +12,7 @@
     groups?: ChannelGroup[];
     onEdit?: (channel: Channel) => void;
     onDelete?: (channelId: string) => void;
+    onLeave?: (channelId: string) => void;
     onMoveToGroup?: (channelId: string, groupId: string | null) => void;
   }
 
@@ -24,6 +25,7 @@
     groups = [],
     onEdit,
     onDelete,
+    onLeave,
     onMoveToGroup,
   }: Props = $props();
 
@@ -39,10 +41,12 @@
   <ChannelContextMenu
     x={contextMenu.x}
     y={contextMenu.y}
+    channelType={channel.type}
     currentGroupId={channel.groupId ?? null}
     {groups}
     onEdit={() => onEdit?.(channel)}
     onDelete={() => onDelete?.(channel.id)}
+    onLeave={() => onLeave?.(channel.id)}
     onMoveToGroup={(groupId) => onMoveToGroup?.(channel.id, groupId)}
     onClose={() => (contextMenu = null)}
   />

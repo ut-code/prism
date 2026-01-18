@@ -1,7 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
-import { organizationMembers, users } from "../../db/schema.ts";
+import {
+  channelMembers,
+  channels,
+  organizationMembers,
+  users,
+} from "../../db/schema.ts";
 import { authMiddleware } from "../../middleware/auth.ts";
 import { getOrganizationPermissions } from "./permissions.ts";
 
@@ -62,6 +67,26 @@ export const organizationMemberAddRoute = new Elysia().use(authMiddleware).post(
         permission: body.permission,
       })
       .returning();
+
+    // Auto-join all default channels in this organization
+    const defaultChannels = await db
+      .select({ id: channels.id })
+      .from(channels)
+      .where(
+        and(
+          eq(channels.organizationId, params.id),
+          eq(channels.type, "default"),
+        ),
+      );
+
+    if (defaultChannels.length > 0) {
+      await db.insert(channelMembers).values(
+        defaultChannels.map((ch) => ({
+          channelId: ch.id,
+          userId: body.userId,
+        })),
+      );
+    }
 
     return membership;
   },
