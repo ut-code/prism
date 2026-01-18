@@ -36,6 +36,17 @@ export interface Channel {
   description?: string | null;
   type: "public" | "private" | "dm";
   organizationId: string;
+  groupId?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ChannelGroup {
+  id: string;
+  name: string;
+  organizationId: string;
+  parentGroupId?: string | null;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }

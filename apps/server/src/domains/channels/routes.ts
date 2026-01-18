@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
 import { channels } from "../../db/schema.ts";
@@ -30,7 +30,7 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
         .select()
         .from(channels)
         .where(eq(channels.organizationId, query.organizationId))
-        .orderBy(desc(channels.createdAt));
+        .orderBy(asc(channels.name));
 
       return channelList;
     } catch (error) {
@@ -80,6 +80,7 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
             name: body.name,
             description: body.description,
             organizationId: body.organizationId,
+            groupId: body.groupId ?? null,
           })
           .returning();
 
@@ -93,9 +94,131 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
         name: t.String({ minLength: 1 }),
         description: t.Optional(t.String()),
         organizationId: t.String(),
+        groupId: t.Optional(t.String()),
       }),
       query: t.Object({
         organizationId: t.Optional(t.String()),
       }),
     },
-  );
+  )
+  .patch(
+    "/:id",
+    async ({ user, params, body, set }) => {
+      try {
+        if (!user) throw new UnauthorizedError();
+
+        const [channel] = await db
+          .select()
+          .from(channels)
+          .where(eq(channels.id, params.id))
+          .limit(1);
+
+        if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+        const perms = await getOrganizationPermissions(
+          user.id,
+          channel.organizationId,
+        );
+        if (!perms.canCreateChannels) {
+          throw new ForbiddenError(
+            "Insufficient permissions",
+            "CANNOT_UPDATE_CHANNEL",
+          );
+        }
+
+        const [updated] = await db
+          .update(channels)
+          .set({
+            ...(body.name !== undefined && { name: body.name }),
+            ...(body.description !== undefined && {
+              description: body.description,
+            }),
+            updatedAt: new Date(),
+          })
+          .where(eq(channels.id, params.id))
+          .returning();
+
+        return updated;
+      } catch (error) {
+        return handleError(error, set);
+      }
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        description: t.Optional(t.Nullable(t.String())),
+      }),
+    },
+  )
+  .patch(
+    "/:id/group",
+    async ({ user, params, body, set }) => {
+      try {
+        if (!user) throw new UnauthorizedError();
+
+        const [channel] = await db
+          .select()
+          .from(channels)
+          .where(eq(channels.id, params.id))
+          .limit(1);
+
+        if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+        const perms = await getOrganizationPermissions(
+          user.id,
+          channel.organizationId,
+        );
+        if (!perms.canCreateChannels) {
+          throw new ForbiddenError(
+            "Insufficient permissions",
+            "CANNOT_UPDATE_CHANNEL",
+          );
+        }
+
+        const [updated] = await db
+          .update(channels)
+          .set({ groupId: body.groupId, updatedAt: new Date() })
+          .where(eq(channels.id, params.id))
+          .returning();
+
+        return updated;
+      } catch (error) {
+        return handleError(error, set);
+      }
+    },
+    {
+      body: t.Object({
+        groupId: t.Nullable(t.String()),
+      }),
+    },
+  )
+  .delete("/:id", async ({ user, params, set }) => {
+    try {
+      if (!user) throw new UnauthorizedError();
+
+      const [channel] = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.id, params.id))
+        .limit(1);
+
+      if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+      const perms = await getOrganizationPermissions(
+        user.id,
+        channel.organizationId,
+      );
+      if (!perms.canCreateChannels) {
+        throw new ForbiddenError(
+          "Insufficient permissions",
+          "CANNOT_DELETE_CHANNEL",
+        );
+      }
+
+      await db.delete(channels).where(eq(channels.id, params.id));
+
+      return { success: true };
+    } catch (error) {
+      return handleError(error, set);
+    }
+  });

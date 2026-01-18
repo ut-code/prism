@@ -1,7 +1,9 @@
 <script lang="ts">
   import "@/app.css";
   import { setupApi } from "@/lib/api.svelte.ts";
+  import ConfirmModal from "@/lib/confirm/ConfirmModal.svelte";
   import { env } from "@/lib/env.ts";
+  import ToastContainer from "@/lib/toast/ToastContainer.svelte";
   import { setupWebSocket } from "@/lib/websocket/index.ts";
 
   const { children } = $props();
@@ -22,3 +24,5 @@
 </script>
 
 {@render children()}
+<ToastContainer />
+<ConfirmModal />
