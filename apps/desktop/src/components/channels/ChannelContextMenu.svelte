@@ -4,7 +4,7 @@
   import FolderOutput from "@lucide/svelte/icons/folder-output";
   import Pencil from "@lucide/svelte/icons/pencil";
   import Trash2 from "@lucide/svelte/icons/trash-2";
-  import type { ChannelGroup } from "./channelGroups.svelte.ts";
+  import type { ChannelGroup } from "@packages/api-client";
 
   interface Props {
     x: number;

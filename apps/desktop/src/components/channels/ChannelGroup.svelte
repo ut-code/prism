@@ -1,13 +1,15 @@
 <script lang="ts">
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
-  import type { Channel } from "@packages/api-client";
+  import type {
+    Channel,
+    ChannelGroup as ChannelGroupType,
+  } from "@packages/api-client";
   import type { UnreadManager } from "@/lib/unread.svelte";
   import type { Selection } from "$components/chat/types";
   import Self from "./ChannelGroup.svelte";
   import ChannelGroupContextMenu from "./ChannelGroupContextMenu.svelte";
   import ChannelItem from "./ChannelItem.svelte";
-  import type { ChannelGroup as ChannelGroupType } from "./channelGroups.svelte.ts";
 
   interface Props {
     group: ChannelGroupType;

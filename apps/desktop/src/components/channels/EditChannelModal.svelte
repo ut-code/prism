@@ -1,103 +1,95 @@
 <script lang="ts">
   import type { Channel } from "@packages/api-client";
-  import Modal, { ModalManager } from "@/lib/modal/modal.svelte";
 
   interface Props {
+    isOpen: boolean;
+    channel: Channel | null;
+    onClose: () => void;
     onSave: (
       channelId: string,
       name: string,
       description: string,
     ) => Promise<void>;
-    registerOpen?: (fn: (channel: Channel) => void) => void;
   }
 
-  const { onSave, registerOpen }: Props = $props();
+  let { isOpen, channel, onClose, onSave }: Props = $props();
 
-  let channelId = $state("");
   let name = $state("");
   let description = $state("");
-  let form: HTMLFormElement | null = $state(null);
   let disabled = $state(false);
-
-  const modalManager = new ModalManager();
-
-  function openModal(channel: Channel) {
-    channelId = channel.id;
-    name = channel.name;
-    description = channel.description ?? "";
-    modalManager.dispatch(editChannelModalContent);
-  }
+  let dialog: HTMLDialogElement | null = $state(null);
 
   $effect(() => {
-    registerOpen?.(openModal);
+    if (isOpen && channel) {
+      name = channel.name;
+      description = channel.description ?? "";
+      dialog?.showModal();
+    } else {
+      dialog?.close();
+    }
   });
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
-    if (disabled || !name.trim()) return;
+    if (disabled || !name.trim() || !channel) return;
 
     disabled = true;
     try {
-      await onSave(channelId, name.trim(), description.trim());
-    } catch (error) {
-      console.error("Failed to update channel:", error);
+      await onSave(channel.id, name.trim(), description.trim());
+      onClose();
+    } catch {
+      // Error handled by controller
     } finally {
       disabled = false;
-      form?.reset();
-      channelId = "";
-      name = "";
-      description = "";
-      modalManager.close();
     }
   }
 </script>
 
-<Modal manager={modalManager} />
+<dialog bind:this={dialog} class="modal" onclose={onClose}>
+  <div class="modal-box">
+    <form onsubmit={handleSubmit} class="flex flex-col gap-4">
+      <h3 class="text-lg font-medium">Edit Channel</h3>
 
-{#snippet editChannelModalContent()}
-  <form bind:this={form} onsubmit={handleSubmit} class="flex flex-col gap-4">
-    <h3 class="text-lg font-medium">Edit Channel</h3>
+      <div class="flex flex-col gap-2">
+        <label for="edit-channel-name" class="text-sm font-medium">Name</label>
+        <input
+          id="edit-channel-name"
+          type="text"
+          placeholder="Channel name"
+          class="input input-bordered"
+          bind:value={name}
+        />
+      </div>
 
-    <div class="flex flex-col gap-2">
-      <label for="edit-channel-name" class="text-sm font-medium">Name</label>
-      <input
-        id="edit-channel-name"
-        type="text"
-        placeholder="Channel name"
-        class="input input-bordered"
-        bind:value={name}
-      />
-    </div>
+      <div class="flex flex-col gap-2">
+        <label for="edit-channel-description" class="text-muted text-sm">
+          Description (optional)
+        </label>
+        <textarea
+          id="edit-channel-description"
+          placeholder="Channel description"
+          class="textarea textarea-bordered"
+          rows="3"
+          bind:value={description}
+        ></textarea>
+      </div>
 
-    <div class="flex flex-col gap-2">
-      <label for="edit-channel-description" class="text-muted text-sm">
-        Description (optional)
-      </label>
-      <textarea
-        id="edit-channel-description"
-        placeholder="Channel description"
-        class="textarea textarea-bordered"
-        rows="3"
-        bind:value={description}
-      ></textarea>
-    </div>
-
-    <div class="flex justify-end gap-2">
-      <button
-        type="button"
-        class="btn btn-ghost btn-sm"
-        onclick={() => modalManager.close()}
-      >
-        Cancel
-      </button>
-      {#if disabled}
-        <button type="submit" class="btn btn-primary btn-sm" disabled>
-          Saving...
-          <span class="loading loading-spinner loading-xs"></span>
+      <div class="flex justify-end gap-2">
+        <button type="button" class="btn btn-ghost btn-sm" onclick={onClose}>
+          Cancel
         </button>
-      {:else}
-        <button type="submit" class="btn btn-primary btn-sm">Save</button>
-      {/if}
-    </div>
+        <button type="submit" class="btn btn-primary btn-sm" {disabled}>
+          {#if disabled}
+            Saving...
+            <span class="loading loading-spinner loading-xs"></span>
+          {:else}
+            Save
+          {/if}
+        </button>
+      </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button type="submit">close</button>
   </form>
-{/snippet}
+</dialog>

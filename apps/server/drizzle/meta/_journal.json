@@ -8,6 +8,13 @@
       "when": 1765968590903,
       "tag": "0000_faithful_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768717215360,
+      "tag": "0001_faulty_dust",
+      "breakpoints": true
     }
   ]
 }

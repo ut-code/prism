@@ -1,8 +1,7 @@
 <script lang="ts">
   import Hash from "@lucide/svelte/icons/hash";
-  import type { Channel } from "@packages/api-client";
+  import type { Channel, ChannelGroup } from "@packages/api-client";
   import ChannelContextMenu from "./ChannelContextMenu.svelte";
-  import type { ChannelGroup } from "./channelGroups.svelte.ts";
 
   interface Props {
     channel: Channel;

@@ -3,8 +3,6 @@ import { browser } from "$app/environment";
 
 const STORAGE_KEY = "channel-groups-collapsed";
 
-export type { ChannelGroup };
-
 export interface GroupedChannels {
   groups: ChannelGroup[];
   channelsByGroup: Map<string | null, Channel[]>;

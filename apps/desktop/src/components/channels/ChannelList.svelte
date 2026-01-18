@@ -1,25 +1,17 @@
 <script lang="ts">
+  import FolderPlus from "@lucide/svelte/icons/folder-plus";
+  import Plus from "@lucide/svelte/icons/plus";
   import User from "@lucide/svelte/icons/user";
-  import type { Channel } from "@packages/api-client";
-  import { onMount } from "svelte";
-  import { getApiClient, unwrapResponse, useQuery } from "@/lib/api.svelte";
-  import { UnreadManager } from "@/lib/unread.svelte";
-  import { useWebSocket } from "@/lib/websocket";
   import type { Selection } from "$components/chat/types";
   import ChannelGroup from "./ChannelGroup.svelte";
   import ChannelItem from "./ChannelItem.svelte";
-  import CreateChannelButton from "./CreateChannelButton.svelte";
-  import CreateGroupButton from "./CreateGroupButton.svelte";
-  import {
-    type ChannelGroup as ChannelGroupType,
-    organizeChannelsIntoGroups,
-    useChannelGroupState,
-  } from "./channelGroups.svelte.ts";
+  import { ChannelListController } from "./ChannelList.controller.svelte.ts";
+  import CreateChannelModal from "./CreateChannelModal.svelte";
+  import CreateGroupModal from "./CreateGroupModal.svelte";
   import DMSection from "./DMSection.svelte";
   import EditChannelModal from "./EditChannelModal.svelte";
+  import { useChannelModals } from "./modals.svelte.ts";
   import RenameGroupModal from "./RenameGroupModal.svelte";
-
-  const api = getApiClient();
 
   interface Props {
     organizationId: string;
@@ -28,107 +20,8 @@
 
   let { organizationId, screenMode = $bindable() }: Props = $props();
 
-  const channels = useQuery<Channel[]>(async () => {
-    const response = await api.channels.get({ query: { organizationId } });
-    return unwrapResponse(response);
-  });
-
-  const channelGroups = useQuery<ChannelGroupType[]>(async () => {
-    const response = await api["channel-groups"].get({
-      query: { organizationId },
-    });
-    return unwrapResponse(response);
-  });
-
-  const unreadManager = new UnreadManager(api, () => organizationId);
-  const groupState = useChannelGroupState(() => organizationId);
-
-  const organized = $derived(
-    organizeChannelsIntoGroups(channels.data ?? [], channelGroups.data ?? []),
-  );
-
-  const rootGroups = $derived(
-    organized.groups.filter((g) => g.parentGroupId === null),
-  );
-
-  const ungroupedChannels = $derived(organized.channelsByGroup.get(null) ?? []);
-
-  useWebSocket("message:created", () => unreadManager.fetchUnreadCounts());
-  onMount(() => unreadManager.fetchUnreadCounts());
-
-  // Group CRUD handlers
-  async function handleCreateGroup(name: string, parentGroupId: string | null) {
-    await api["channel-groups"].post({
-      name,
-      organizationId,
-      parentGroupId: parentGroupId ?? undefined,
-    });
-    channelGroups.refetch();
-  }
-
-  async function handleRenameGroup(groupId: string, newName: string) {
-    await api["channel-groups"]({ id: groupId }).patch({ name: newName });
-    channelGroups.refetch();
-  }
-
-  async function handleDeleteGroup(groupId: string) {
-    if (!confirm("Are you sure you want to delete this group?")) return;
-    await api["channel-groups"]({ id: groupId }).delete();
-    channelGroups.refetch();
-  }
-
-  // Channel handlers
-  async function handleEditChannel(
-    channelId: string,
-    name: string,
-    description: string,
-  ) {
-    await api.channels({ id: channelId }).patch({
-      name,
-      description: description || null,
-    });
-    channels.refetch();
-  }
-
-  async function handleMoveChannelToGroup(
-    channelId: string,
-    groupId: string | null,
-  ) {
-    await api.channels({ id: channelId }).group.patch({ groupId });
-    channels.refetch();
-  }
-
-  async function handleDeleteChannel(channelId: string) {
-    if (!confirm("Are you sure you want to delete this channel?")) return;
-    await api.channels({ id: channelId }).delete();
-    channels.refetch();
-  }
-
-  // Context menu state
-  let selectedGroupId = $state<string | null>(null);
-  let openChannelModal: (() => void) | null = $state(null);
-  let openGroupModal: (() => void) | null = $state(null);
-  let openRenameModal: ((id: string, name: string) => void) | null =
-    $state(null);
-  let openEditChannelModal: ((channel: Channel) => void) | null = $state(null);
-
-  function handleCreateChannelFromContext(groupId: string) {
-    selectedGroupId = groupId;
-    setTimeout(() => openChannelModal?.(), 0);
-  }
-
-  function handleCreateGroupFromContext(parentGroupId: string) {
-    selectedGroupId = parentGroupId;
-    setTimeout(() => openGroupModal?.(), 0);
-  }
-
-  function handleRenameFromContext(groupId: string, currentName: string) {
-    openRenameModal?.(groupId, currentName);
-  }
-
-  function handleEditChannelFromContext(channel: Channel) {
-    openEditChannelModal?.(channel);
-  }
+  const controller = new ChannelListController(() => organizationId);
+  const modals = useChannelModals();
 </script>
 
 <div class="flex h-full flex-col">
@@ -138,98 +31,112 @@
         Channels
       </span>
       <div class="flex items-center gap-1">
-        <CreateGroupButton
-          groups={channelGroups.data ?? []}
-          onCreate={handleCreateGroup}
-        />
-        <CreateChannelButton
-          {organizationId}
-          groups={channelGroups.data ?? []}
-          onCreated={() => channels.refetch()}
-        />
+        <button
+          class="btn btn-ghost btn-xs btn-square"
+          title="New group"
+          onclick={() => modals.openCreateGroup()}
+        >
+          <FolderPlus class="text-muted size-4" />
+        </button>
+        <button
+          class="btn btn-ghost btn-xs btn-square"
+          title="New channel"
+          onclick={() => modals.openCreateChannel()}
+        >
+          <Plus class="text-muted size-4" />
+        </button>
       </div>
     </header>
 
     <nav class="px-2">
-      {#if channels.data}
-        {#each rootGroups as group (group.id)}
+      {#if controller.channels.data}
+        {#each controller.rootGroups as group (group.id)}
           <ChannelGroup
             {group}
-            channels={organized.channelsByGroup.get(group.id) ?? []}
-            childGroups={organized.groups.filter(
+            channels={controller.organized.channelsByGroup.get(group.id) ?? []}
+            childGroups={controller.organized.groups.filter(
               (g) => g.parentGroupId === group.id,
             )}
-            allGroups={organized.groups}
-            allChannelsByGroup={organized.channelsByGroup}
+            allGroups={controller.organized.groups}
+            allChannelsByGroup={controller.organized.channelsByGroup}
             {organizationId}
             {screenMode}
-            {unreadManager}
-            isCollapsed={groupState.isCollapsed}
-            onToggle={groupState.toggle}
-            onCreateChannel={handleCreateChannelFromContext}
-            onCreateGroup={handleCreateGroupFromContext}
-            onRename={handleRenameFromContext}
-            onDelete={handleDeleteGroup}
-            onEditChannel={handleEditChannelFromContext}
-            onDeleteChannel={handleDeleteChannel}
-            onMoveChannelToGroup={handleMoveChannelToGroup}
+            unreadManager={controller.unreadManager}
+            isCollapsed={controller.groupState.isCollapsed}
+            onToggle={controller.groupState.toggle}
+            onCreateChannel={(id) => modals.openCreateChannel(id)}
+            onCreateGroup={(id) => modals.openCreateGroup(id)}
+            onRename={(id, name) => modals.openRenameGroup(id, name)}
+            onDelete={(id) => controller.deleteGroup(id)}
+            onEditChannel={(ch) => modals.openEditChannel(ch)}
+            onDeleteChannel={(id) => controller.deleteChannel(id)}
+            onMoveChannelToGroup={(chId, gId) =>
+              controller.moveChannelToGroup(chId, gId)}
           />
         {/each}
 
-        {#if rootGroups.length > 0 && ungroupedChannels.length > 0}
+        {#if controller.rootGroups.length > 0 && controller.ungroupedChannels.length > 0}
           <div class="divider text-muted my-2 text-xs">Ungrouped</div>
         {/if}
 
-        {#each ungroupedChannels as channel (channel.id)}
+        {#each controller.ungroupedChannels as channel (channel.id)}
           <ChannelItem
             {channel}
             {organizationId}
             active={screenMode.type === "chat" &&
               screenMode.selectedChannelId === channel.id}
-            unreadCount={unreadManager.getUnreadCount(channel.id)}
-            groups={organized.groups}
-            onEdit={handleEditChannelFromContext}
-            onDelete={handleDeleteChannel}
-            onMoveToGroup={handleMoveChannelToGroup}
+            unreadCount={controller.unreadManager.getUnreadCount(channel.id)}
+            groups={controller.organized.groups}
+            onEdit={(ch) => modals.openEditChannel(ch)}
+            onDelete={(id) => controller.deleteChannel(id)}
+            onMoveToGroup={(chId, gId) =>
+              controller.moveChannelToGroup(chId, gId)}
           />
         {/each}
+
+        {#if controller.channels.data.length === 0}
+          <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
+            No channels
+          </div>
+        {/if}
       {:else}
         <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
           Loading...
         </div>
       {/if}
-
-      {#if channels.data?.length === 0}
-        <div class="text-muted px-2 py-4 text-center text-sm opacity-60">
-          No channels
-        </div>
-      {/if}
     </nav>
   </section>
 
-  <!-- Hidden modals for context menu -->
-  <CreateChannelButton
+  <CreateChannelModal
     {organizationId}
-    groups={channelGroups.data ?? []}
-    defaultGroupId={selectedGroupId}
-    onCreated={() => channels.refetch()}
-    showButton={false}
-    registerOpen={(fn) => (openChannelModal = fn)}
+    groups={controller.channelGroups.data ?? []}
+    isOpen={modals.createChannel.isOpen}
+    defaultGroupId={modals.createChannel.defaultGroupId}
+    onClose={() => modals.closeCreateChannel()}
+    onCreated={() => controller.refetchChannels()}
   />
-  <CreateGroupButton
-    groups={channelGroups.data ?? []}
-    defaultParentGroupId={selectedGroupId}
-    onCreate={handleCreateGroup}
-    showButton={false}
-    registerOpen={(fn) => (openGroupModal = fn)}
+
+  <CreateGroupModal
+    groups={controller.channelGroups.data ?? []}
+    isOpen={modals.createGroup.isOpen}
+    defaultParentGroupId={modals.createGroup.defaultParentGroupId}
+    onClose={() => modals.closeCreateGroup()}
+    onCreate={(name, parentId) => controller.createGroup(name, parentId)}
   />
+
   <RenameGroupModal
-    onRename={handleRenameGroup}
-    registerOpen={(fn) => (openRenameModal = fn)}
+    isOpen={modals.renameGroup.isOpen}
+    groupId={modals.renameGroup.groupId}
+    currentName={modals.renameGroup.currentName}
+    onClose={() => modals.closeRenameGroup()}
+    onRename={(id, name) => controller.renameGroup(id, name)}
   />
+
   <EditChannelModal
-    onSave={handleEditChannel}
-    registerOpen={(fn) => (openEditChannelModal = fn)}
+    isOpen={modals.editChannel.isOpen}
+    channel={modals.editChannel.channel}
+    onClose={() => modals.closeEditChannel()}
+    onSave={(id, name, desc) => controller.editChannel(id, name, desc)}
   />
 
   <DMSection
