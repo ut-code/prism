@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
 import { channels } from "../../db/schema.ts";
@@ -30,7 +30,7 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
         .select()
         .from(channels)
         .where(eq(channels.organizationId, query.organizationId))
-        .orderBy(desc(channels.createdAt));
+        .orderBy(asc(channels.name));
 
       return channelList;
     } catch (error) {
@@ -191,4 +191,34 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
         groupId: t.Nullable(t.String()),
       }),
     },
-  );
+  )
+  .delete("/:id", async ({ user, params, set }) => {
+    try {
+      if (!user) throw new UnauthorizedError();
+
+      const [channel] = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.id, params.id))
+        .limit(1);
+
+      if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+      const perms = await getOrganizationPermissions(
+        user.id,
+        channel.organizationId,
+      );
+      if (!perms.canCreateChannels) {
+        throw new ForbiddenError(
+          "Insufficient permissions",
+          "CANNOT_DELETE_CHANNEL",
+        );
+      }
+
+      await db.delete(channels).where(eq(channels.id, params.id));
+
+      return { success: true };
+    } catch (error) {
+      return handleError(error, set);
+    }
+  });

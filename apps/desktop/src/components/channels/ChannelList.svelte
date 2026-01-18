@@ -98,6 +98,12 @@
     channels.refetch();
   }
 
+  async function handleDeleteChannel(channelId: string) {
+    if (!confirm("Are you sure you want to delete this channel?")) return;
+    await api.channels({ id: channelId }).delete();
+    channels.refetch();
+  }
+
   // Context menu state
   let selectedGroupId = $state<string | null>(null);
   let openChannelModal: (() => void) | null = $state(null);
@@ -165,6 +171,7 @@
             onRename={handleRenameFromContext}
             onDelete={handleDeleteGroup}
             onEditChannel={handleEditChannelFromContext}
+            onDeleteChannel={handleDeleteChannel}
             onMoveChannelToGroup={handleMoveChannelToGroup}
           />
         {/each}
@@ -182,6 +189,7 @@
             unreadCount={unreadManager.getUnreadCount(channel.id)}
             groups={organized.groups}
             onEdit={handleEditChannelFromContext}
+            onDelete={handleDeleteChannel}
             onMoveToGroup={handleMoveChannelToGroup}
           />
         {/each}

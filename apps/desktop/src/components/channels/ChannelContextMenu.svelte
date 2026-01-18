@@ -3,6 +3,7 @@
   import FolderInput from "@lucide/svelte/icons/folder-input";
   import FolderOutput from "@lucide/svelte/icons/folder-output";
   import Pencil from "@lucide/svelte/icons/pencil";
+  import Trash2 from "@lucide/svelte/icons/trash-2";
   import type { ChannelGroup } from "./channelGroups.svelte.ts";
 
   interface Props {
@@ -11,6 +12,7 @@
     currentGroupId: string | null;
     groups: ChannelGroup[];
     onEdit: () => void;
+    onDelete: () => void;
     onMoveToGroup: (groupId: string | null) => void;
     onClose: () => void;
   }
@@ -21,6 +23,7 @@
     currentGroupId,
     groups,
     onEdit,
+    onDelete,
     onMoveToGroup,
     onClose,
   }: Props = $props();
@@ -29,6 +32,11 @@
 
   function handleEdit() {
     onEdit();
+    onClose();
+  }
+
+  function handleDelete() {
+    onDelete();
     onClose();
   }
 
@@ -120,4 +128,15 @@
       Remove from Group
     </button>
   {/if}
+
+  <div class="divider my-1"></div>
+
+  <button
+    type="button"
+    class="btn btn-ghost btn-sm text-error justify-start gap-2"
+    onclick={handleDelete}
+  >
+    <Trash2 class="size-4" />
+    Delete Channel
+  </button>
 </div>

@@ -12,6 +12,7 @@
     indent?: string;
     groups?: ChannelGroup[];
     onEdit?: (channel: Channel) => void;
+    onDelete?: (channelId: string) => void;
     onMoveToGroup?: (channelId: string, groupId: string | null) => void;
   }
 
@@ -23,6 +24,7 @@
     indent,
     groups = [],
     onEdit,
+    onDelete,
     onMoveToGroup,
   }: Props = $props();
 
@@ -41,6 +43,7 @@
     currentGroupId={channel.groupId ?? null}
     {groups}
     onEdit={() => onEdit?.(channel)}
+    onDelete={() => onDelete?.(channel.id)}
     onMoveToGroup={(groupId) => onMoveToGroup?.(channel.id, groupId)}
     onClose={() => (contextMenu = null)}
   />
