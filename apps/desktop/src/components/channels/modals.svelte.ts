@@ -26,7 +26,12 @@ interface EditChannelModalState {
   channel: Channel | null;
 }
 
+interface BrowseChannelsModalState {
+  isOpen: boolean;
+}
+
 class ChannelModals {
+  browseChannels = $state<BrowseChannelsModalState>({ isOpen: false });
   createChannel = $state<CreateChannelModalState>({
     isOpen: false,
     defaultGroupId: null,
@@ -78,6 +83,14 @@ class ChannelModals {
 
   closeEditChannel() {
     this.editChannel = { isOpen: false, channel: null };
+  }
+
+  openBrowseChannels() {
+    this.browseChannels = { isOpen: true };
+  }
+
+  closeBrowseChannels() {
+    this.browseChannels = { isOpen: false };
   }
 }
 

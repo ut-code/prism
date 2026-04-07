@@ -2,17 +2,20 @@
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
   import FolderInput from "@lucide/svelte/icons/folder-input";
   import FolderOutput from "@lucide/svelte/icons/folder-output";
+  import LogOut from "@lucide/svelte/icons/log-out";
   import Pencil from "@lucide/svelte/icons/pencil";
   import Trash2 from "@lucide/svelte/icons/trash-2";
-  import type { ChannelGroup } from "@packages/api-client";
+  import type { Channel, ChannelGroup } from "@packages/api-client";
 
   interface Props {
     x: number;
     y: number;
+    channelType: Channel["type"];
     currentGroupId: string | null;
     groups: ChannelGroup[];
     onEdit: () => void;
     onDelete: () => void;
+    onLeave?: () => void;
     onMoveToGroup: (groupId: string | null) => void;
     onClose: () => void;
   }
@@ -20,13 +23,17 @@
   const {
     x,
     y,
+    channelType,
     currentGroupId,
     groups,
     onEdit,
     onDelete,
+    onLeave,
     onMoveToGroup,
     onClose,
   }: Props = $props();
+
+  const canLeave = $derived(channelType !== "default");
 
   let showMoveSubmenu = $state(false);
 
@@ -37,6 +44,11 @@
 
   function handleDelete() {
     onDelete();
+    onClose();
+  }
+
+  function handleLeave() {
+    onLeave?.();
     onClose();
   }
 
@@ -126,6 +138,17 @@
     >
       <FolderOutput class="size-4" />
       Remove from Group
+    </button>
+  {/if}
+
+  {#if canLeave}
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm justify-start gap-2"
+      onclick={handleLeave}
+    >
+      <LogOut class="size-4" />
+      Leave Channel
     </button>
   {/if}
 

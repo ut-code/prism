@@ -13,7 +13,7 @@ export const channels = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     description: text("description"),
-    type: text("type", { enum: ["public", "private", "dm"] })
+    type: text("type", { enum: ["default", "public", "private", "dm"] })
       .notNull()
       .default("public"),
     organizationId: uuid("organization_id")

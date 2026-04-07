@@ -29,6 +29,7 @@
     onDelete?: (groupId: string) => void;
     onEditChannel?: (channel: Channel) => void;
     onDeleteChannel?: (channelId: string) => void;
+    onLeaveChannel?: (channelId: string) => void;
     onMoveChannelToGroup?: (channelId: string, groupId: string | null) => void;
   }
 
@@ -50,6 +51,7 @@
     onDelete,
     onEditChannel,
     onDeleteChannel,
+    onLeaveChannel,
     onMoveChannelToGroup,
   }: Props = $props();
 
@@ -105,6 +107,7 @@
           groups={allGroups}
           onEdit={onEditChannel}
           onDelete={onDeleteChannel}
+          onLeave={onLeaveChannel}
           onMoveToGroup={onMoveChannelToGroup}
         />
       {/each}
@@ -128,6 +131,7 @@
           {onDelete}
           {onEditChannel}
           {onDeleteChannel}
+          {onLeaveChannel}
           {onMoveChannelToGroup}
         />
       {/each}

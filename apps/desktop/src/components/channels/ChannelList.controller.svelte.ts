@@ -20,15 +20,25 @@ export class ChannelListController {
   unreadManager;
   groupState;
 
+  // Filter to show only joined channels in sidebar
+  #joinedChannels: Channel[] = $derived.by(() =>
+    (this.channels.data ?? []).filter((ch) => ch.joined),
+  );
+
   #organized: GroupedChannels = $derived.by(() =>
     organizeChannelsIntoGroups(
-      this.channels.data ?? [],
+      this.#joinedChannels,
       this.channelGroups.data ?? [],
     ),
   );
 
   get organized() {
     return this.#organized;
+  }
+
+  // All channels (for channel browser)
+  get allChannels() {
+    return this.channels.data ?? [];
   }
 
   get rootGroups() {
@@ -159,5 +169,35 @@ export class ChannelListController {
 
   refetchChannels() {
     this.channels.refetch();
+  }
+
+  async joinChannel(channelId: string) {
+    try {
+      await this.#api.channels({ id: channelId }).join.post();
+      this.channels.refetch();
+      showToast("Joined channel", "success");
+    } catch (error) {
+      showToast("Failed to join channel", "error");
+      throw error;
+    }
+  }
+
+  async leaveChannel(channelId: string) {
+    const confirmed = await confirm({
+      title: "Leave Channel",
+      message: "Are you sure you want to leave this channel?",
+      confirmText: "Leave",
+      variant: "danger",
+    });
+    if (!confirmed) return;
+
+    try {
+      await this.#api.channels({ id: channelId }).leave.post();
+      this.channels.refetch();
+      showToast("Left channel", "success");
+    } catch (error) {
+      showToast("Failed to leave channel", "error");
+      throw error;
+    }
   }
 }

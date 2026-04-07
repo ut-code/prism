@@ -1,7 +1,7 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, count, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "../../db/index.ts";
-import { channels } from "../../db/schema.ts";
+import { channelMembers, channels } from "../../db/schema.ts";
 import {
   BadRequestError,
   ForbiddenError,
@@ -26,13 +26,31 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
 
       await getOrganizationPermissions(user.id, query.organizationId);
 
+      // Get channels with membership info and member counts
       const channelList = await db
-        .select()
+        .select({
+          id: channels.id,
+          name: channels.name,
+          description: channels.description,
+          type: channels.type,
+          organizationId: channels.organizationId,
+          groupId: channels.groupId,
+          createdAt: channels.createdAt,
+          updatedAt: channels.updatedAt,
+          memberCount: count(channelMembers.id),
+          joined: sql<boolean>`bool_or(${channelMembers.userId} = ${user.id})`,
+        })
         .from(channels)
+        .leftJoin(channelMembers, eq(channels.id, channelMembers.channelId))
         .where(eq(channels.organizationId, query.organizationId))
+        .groupBy(channels.id)
         .orderBy(asc(channels.name));
 
-      return channelList;
+      // For default channels, everyone is considered joined
+      return channelList.map((ch) => ({
+        ...ch,
+        joined: ch.type === "default" ? true : (ch.joined ?? false),
+      }));
     } catch (error) {
       return handleError(error, set);
     }
@@ -216,6 +234,88 @@ export const channelRoutes = new Elysia({ prefix: "/channels" })
       }
 
       await db.delete(channels).where(eq(channels.id, params.id));
+
+      return { success: true };
+    } catch (error) {
+      return handleError(error, set);
+    }
+  })
+  .post("/:id/join", async ({ user, params, set }) => {
+    try {
+      if (!user) throw new UnauthorizedError();
+
+      const [channel] = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.id, params.id))
+        .limit(1);
+
+      if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+      await getOrganizationPermissions(user.id, channel.organizationId);
+
+      // Only public channels can be joined freely
+      if (channel.type !== "public") {
+        throw new ForbiddenError(
+          "Only public channels can be joined",
+          "CANNOT_JOIN_CHANNEL",
+        );
+      }
+
+      // Check if already a member (idempotent)
+      const [existing] = await db
+        .select()
+        .from(channelMembers)
+        .where(
+          and(
+            eq(channelMembers.channelId, params.id),
+            eq(channelMembers.userId, user.id),
+          ),
+        )
+        .limit(1);
+
+      if (!existing) {
+        await db.insert(channelMembers).values({
+          channelId: params.id,
+          userId: user.id,
+        });
+      }
+
+      return { success: true };
+    } catch (error) {
+      return handleError(error, set);
+    }
+  })
+  .post("/:id/leave", async ({ user, params, set }) => {
+    try {
+      if (!user) throw new UnauthorizedError();
+
+      const [channel] = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.id, params.id))
+        .limit(1);
+
+      if (!channel) throw new NotFoundError("Channel", "CHANNEL_NOT_FOUND");
+
+      await getOrganizationPermissions(user.id, channel.organizationId);
+
+      // Cannot leave default channels
+      if (channel.type === "default") {
+        throw new ForbiddenError(
+          "Cannot leave default channels",
+          "CANNOT_LEAVE_CHANNEL",
+        );
+      }
+
+      await db
+        .delete(channelMembers)
+        .where(
+          and(
+            eq(channelMembers.channelId, params.id),
+            eq(channelMembers.userId, user.id),
+          ),
+        );
 
       return { success: true };
     } catch (error) {

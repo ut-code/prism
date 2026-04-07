@@ -34,9 +34,11 @@ export interface Channel {
   id: string;
   name: string;
   description?: string | null;
-  type: "public" | "private" | "dm";
+  type: "default" | "public" | "private" | "dm";
   organizationId: string;
   groupId?: string | null;
+  joined: boolean;
+  memberCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
